@@ -1,0 +1,3 @@
+[submodule "Assets/ProcessCommunicationToolkit-Csharp"]
+	path = Assets/ProcessCommunicationToolkit-Csharp
+	url = https://github.com/carter-james89/ProcessCommunicationToolkit-Csharp
