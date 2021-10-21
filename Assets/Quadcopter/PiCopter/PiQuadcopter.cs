@@ -1,10 +1,9 @@
 using ProcessCommunicationToolkit;
 using ProcessCommunicationToolkit.SocketPortConnection;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityControllerForTello;
 using UnityEngine;
+using ProcessCommunicationToolkit_Csharp;
 
 public class QuadcopterData : IUplinkData
 {
@@ -53,13 +52,23 @@ public class PiQuadcopter : Quadcopter
 
     private void OnConnectedToServer(string obj)
     {
-        client.ListenForServerData(client.SerializeJson(new QuadcopterData()).Length, OnDataRecievedFromServer);
+        client.ListenForServerData(CommunicationUtilities.TypeToByte(new QuadcopterData()).Length, OnDataRecievedFromServer);
     }
 
     private byte[] OnDataRecievedFromServer(byte[] arg)
     {
-        var quadData = client.AttemptDeserialize(arg, typeof(QuadcopterData));
-        return client.ConvertToBytes(client.SerializeJson(quadData));
+        QuadcopterData dataFromQuad = (QuadcopterData)CommunicationUtilities.ByteToType<QuadcopterData>(arg);
+        //run calculations and return
+        if (_rollOffset == 0)
+        {
+            _rollOffset = dataFromQuad.gyroRoll;
+            _pitchOffset = dataFromQuad.gyroPitch;
+            _yawOffset = dataFromQuad.gyroYaw;
+        }
+        gyroPitch = dataFromQuad.gyroPitch - _pitchOffset;
+        gyroRoll = dataFromQuad.gyroRoll - _rollOffset;
+        gyroYaw = dataFromQuad.gyroYaw - _yawOffset;
+        return CommunicationUtilities.TypeToByte(dataFromQuad);
     }
 
     protected override void OnDestroy()
@@ -69,49 +78,9 @@ public class PiQuadcopter : Quadcopter
         client.onConnectionEstablished += OnConnectedToServer;
     }
 
-    //private void OnClientLogMessageRecieved(string obj)
-    //{
-    //    Debug.Log(obj);
-    //}
-
     private void Update()
     {
         transform.rotation = Quaternion.Euler(new Vector3(gyroPitch,gyroYaw,gyroRoll));
-    }
-    public static void OnDataRecieved(byte[] data)
-    {
-       // client.
-        //string someString = Encoding.ASCII.GetString(data);
-        // Console.WriteLine(someString);
-    }
-
-    private  void OnReceivedCustomMessage(string obj)
-    {
-        if (obj.IndexOf("exit") > -1)
-        {
-            //ShutDown();
-        }
-        else
-        {
-            Debug.Log("got custom message " + obj);
-            //arduinoConnection.Write(obj);
-        }
-    }
-    private void OnReceivedValidObject(IUplinkData validPackage)
-    {
-        var quadData = validPackage as QuadcopterData;
-
-        if(_rollOffset == 0)
-        {
-            _rollOffset = quadData.gyroRoll;
-            _pitchOffset = quadData.gyroPitch;
-            _yawOffset = quadData.gyroYaw;
-        }
-        gyroPitch = quadData.gyroPitch - _pitchOffset;
-        gyroRoll = quadData.gyroRoll - _rollOffset;
-        gyroYaw = quadData.gyroYaw - _yawOffset;
-
-    
     }
 
     public override bool IsSimulator()
