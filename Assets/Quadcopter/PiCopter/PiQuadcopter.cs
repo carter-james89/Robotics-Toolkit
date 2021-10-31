@@ -31,6 +31,8 @@ public class PiQuadcopter : Quadcopter
     private float _rollOffset;
     private float _yawOffset;
 
+    private const string ipAddress = "192.168.86.50";
+
     public override void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
     {
         base.Initialize(defaultInputSource);
@@ -42,7 +44,7 @@ public class PiQuadcopter : Quadcopter
 
     private void Awake()
     {
-        client = new ClientUplink(11000, "192.168.86.50");
+        client = new ClientUplink(11000, ipAddress);
          client.uplinkMessage += x => Debug.Log(x);
        // client.uplinkMessage += OnClientLogMessageRecieved;
         client.EstablishConnection();

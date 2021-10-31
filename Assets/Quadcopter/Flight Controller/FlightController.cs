@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FlightController : MonoBehaviour
+public class FlightController : MonoBehaviour, IFlightController
 {
     [SerializeField]
     private List<Motor> _motors;
@@ -73,7 +73,7 @@ public class FlightController : MonoBehaviour
         _positionPidZ.SetPoint = 0;
     }
 
-    private void FixedUpdate()
+    public void Run()
     {
 
 
