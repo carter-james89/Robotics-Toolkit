@@ -1,7 +1,7 @@
 using TelloLib;
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// Controller which controls the Game UI, and displays the Tello's video feed to a texture
@@ -39,7 +39,7 @@ namespace UnityControllerForTello
         /// Initialize the vido feed to listen for <see cref="Tello.onVideoData"/>
         /// </summary>
         /// <param name="tello">The Quadcopter to get video from</param>
-        public void InitializeFeed(TelloQuadcopter tello)
+        public void InitializeFeed()
         {
             Debug.Log("Initialize video feed");
             Tello.onVideoData += Tello_onVideoData;

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// Draws a line of <see cref="TrailPoint"/>s to represent the Trail a <see cref="Quadcopter"/> has traveled

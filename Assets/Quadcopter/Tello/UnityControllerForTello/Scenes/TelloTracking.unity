@@ -338,6 +338,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbed06749aaa32743954bdaad6605316, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &183673977 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6272371032624815340, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
+  m_PrefabInstance: {fileID: 6512388467678731065}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cce66966ed6113b4c9472f40b671b41d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &183673978 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4574642230858674212, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
+  m_PrefabInstance: {fileID: 6512388467678731065}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f40e33bc063923b418434be1df54b465, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &212003919 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5569858894476000523, guid: c4cde373a441a22428152f35879e6111, type: 3}
@@ -536,7 +558,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45dd6e07923d68647adc272087d635f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  telloSimulator: {fileID: 1900212342}
+  telloSimulator: {fileID: 183673978}
   tello: {fileID: 174800376}
   _waypointPilot: {fileID: 1362793617}
   autoPilotTransitionSytle: 0
@@ -544,6 +566,8 @@ MonoBehaviour:
   _pilotInupts: {fileID: 314021175}
   _waypointMission: {fileID: 2090872082}
   sceneType: 1
+  _simulatedFlightController: {fileID: 183673977}
+  _telloFlightController: {fileID: 0}
 --- !u!4 &314021174
 Transform:
   m_ObjectHideFlags: 0
@@ -1217,7 +1241,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &864746350
 Transform:
   m_ObjectHideFlags: 0
@@ -1562,6 +1586,17 @@ Transform:
   m_Father: {fileID: 844405905}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &987085185 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3941422548308605443, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
+  m_PrefabInstance: {fileID: 6512388467678731065}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb60465c5a4e9f140be4c09556e7a3cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &995049762
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2602,17 +2637,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1883906987}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &1900212342 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6512388468462955343, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
-  m_PrefabInstance: {fileID: 6512388467678731065}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd1f07f6e469da44c9bc421c6b464258, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1900212344 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6512388468462955329, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
@@ -2876,6 +2900,14 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4574642230858674212, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
+      propertyPath: _trailVisualizer
+      value: 
+      objectReference: {fileID: 987085185}
+    - target: {fileID: 4574642230858674212, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
+      propertyPath: groundSensorPoint
+      value: 
+      objectReference: {fileID: 9138029510741205671, guid: 99c8bc6b58a454b4186f6802595562db, type: 3}
     - target: {fileID: 6512388468462955329, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
       propertyPath: m_RootOrder
       value: 2
@@ -2940,7 +2972,8 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6512388468462955343, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: c2f3653edf8c833439987b0f86b8e444, type: 3}
 --- !u!1001 &7909170847639740997
 PrefabInstance:

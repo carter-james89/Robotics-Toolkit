@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// A point representing a postion in global space a <see cref="Quadcopter"/> traveled

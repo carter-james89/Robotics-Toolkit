@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// A basic autopilot which uses <see cref="PidController"/> to fly to a given point using the offset

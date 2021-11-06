@@ -1,7 +1,8 @@
+using ProcessCommunicationToolkit;
 using System;
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace QuadcopterUtilities
 {
     /// <summary>
     /// Interface for all Quadcopters, real or simulated 
@@ -13,6 +14,35 @@ namespace UnityControllerForTello
     /// </remarks>
     public interface IQuadcopter
     {
+        public class QuadcopterData : IUplinkData
+        {
+            public double throttle;
+            public double yaw;
+            public double pitch;
+            public double roll;
+
+            public float gyroYaw;
+            public float gyroRoll;
+            public float gyroPitch;
+
+            public float posX;
+            public float posY;
+            public float posZ;
+
+            public float height;
+        }
+        public class GroundStationData : IUplinkData
+        {
+            public double throttle;
+            public double yaw;
+            public double pitch;
+            public double roll;
+
+            public double motorFRSpeed;
+            public double motorFLSpeed;
+            public double motorBRSpeed;
+            public double motorBLSpeed;
+        }
         public enum FlightStatus
         {
             /// <summary>
@@ -54,7 +84,7 @@ namespace UnityControllerForTello
         /// </summary>
         /// <param name="pilotInputs">Where to find the inputs from the pilot</param>
         /// <param name="autoPilot">The autopilot module used, activated via <see cref="ActivateAutoPilot"/></param>
-        public void Initialize(Func<IInputs.FlightControlValues> defaultInputSource);
+        public void Initialize(IFlightController flightController ,Func<IInputs.FlightControlValues> defaultInputSource);
 
         /// <summary>
         /// Override the default source of <see cref="IInputs.FlightControlValues"/>
@@ -70,6 +100,8 @@ namespace UnityControllerForTello
         /// <param name="abortListener">The function that was provided to be called when quad aborts</param>
         public void RemoveInputOverride(Func<IInputs.FlightControlValues> inputValueSource, Action abortListener);
 
+
+        public Transform GetLocalTrackingSpace();
         /// <summary>
         /// Set the Home Point the Quad will attempt to return to
         /// Usually set at launch
@@ -111,7 +143,7 @@ namespace UnityControllerForTello
         /// <summary>
         /// Launch the quadcopter
         /// </summary>
-        public void TakeOff();
+        public void Takeoff();
 
         /// <summary>
         /// Land the quadcopter

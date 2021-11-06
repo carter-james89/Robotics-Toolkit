@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FlightController : MonoBehaviour, IFlightController
+public class FlightController : MonoBehaviour
 {
     [SerializeField]
     private List<Motor> _motors;

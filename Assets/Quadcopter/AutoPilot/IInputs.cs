@@ -1,4 +1,4 @@
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// Interface for any source of input to <see cref="IQuadcopter"/>

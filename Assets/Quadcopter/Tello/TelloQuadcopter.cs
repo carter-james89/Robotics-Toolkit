@@ -3,7 +3,7 @@ using TelloLib;
 using UnityEngine;
 
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// Quadcopter class to control the real world DJI Tello
@@ -17,10 +17,7 @@ namespace UnityControllerForTello
         [SerializeField]
         private TelloVideoFeed _videoFeed;
 
-        /// <summary>
-        /// The last frame recieved updated via <see cref="Tello_onUpdate(int)"/>
-        /// </summary>
-        private int _lastTelloUpdateFrame;
+    
 
         /// <summary>
         /// Is the Tello tracking accurate this frame?
@@ -36,11 +33,7 @@ namespace UnityControllerForTello
         /// </summary>
         public Tello.ConnectionState connectionState;
 
-        /// <summary>
-        /// How many packkages have we recieved from the Tello
-        /// </summary>
-        [SerializeField]
-        private int _telloFrameCount = 0;
+
 
         /// <summary>
         /// The offset of the tracking values when tracking first achieved after liftoff
@@ -75,88 +68,42 @@ namespace UnityControllerForTello
         /// </summary>
         /// <param name="pilotInputs">Where to find the inputs from the pilot</param>
         /// <param name="autoPilot">The autopilot module used, activated via <see cref="ActivateAutoPilot"/></param>
-        public override void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
-        {
-            base.Initialize(defaultInputSource);
-            ConnectToTello();
-        }
+        //public override void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
+        //{
+        //    base.Initialize(defaultInputSource);
+     
+        //}
 
-        /// <summary>
-        /// Attempt to connect to the Tello via <see cref="Tello"/> Library
-        /// Must be connected to quadcopter via wifi
-        /// </summary>
-        public void ConnectToTello()
-        {
-            Tello.onConnection += Tello_onStateChanged;
-            Tello.onUpdate += Tello_onUpdate;
-            if (_videoFeed)
-            {
-                _videoFeed.InitializeFeed(this);
-            }
-            else
-            {
-                Debug.LogWarning("No TelloVideoFeed supplied in inspector, will not display video feed from Tello");
-            }
-            Tello.startConnecting();
-        }
 
-        /// <summary>
-        /// Called from <see cref="Tello.onConnection"/> when the state of the connection with the Tello is changed
-        /// </summary>
-        private void Tello_onStateChanged(Tello.ConnectionState newState)
-        {
-            Debug.Log("Tello State Updated : " + newState);
-            if (newState == Tello.ConnectionState.Connected)
-            {
-               // Debug.Log("Connected to Tello, please wait for camera feed " + Tello.state.);
-                Tello.setPicVidMode(1); // 0: picture, 1: video
-                Tello.setVideoBitRate((int)TelloVideoFeed.VideoBitRate.VideoBitRateAuto);
-                Tello.requestIframe();
-            }
-            else if (newState == Tello.ConnectionState.Disconnected)
-            {
-                Debug.Log("Disconnected from Tello");
-            }
-        }
-        /// <summary>
-        /// Called from <see cref="Tello.onUpdate"/> when an update a package is recieved from the Tello
-        /// </summary>
-        ///<remarks>
-        ///<see cref="Tello_onUpdate(int)"/> happens on its own thread, and to interact with unity/inputs we need to use <see cref="Update"/>
-        ///This simply records that an update has been recieved from the Tello, and will be handled in the next <see cref="Update"/>
-        /// </remarks>
-        private void Tello_onUpdate(int cmdID)
-        {
-            _telloFrameCount++;
-            _lastTelloUpdateFrame = Time.frameCount;
-        }
+
+
         private void Update()
         {
-            if (_lastTelloUpdateFrame != Time.frameCount)
-            {
-                SyncDataWithTello();
-                SetSensorGround();
+            //if (_lastTelloUpdateFrame != Time.frameCount)
+            //{
+            //    SyncDataWithTello();
+            //    SetSensorGround();
 
-                switch (_flightStatus)
-                {
-                    case IQuadcopter.FlightStatus.Launching:
-                        CheckForLaunchComplete();
-                        break;
-                    case IQuadcopter.FlightStatus.Flying:
-                        try
-                        {
-                            validTrackedFrame = SetVirtualTelloPosition();
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.Log(e + " : Emergency Abort");
-                            abort?.Invoke();                          
-                        }
-                        break;
-                }
-                ProcessInputs(); //need to run in update to get Input Values for this frame
-                SendTelloInputs();
-            }
+            //    switch (_flightStatus)
+            //    {
+            //        case IQuadcopter.FlightStatus.Launching:
+            //            CheckForLaunchComplete();
+            //            break;
+            //        case IQuadcopter.FlightStatus.Flying:
+            //            try
+            //            {
+            //                validTrackedFrame = SetVirtualTelloPosition();
+            //            }
+            //            catch (Exception e)
+            //            {
+            //                Debug.Log(e + " : Emergency Abort");
+            //                abort?.Invoke();                          
+            //            }
+            //            break;
+            //    }
+            //    ProcessInputs(); //need to run in update to get Input Values for this frame
+            //    SendTelloInputs();
+            //}
         }
         /// <summary>
         /// Sent the Inputs from either the <see cref="PilotInputs"/> or <see cref="IAutoPilot"/> to the Tello
@@ -309,7 +256,7 @@ namespace UnityControllerForTello
                 yaw = yaw * (180 / Mathf.PI);
                 pitch = (pitch * (180 / Mathf.PI));
                 roll = roll * (180 / Mathf.PI);
-                SetVirtualPosition(new Vector2(adjustedPosition.x, adjustedPosition.z), height * .1f, Quaternion.Euler(new Vector3(-pitch, yaw, roll)),vertSpeed);
+                //SetVirtualPosition(new Vector2(adjustedPosition.x, adjustedPosition.z), height * .1f, Quaternion.Euler(new Vector3(-pitch, yaw, roll)),vertSpeed);
               //  transform.position = adjustedPosition;
                // transform.position += new Vector3(0, _elevationOffset, 0);
                 //yaw = yaw * (180 / Mathf.PI);
@@ -321,7 +268,7 @@ namespace UnityControllerForTello
             }
             else
             {
-                Debug.Log("Tracking lost " + _telloFrameCount);
+               // Debug.Log("Tracking lost " + _telloFrameCount);
                 validTrackingFrame = false;
             }
             return validTrackingFrame;
@@ -330,7 +277,7 @@ namespace UnityControllerForTello
         /// <summary>
         /// Launch the Tello via its auto liftoff feature
         /// </summary>
-        public override void TakeOff()
+        public override void Takeoff()
         {
             if (connectionState == Tello.ConnectionState.Connected)
             {
@@ -362,10 +309,7 @@ namespace UnityControllerForTello
             }
         }
 
-        public override bool IsSimulator()
-        {
-            return false;
-        }
+ 
 
         protected override void OnDestroy()
         {
@@ -374,8 +318,8 @@ namespace UnityControllerForTello
             {
                 //Tello.stopConnecting();
             }
-            Tello.onConnection -= Tello_onStateChanged;
-            Tello.onUpdate -= Tello_onUpdate;
+          //  Tello.onConnection -= Tello_onStateChanged;
+           // Tello.onUpdate -= Tello_onUpdate;
             //if(connectionState == Tello.ConnectionState.Connected)
             //{
             //   Tello.sto
@@ -383,10 +327,7 @@ namespace UnityControllerForTello
             Tello.stopConnecting();
         }
 
-        public override bool IsTracking()
-        {
-            return validTrackedFrame;
-        }
+
 
         //Tello api, public so they can be seen in inspector
         public bool flying;

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// Base class which provides functionality for most autopilots

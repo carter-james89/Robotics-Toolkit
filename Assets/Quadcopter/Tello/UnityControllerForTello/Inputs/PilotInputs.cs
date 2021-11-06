@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     public class PilotInputs : MonoBehaviour, IInputs
     {

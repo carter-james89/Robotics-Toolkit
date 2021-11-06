@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// Interface for all Autopilot modules, designed to work with <see cref="IQuadcopter"/>

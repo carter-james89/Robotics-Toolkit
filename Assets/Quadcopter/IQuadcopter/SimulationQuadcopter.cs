@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// A simulator Quadcopter meant to replicate the DJI Tello
@@ -31,15 +31,15 @@ namespace UnityControllerForTello
 
 
 
-        public override void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
-        {
-            base.Initialize(defaultInputSource);
+        //public override void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
+        //{
+        //    base.Initialize(defaultInputSource);
 
-            var physicsCalculator = new GameObject("Simulation Physics Simulation");
-            rigidBody = physicsCalculator.AddComponent<Rigidbody>();
+        //    var physicsCalculator = new GameObject("Simulation Physics Simulation");
+        //    rigidBody = physicsCalculator.AddComponent<Rigidbody>();
 
-            Time.timeScale = timeSpeed;
-        }
+        //    Time.timeScale = timeSpeed;
+        //}
 
         //public float deltaHeight;
         //private float _prevHeight = 0;
@@ -61,7 +61,7 @@ namespace UnityControllerForTello
             {
                 Debug.DrawRay(rigidBody.transform.position, transform.TransformDirection(Vector3.down) * hit.distance, Color.yellow);
             }
-            SetVirtualPosition(new Vector3(rigidBody.transform.position.x, rigidBody.transform.position.z), hit.distance,rigidBody.transform.rotation, rigidBody.velocity.y);
+            //SetVirtualPosition(new Vector3(rigidBody.transform.position.x, rigidBody.transform.position.z), hit.distance,rigidBody.transform.rotation, rigidBody.velocity.y);
             //deltaHeight = _prevHeight - hit.distance;
             //_prevHeight = hit.distance;
             //elvInput = currentInputs.throttle;
@@ -148,7 +148,7 @@ namespace UnityControllerForTello
         /// <summary>
         /// Move the simulator into <see cref="IQuadcopter.FlightStatus.Flying"/> mode, and activate physics
         /// </summary>
-        public override void TakeOff()
+        public override void Takeoff()
         {
             Debug.Log("Simulator TakeOff");
             rigidBody.transform.position += new Vector3(0, .8f, 0);
@@ -160,22 +160,6 @@ namespace UnityControllerForTello
             _flightStatus = IQuadcopter.FlightStatus.Flying;
         }
 
-        /// <summary>
-        /// This is a simulator
-        /// </summary>
-        /// <returns>True</returns>
-        public override bool IsSimulator()
-        {
-            return true;
-        }
 
-        /// <summary>
-        /// The simulator will never loose tracking
-        /// </summary>
-        /// <returns>True</returns>
-        public override bool IsTracking()
-        {
-            return true;
-        }
     }
 }

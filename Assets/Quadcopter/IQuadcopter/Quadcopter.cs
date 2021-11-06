@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace QuadcopterUtilities
 {
     /// <summary>
     /// Base class for standard quadcopters, both real and simulated
     /// Satisfies the requirements of <see cref="IQuadcopter"/>, and handles most of the heavy lifting for basic functions
     /// </summary>
-    public abstract class Quadcopter : MonoBehaviour, IQuadcopter
+    public class Quadcopter : MonoBehaviour, IQuadcopter
     {
         /// <summary>
         /// The current inputs for this Frame from either <see cref="defaultInputSource"/> or <see cref="overrideInputSource"/>, set in <see cref="ProcessInputs"/>
@@ -18,6 +18,13 @@ namespace UnityControllerForTello
 
         [SerializeField]
         protected GameObject groundSensorPoint;
+
+        protected IFlightController _flightController;
+
+        public Transform GetLocalTrackingSpace()
+        {
+            return transform.parent;
+        }
 
         /// <summary>
         /// Used to visalize the trail the quadcopter has traveled
@@ -41,19 +48,48 @@ namespace UnityControllerForTello
         [SerializeField]
         private bool _headLessMode = false;
 
+        [SerializeField]
+        private bool _selfInitialize = false;
+
+        protected void Awake()
+        {
+            if (_selfInitialize)
+            {
+                //Initialize(GetComponent<IFlightController>(), GetComponent<IInputs>().GetInputValues);
+            }
+        }
+
         /// <summary>
         /// Launch the quadcopter
         /// </summary>
-        public abstract void TakeOff();
+        public virtual void Takeoff()
+        {
+            Debug.Log("Takeoff");
+            _flightController.Takeoff();
+
+            //Update();
+            var quadData = _flightController.GetSensorData();
+            SetVirtualPosition(quadData);
+            ResetKnownOffset();
+
+            SetHomePoint(transform.localPosition);
+            _flightStatus = IQuadcopter.FlightStatus.Flying;
+        }
         /// <summary>
         /// Land the quadcopter
         /// </summary>
-        public abstract void Land();
+        public virtual void Land()
+        {
+            _flightController.Land();
+        }
         /// <summary>
         /// Is this quadcopter a simulator or a real quadcopter
         /// </summary>
         /// <returns></returns>
-        public abstract bool IsSimulator();
+        public bool IsSimulator()
+        {
+            return _flightController.IsSimulator();
+        }
 
         /// <summary>
         /// Event that is called whenever the GameObjects <see cref="Transform"/> is changed
@@ -67,7 +103,6 @@ namespace UnityControllerForTello
         /// The point the Quad took off from, can be updated on the fly
         /// </summary>
         public Vector3 homePoint { get; private set; }
-
 
         /// <summary>
         /// The updates supplied by either the Pilot or the AutoPilot for this frame
@@ -83,9 +118,17 @@ namespace UnityControllerForTello
         /// </summary>
         /// <param name="pilotInputs">Where to find the inputs from the pilot</param>
         /// <param name="autoPilot">The autopilot module used, activated via <see cref="ActivateAutoPilot"/></param>
-        public virtual void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
+        public virtual void Initialize(IFlightController flightController, Func<IInputs.FlightControlValues> defaultInputSource)
         {
+            if (flightController == null)
+            {
+                Debug.Log("what the actual fuck");
+                Debug.Break();
+            }
             _flightStatus = IQuadcopter.FlightStatus.PreLaunch;
+
+            _flightController = flightController;
+            _flightController.Initialize(this, OnFlightStatusChanged);
 
             this.defaultInputSource = defaultInputSource;
 
@@ -93,6 +136,26 @@ namespace UnityControllerForTello
             {
                 _trailVisualizer.Initialize(this);
             }
+        }
+
+        private void OnFlightStatusChanged(IQuadcopter.FlightStatus newStatus)
+        {
+            switch (newStatus)
+            {
+                case IQuadcopter.FlightStatus.PreLaunch:
+                    break;
+                case IQuadcopter.FlightStatus.PrimingProps:
+                    break;
+                case IQuadcopter.FlightStatus.Launching:
+                    break;
+                case IQuadcopter.FlightStatus.Flying:
+                    break;
+                case IQuadcopter.FlightStatus.Landing:
+                    break;
+                default:
+                    break;
+            }
+            _flightStatus = newStatus;
         }
 
         public float deltaHeight;
@@ -109,74 +172,45 @@ namespace UnityControllerForTello
 
         private List<GameObject> sensorPoints;
 
-        public void SetVirtualPosition(Vector2 xzPos, float height, Quaternion calculatedRotation, float vertSpeed)
+        public void SetVirtualPosition(IQuadcopter.QuadcopterData quadData)
         {
-            float floatHeight = (float)Math.Round(height, 1);
-            //Debug.Log("Recording Static Height Delta Change " + floatHeight);
-            //RaycastHit hit;
-            //// Does the ray intersect any objects excluding the player layer
-            //if (Physics.Raycast(rigidBody.transform.position, rigidBody.transform.TransformDirection(Vector3.down), out hit, Mathf.Infinity))
-            //{
-            //    Debug.DrawRay(rigidBody.transform.position, transform.TransformDirection(Vector3.down) * hit.distance, Color.yellow);
-            //}
-            //Debug.Log(height);
-            this.vertSpeed = vertSpeed;
-
-            deltaHeight = _prevHeight - floatHeight;
-            _prevHeight = floatHeight;
+            deltaHeight = _prevHeight - quadData.height;
+            _prevHeight = quadData.height;
             elvInput = currentInputs.throttle;
 
-            var tempPos = new Vector3(xzPos.x, floatHeight + heightOffset, xzPos.y);// rigidBody.transform.position;
+            var tempPos = new Vector3(quadData.posX, quadData.height + heightOffset, quadData.posZ);// rigidBody.transform.position;
 
-            var newGroundSensorPoint = CreateSensorPoint();
+            //var newGroundSensorPoint = CreateSensorPoint();
 
-            if (_flightStatus == IQuadcopter.FlightStatus.Flying)
-                if (Math.Abs(deltaHeight) > .1 && Math.Abs(elvInput) <= .05f)
-                {
-                  //  Debug.Log("Known height updated " + deltaHeight);
-                    // if (Math.Abs(currentInputs.throttle) < .05)
-                    // {
-                    heightOffset += deltaHeight;
-                    // }
-                    tempPos.y = floatHeight + heightOffset + assumedHeightOffset;
-                }
-                else if (Math.Abs(elvInput) <= .05f)//Math.Abs(vertSpeed) <= .1 && Math.Abs(elvInput) <= .05f)// && Math.Abs(deltaHeight) > 0)
-                {
-                    assumedHeightOffset += deltaHeight;
-                    tempPos.y = floatHeight + heightOffset + assumedHeightOffset;
-                   // Debug.Log("Recording Static Height Delta Change " + deltaHeight);
-                }
+            //if (_flightStatus == IQuadcopter.FlightStatus.Flying)
+            //    if (Math.Abs(deltaHeight) > .1 && Math.Abs(elvInput) <= .05f)
+            //    {
+            //        heightOffset += deltaHeight;
+            //        tempPos.y = quadData.height + heightOffset + assumedHeightOffset;
+            //    }
+            //    else if (Math.Abs(elvInput) <= .05f)//Math.Abs(vertSpeed) <= .1 && Math.Abs(elvInput) <= .05f)// && Math.Abs(deltaHeight) > 0)
+            //    {
+            //        assumedHeightOffset += deltaHeight;
+            //        tempPos.y = quadData.height + heightOffset + assumedHeightOffset;
+            //        // Debug.Log("Recording Static Height Delta Change " + deltaHeight);
+            //    }
 
-            //else if (Math.Abs(vertSpeed) > .1 && Math.Abs(elvInput) > .1f)
+            transform.localPosition = tempPos;
+
+            transform.localRotation = Quaternion.Euler(quadData.gyroPitch, quadData.gyroYaw, quadData.gyroRoll);
+
+            //   newGroundSensorPoint.transform.position = transform.position + (Vector3.down * quadData.height);
+
+            //if (assumedHeightOffset > .1)
+            //    newGroundSensorPoint.GetComponent<MeshRenderer>().material.color = Color.red;
+
+            //else if (heightOffset > .1)
+            //    newGroundSensorPoint.GetComponent<MeshRenderer>().material.color = Color.green;
+
+            //if (Math.Abs(vertSpeed) > .1 || Math.Abs(elvInput) > .05f)
             //{
-            //    ResetOffset();
+            //    newGroundSensorPoint.GetComponent<MeshRenderer>().material.color = Color.black;
             //}
-            //if (Math.Abs(currentInputs.throttle) < .05)
-            //{
-            //    heightOffset += deltaHeight;
-            //    tempPos.y = height + heightOffset;
-            //}
-
-            //var groundpoint = transform.position - (Vector3.down * tempPos.y);
-
-
-            transform.position = tempPos;
-
-            transform.rotation = calculatedRotation;
-
-
-            newGroundSensorPoint.transform.position = transform.position + (Vector3.down * height);
-
-            if (assumedHeightOffset > .1)
-                newGroundSensorPoint.GetComponent<MeshRenderer>().material.color = Color.red;
-
-            else if (heightOffset > .1)
-                newGroundSensorPoint.GetComponent<MeshRenderer>().material.color = Color.green;
-
-            if (Math.Abs(vertSpeed) > .1 || Math.Abs(elvInput) > .05f)
-            {
-                newGroundSensorPoint.GetComponent<MeshRenderer>().material.color = Color.black;
-            }
         }
 
         private GameObject CreateSensorPoint()
@@ -200,32 +234,6 @@ namespace UnityControllerForTello
             }
         }
 
-
-        //public void SetVirtualPosition(Vector2 xzPos, float height, Quaternion calculatedRotation)
-        //{
-        //    deltaHeight = _prevHeight - height;
-        //    _prevHeight = height;
-        //    _elvInput = currentInputs.throttle;
-
-        //  //  var tempPos = transform.position;
-        ////    float calculatedHeight = height;
-        //    if (Math.Abs(deltaHeight) > .1)
-        //    {
-        //        if (Math.Abs(currentInputs.throttle) < .05)
-        //        {
-        //            heightOffset += deltaHeight;
-        //        }
-        //       //height + heightOffset;
-        //    }
-
-        //    transform.position = new Vector3(xzPos.x, height + heightOffset, xzPos.y);
-        //    transform.rotation = calculatedRotation;
-
-        //    var newGroundSensorPoint = Instantiate(groundSensorPoint);
-        //    newGroundSensorPoint.transform.position = transform.position + (Vector3.down * height);
-        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * height, Color.yellow);
-        //    OnTransformUpdated();
-        //}
         public void ResetOffset()
         {
             // heightOffset = 0;
@@ -234,6 +242,17 @@ namespace UnityControllerForTello
         public void ResetKnownOffset()
         {
             heightOffset = 0;
+        }
+
+        public void Update()
+        {
+            if (_flightController != null && _flightController.IsInitialized())
+            {
+                var quadData = _flightController.GetSensorData();
+                SetVirtualPosition(quadData);
+                ProcessInputs();
+                _flightController.Run(_flightStatus, currentInputs);
+            }
         }
 
         /// <summary>
@@ -266,7 +285,7 @@ namespace UnityControllerForTello
             currentInputs = overrideInputSource == null ? _headLessMode ? ConvertToHeadlessInputs(defaultInputs) : defaultInputs : overrideInputSource.Invoke();
             if (currentInputs.takeOff && _flightStatus == IQuadcopter.FlightStatus.PreLaunch)
             {
-                TakeOff();
+                Takeoff();
             }
             else if (currentInputs.land)
             {
@@ -321,7 +340,7 @@ namespace UnityControllerForTello
         /// </summary>
         protected void OnTransformUpdated()
         {
-            onTransformChanged?.Invoke(transform.position, transform.rotation);
+            onTransformChanged?.Invoke(transform.localPosition, transform.localRotation);
         }
 
         public IQuadcopter.FlightStatus GetFlightStatus()
@@ -365,7 +384,10 @@ namespace UnityControllerForTello
         /// Is the quad currently in a valid state of tracking?
         /// </summary>
         /// <returns></returns>
-        public abstract bool IsTracking();
+        public bool IsTracking()
+        {
+            return true;
+        }
 
         /// <summary>
         /// Action to raise if the quad needs to Abort and return to <see cref="defaultInputSource"/>

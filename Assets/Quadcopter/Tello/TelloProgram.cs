@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace UnityControllerForTello
+namespace  QuadcopterUtilities
 {
     /// <summary>
     /// The program to control the DJI Tello in TelloTracking.unity
@@ -72,6 +72,14 @@ namespace UnityControllerForTello
         /// </summary>
         public IQuadcopter quadcopter;
 
+        [SerializeField]
+        private SimulatedOnboardFlightController _simulatedFlightController;
+        [SerializeField]
+        private TelloFlightController _telloFlightController;
+
+        [SerializeField]
+        private IFlightController _flightController;
+
         void Start()
         {
             switch (sceneType)
@@ -79,20 +87,22 @@ namespace UnityControllerForTello
                 case SceneType.Flight:
                     quadcopter = tello;
                     telloSimulator.gameObject.SetActive(false);
+                    _flightController = _telloFlightController;
                     break;
                 case SceneType.Simulation:
                     quadcopter = telloSimulator;
                     tello.gameObject.SetActive(false);
+                    _flightController = _simulatedFlightController;
                     break;
                 default:
                     break;
             }
-            quadcopter.Initialize(_pilotInupts.GetInputValues);
+            quadcopter.Initialize(_flightController,_pilotInupts.GetInputValues);
             _waypointPilot.Initialize(quadcopter);
 
             if(sceneType == SceneType.Simulation)
             {
-                quadcopter.TakeOff();
+                //squadcopter.Takeoff();
                 //_waypointPilot.ActivateAutoPilot();
               //  _waypointMission.BeginMission(_waypointPilot);
             }

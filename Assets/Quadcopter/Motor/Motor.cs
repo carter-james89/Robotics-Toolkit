@@ -21,6 +21,11 @@ public class Motor : MonoBehaviour
 
     private float _maxTorque = .003f;
 
+    public void SetQuadBody(Rigidbody quadBody)
+    {
+        _quadBody = quadBody;
+    }
+
     private void FixedUpdate()
     {
 

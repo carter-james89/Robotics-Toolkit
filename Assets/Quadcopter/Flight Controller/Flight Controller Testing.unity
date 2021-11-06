@@ -205,7 +205,7 @@ MonoBehaviour:
   _motorShaft: {fileID: 0}
   _quadBody: {fileID: 1877514358}
   _counterMotor: 0
-  motorSpeed: 0.1
+  motorSpeed: 0
 --- !u!1 &71161502
 GameObject:
   m_ObjectHideFlags: 0
@@ -251,6 +251,36 @@ WindZone:
   m_WindTurbulence: 1
   m_WindPulseMagnitude: 0.5
   m_WindPulseFrequency: 0.01
+--- !u!1 &111475875
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 111475876}
+  m_Layer: 0
+  m_Name: Waypoint Autopilot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &111475876
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 111475875}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.017205417, y: 1, z: 0.66340715}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &144228685
 GameObject:
   m_ObjectHideFlags: 0
@@ -684,7 +714,7 @@ MonoBehaviour:
   _motorShaft: {fileID: 0}
   _quadBody: {fileID: 1877514358}
   _counterMotor: 1
-  motorSpeed: 0.1
+  motorSpeed: 0
 --- !u!1 &395717889
 GameObject:
   m_ObjectHideFlags: 0
@@ -2929,7 +2959,7 @@ MonoBehaviour:
   _motorShaft: {fileID: 0}
   _quadBody: {fileID: 1877514358}
   _counterMotor: 0
-  motorSpeed: 0.1
+  motorSpeed: 0
 --- !u!1 &1183319688
 GameObject:
   m_ObjectHideFlags: 0
@@ -3459,7 +3489,7 @@ MonoBehaviour:
   _motorShaft: {fileID: 0}
   _quadBody: {fileID: 1877514358}
   _counterMotor: 1
-  motorSpeed: 0.1
+  motorSpeed: 0
 --- !u!1 &1877514357
 GameObject:
   m_ObjectHideFlags: 0
@@ -3471,10 +3501,12 @@ GameObject:
   - component: {fileID: 1877514359}
   - component: {fileID: 1877514358}
   - component: {fileID: 1877514360}
-  - component: {fileID: 1877514361}
   - component: {fileID: 1877514364}
   - component: {fileID: 1877514363}
   - component: {fileID: 1877514362}
+  - component: {fileID: 1877514365}
+  - component: {fileID: 1877514361}
+  - component: {fileID: 1877514366}
   m_Layer: 0
   m_Name: Flight Controller Quad
   m_TagString: Untagged
@@ -3490,7 +3522,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1877514357}
   serializedVersion: 2
-  m_Mass: 0.4
+  m_Mass: 0.3
   m_Drag: 2
   m_AngularDrag: 5
   m_UseGravity: 1
@@ -3539,21 +3571,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 1877514357}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad5bc13958244d34d8eac33428ddfa4e, type: 3}
+  m_Script: {fileID: 11500000, guid: f40e33bc063923b418434be1df54b465, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _motors:
-  - {fileID: 1179178572}
-  - {fileID: 67331216}
-  - {fileID: 1858441404}
-  - {fileID: 333975212}
-  _targetGimbal: {fileID: 1288006998}
-  flMotor: {fileID: 333975212}
-  frMotor: {fileID: 1179178572}
-  blMotor: {fileID: 67331216}
-  brMotor: {fileID: 1858441404}
-  _timeSinceLastUpdate: 0
-  _stableize: 1
+  groundSensorPoint: {fileID: 9138029510741205671, guid: 99c8bc6b58a454b4186f6802595562db, type: 3}
+  _trailVisualizer: {fileID: 0}
+  _flightStatus: 0
+  _headLessMode: 0
+  _selfInitialize: 1
+  deltaHeight: 0
+  heightOffset: 0
+  elvInput: 0
+  assumedHeightOffset: 0
+  vertSpeed: 0
 --- !u!114 &1877514362
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8339,6 +8369,35 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &1877514365
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877514357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb4174a62fedc67488b38d27472d65e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flMotor: {fileID: 333975212}
+  frMotor: {fileID: 1179178572}
+  blMotor: {fileID: 67331216}
+  brMotor: {fileID: 1858441404}
+--- !u!114 &1877514366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877514357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1d7c95cb978c86499c12f4856bbad8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputType: 1
 --- !u!1 &1958844281
 GameObject:
   m_ObjectHideFlags: 0
