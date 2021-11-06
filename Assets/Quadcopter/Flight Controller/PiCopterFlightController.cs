@@ -38,15 +38,18 @@ public class MotorThrustCalculator
         public float motorBL;
     }
 
+    private float _yawHoldAngle;
+
     public float altitudeHoldPos { get; private set; }
     public void SetAltitudeHold(float newHoldHeight)
     {
         altitudeHoldPos = newHoldHeight;
     }
 
-    public void Initialize(float P, float I, float D, float max, float min)
+    public void Initialize(float currentHeading)
     {
-        _elevationPid = new PidController(P,I,D,max,min);
+        _yawHoldAngle = currentHeading;
+        _elevationPid = new PidController(.03f, .04f, 0.04f, .8f, .1f);
         _elevationPid.SetPoint = 0;
 
         var translateP = .001f;
@@ -62,6 +65,8 @@ public class MotorThrustCalculator
 
         _yawPid = new PidController(.03f, 0.05f, 0.008, .1f, -.1f);
         _yawPid.SetPoint = 0;
+
+        prevDeltaTime = Time.time;
     }
 
     private float _yawHoldHeading;
@@ -72,55 +77,9 @@ public class MotorThrustCalculator
         var deltaTime1 = (int)(_timeSinceLastUpdate * 1000);
         var deltaTime = new System.TimeSpan(0, 0, 0, 0, (deltaTime1));
 
-        float pitchAngle = 0;
-        if(inputs.pitch > 0)
-        {
-            pitchAngle = Mathf.Lerp(0, 15, inputs.pitch);
-        }
-        else
-        {
-            pitchAngle = Mathf.Lerp(0, -15, -inputs.pitch);
-        }
-        float rollAngle = 0;
-        if (inputs.roll > 0)
-        {
-            rollAngle = Mathf.Lerp(0, 15, inputs.roll);
-        }
-        else
-        {
-            rollAngle = Mathf.Lerp(0, -15, -inputs.roll);
-        }
 
-        float yawAngle = 0;
-        if (inputs.yaw > 0)
-        {
-            yawAngle = Mathf.Lerp(0, 15, inputs.yaw);
-            _yawHoldHeading = currentEuler.y - yawAngle;
-        }
-        else if (inputs.yaw < 0)
-        {
-            yawAngle = Mathf.Lerp(0, -15, -inputs.yaw);
-            _yawHoldHeading = currentEuler.y - yawAngle;
-        }
-        //Debug.Log(yawAngle);
-        var desiredEuler = new Vector3(pitchAngle, _yawHoldHeading, -rollAngle);    
-
-        float heightOffset = 0;
-        float throttleValue = 0;
-        if (Math.Abs(inputs.throttle) > 0)
-        {
-            altitudeHoldPos = currentPos.y;
-            throttleValue = inputs.throttle;
-        }
-        else
-        {
-            heightOffset = currentPos.y - altitudeHoldPos;
-            _elevationPid.ProcessVariable = heightOffset;
-            double trgtThrottle = _elevationPid.ControlVariable(deltaTime);
-            throttleValue = (float)trgtThrottle;
-        }
-
-        var eulerDif =  currentEuler - desiredEuler;
+        var throttleValue = calculateThrottle(inputs.throttle, currentPos.y, deltaTime);
+        var eulerDif =  currentEuler - calculateDesiredAngle(inputs);
         var pitchOffset = eulerDif.x;
 
         if (pitchOffset < -180)
@@ -158,8 +117,6 @@ public class MotorThrustCalculator
         var trgtyaw = _yawPid.ControlVariable(deltaTime);
         float yawValue = (float)trgtyaw;
 
-        //Debug.Log("yaw offset " +yawOffset);
-       // Debug.Log("yaw value " + yawValue);
         var motorValues = new MotorValues();
         motorValues.motorFR = throttleValue + pitchValue - rollValue + yawValue;
         motorValues.motorFL = throttleValue + pitchValue + rollValue - yawValue;
@@ -167,6 +124,64 @@ public class MotorThrustCalculator
         motorValues.motorBL = throttleValue - pitchValue + rollValue + yawValue;
 
         return motorValues;
+    }
+
+    private Vector3 calculateDesiredAngle(IInputs.FlightControlValues inputs)
+    {
+        float pitchAngle = 0;
+        if (inputs.pitch > 0)
+        {
+            pitchAngle = Mathf.Lerp(0, 15, inputs.pitch);
+        }
+        else
+        {
+            pitchAngle = Mathf.Lerp(0, -15, -inputs.pitch);
+        }
+        float rollAngle = 0;
+        if (inputs.roll > 0)
+        {
+            rollAngle = Mathf.Lerp(0, 15, inputs.roll);
+        }
+        else
+        {
+            rollAngle = Mathf.Lerp(0, -15, -inputs.roll);
+        }
+
+        float yawAngle = 0;
+        if (inputs.yaw > 0)
+        {
+            yawAngle = Mathf.Lerp(0, 15, inputs.yaw);
+            _yawHoldHeading = _yawHoldAngle - yawAngle;
+        }
+        else if (inputs.yaw < 0)
+        {
+            yawAngle = Mathf.Lerp(0, -15, -inputs.yaw);
+            _yawHoldHeading = _yawHoldAngle - yawAngle;
+        }
+        return new Vector3(pitchAngle, _yawHoldHeading, -rollAngle);
+    }
+
+    private float calculateThrottle(float throttle, float currentHeight, TimeSpan deltaTime)
+    {
+        float throttleValue = 0;
+        if (Math.Abs(throttle) > 0)
+        {
+            altitudeHoldPos = currentHeight;
+            throttleValue = throttle;
+        }
+        else
+        {
+            var heightOffset = currentHeight - altitudeHoldPos;
+            _elevationPid.ProcessVariable = heightOffset;
+            double trgtThrottle = _elevationPid.ControlVariable(deltaTime);
+            throttleValue = (float)trgtThrottle;
+        }
+        return throttleValue;
+    }
+
+    private void calculatePitch(float desiredPitch, TimeSpan deltaTime)
+    {
+
     }
 }
 
@@ -218,7 +233,7 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
 
         client.onConnectionEstablished += OnConnectedToServer;
 
-        _motorCalculator.Initialize(.1f,0,0,1,.2f);
+        _motorCalculator.Initialize(quadToControl.GetGameObject().transform.eulerAngles.y);
         _isInitialized = true;
     }
 

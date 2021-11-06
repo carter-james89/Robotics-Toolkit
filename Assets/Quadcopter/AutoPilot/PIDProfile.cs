@@ -8,3 +8,8 @@ public class PIDProfile : MonoBehaviour {
     public float PIDzP = .1f, PIDzI = 0, PIDzD = .0f;
     public float yawP, yawI, yawD;
 }
+
+public class PIDValues
+{
+
+}

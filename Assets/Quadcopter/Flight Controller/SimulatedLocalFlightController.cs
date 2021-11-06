@@ -25,6 +25,8 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
 
     private Action<IQuadcopter.FlightStatus> _onFlightStatusChanged;
 
+    private Rigidbody _rigidBody;
+
     private bool _isInitialized;
     public bool IsInitialized()
     {
@@ -59,11 +61,14 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
         return _quadcopterData;
     }
 
+    private IQuadcopter _quadToControl;
+
     public void Initialize(IQuadcopter quadToControl, Action<IQuadcopter.FlightStatus> onFlightStatusChanged)
     {
-        _motorCalculator = new MotorThrustCalculator();
-        _motorCalculator.Initialize(.03f, .04f, 0.04f, .8f, .1f);
+        _quadToControl = quadToControl;
         //new PidController(.14f, .03f, 0.04f, .8f, .1f);
+        _rigidBody = quadToControl.GetGameObject().GetComponent<Rigidbody>();
+        _rigidBody.useGravity = false;
 
         _groundStatationData = new GroundStationData();
 
@@ -111,8 +116,10 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
     public void Takeoff()
     {
         Debug.Log("Simulator TakeOff");
+        _motorCalculator = new MotorThrustCalculator();
+        _motorCalculator.Initialize(_quadToControl.GetGameObject().transform.eulerAngles.y);
         _motorCalculator.SetAltitudeHold(1);
         _onFlightStatusChanged.Invoke(FlightStatus.Launching);
-      
+        _rigidBody.useGravity = true;
     }
 }
