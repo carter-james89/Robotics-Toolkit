@@ -38,8 +38,6 @@ public class MotorThrustCalculator
         public float motorBL;
     }
 
-    private float _yawHoldAngle;
-
     public float altitudeHoldPos { get; private set; }
     public void SetAltitudeHold(float newHoldHeight)
     {
@@ -48,7 +46,7 @@ public class MotorThrustCalculator
 
     public void Initialize(float currentHeading)
     {
-        _yawHoldAngle = currentHeading;
+        _yawHoldHeading = currentHeading;
         _elevationPid = new PidController(.03f, .04f, 0.04f, .8f, .1f);
         _elevationPid.SetPoint = 0;
 
@@ -151,12 +149,12 @@ public class MotorThrustCalculator
         if (inputs.yaw > 0)
         {
             yawAngle = Mathf.Lerp(0, 15, inputs.yaw);
-            _yawHoldHeading = _yawHoldAngle - yawAngle;
+            _yawHoldHeading = _yawHoldHeading - yawAngle;
         }
         else if (inputs.yaw < 0)
         {
-            yawAngle = Mathf.Lerp(0, -15, -inputs.yaw);
-            _yawHoldHeading = _yawHoldAngle - yawAngle;
+            yawAngle = Mathf.Lerp(0, 15, -inputs.yaw);
+            _yawHoldHeading = _yawHoldHeading + yawAngle;
         }
         return new Vector3(pitchAngle, _yawHoldHeading, -rollAngle);
     }
@@ -194,6 +192,8 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     private static ClientUplink client;
     private static ServerUplink server;
 
+    private Action<IQuadcopter.FlightStatus> _onFlightStatusChanged;
+
     [SerializeField]
     private bool _sendToClient = true;
 
@@ -205,6 +205,8 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     private GroundStationData _groundStatationData;
 
     private MotorThrustCalculator _motorCalculator;
+
+    private IQuadcopter _quadToControl;
 
     private bool _isInitialized;
     public bool IsInitialized()
@@ -221,7 +223,9 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     }
 
     public void Initialize(IQuadcopter quadToControl, Action<IQuadcopter.FlightStatus> onFlightStatusChanged)
-    {     
+    {
+        _quadToControl = quadToControl;
+        _onFlightStatusChanged = onFlightStatusChanged;
         server = new ServerUplink(11001, ipAddress);
         server.uplinkMessage += x => Debug.Log("Server Log : " + x);
         server.EstablishConnection();
@@ -233,7 +237,7 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
 
         client.onConnectionEstablished += OnConnectedToServer;
 
-        _motorCalculator.Initialize(quadToControl.GetGameObject().transform.eulerAngles.y);
+  
         _isInitialized = true;
     }
 
@@ -302,7 +306,10 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
 
     public void Takeoff()
     {
-        throw new System.NotImplementedException();
+        _motorCalculator = new MotorThrustCalculator();
+        _motorCalculator.Initialize(_quadToControl.GetGameObject().transform.eulerAngles.y);
+        _motorCalculator.SetAltitudeHold(1);
+        _onFlightStatusChanged.Invoke(FlightStatus.Launching);
     }
 
     public void Land()

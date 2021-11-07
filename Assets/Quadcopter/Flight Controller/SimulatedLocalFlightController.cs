@@ -9,7 +9,7 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
 {
     private MotorThrustCalculator _motorCalculator;
 
-
+    private IQuadcopter _quadToControl;
 
     [SerializeField]
     private Motor flMotor;
@@ -61,7 +61,7 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
         return _quadcopterData;
     }
 
-    private IQuadcopter _quadToControl;
+
 
     public void Initialize(IQuadcopter quadToControl, Action<IQuadcopter.FlightStatus> onFlightStatusChanged)
     {

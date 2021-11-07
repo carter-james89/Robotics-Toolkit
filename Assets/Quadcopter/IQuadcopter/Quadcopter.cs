@@ -164,6 +164,8 @@ namespace QuadcopterUtilities
         private float heightOffset = 0;
         [SerializeField]
         private float elvInput;
+        [SerializeField]
+        private float yawInput;
 
         [SerializeField]
         private float assumedHeightOffset = 0;
@@ -177,6 +179,7 @@ namespace QuadcopterUtilities
             deltaHeight = _prevHeight - quadData.height;
             _prevHeight = quadData.height;
             elvInput = currentInputs.throttle;
+            yawInput = currentInputs.yaw;
 
             var tempPos = new Vector3(quadData.posX, quadData.height + heightOffset, quadData.posZ);// rigidBody.transform.position;
 
