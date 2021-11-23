@@ -77,7 +77,7 @@ public class MotorThrustCalculator
 
 
         var throttleValue = calculateThrottle(inputs.throttle, currentPos.y, deltaTime);
-        var eulerDif =  currentEuler - calculateDesiredAngle(inputs);
+        var eulerDif = currentEuler - calculateDesiredAngle(inputs);
         var pitchOffset = eulerDif.x;
 
         if (pitchOffset < -180)
@@ -209,13 +209,29 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     private IQuadcopter _quadToControl;
 
     private bool _isInitialized;
+    private bool _serverConnected;
+    private bool _clientConnected;
     public bool IsInitialized()
     {
         return _isInitialized;
     }
+    public bool IsReadyToFly()
+    {
+        if ((!_startServer || server.uplinkStatus == SocketUplink.Status.Connected) && (!_startClient || client.uplinkStatus == SocketUplink.Status.Connected))
+        {
+            return true;
+        }
+        //Debug.Log(server.uplinkStatus);
+        //Debug.Log(_clientConnected);
+        return false;
+    }
 
 
-    private const string ipAddress = "192.168.86.50";
+    private const string ipAddress = "192.168.86.41";// "192.168.86.50";
+    private const string serverIPAddress = "192.168.86.27";
+
+    private bool _startServer = true;
+    private bool _startClient = true;
 
     public Quaternion GetGyroRotation()
     {
@@ -226,26 +242,42 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     {
         _quadToControl = quadToControl;
         _onFlightStatusChanged = onFlightStatusChanged;
-        server = new ServerUplink(11001, ipAddress);
-        server.uplinkMessage += x => Debug.Log("Server Log : " + x);
-        server.EstablishConnection();
 
-        client = new ClientUplink(11000, ipAddress);
-        client.uplinkMessage += x => Debug.Log("Client Log : " + x);
-        // client.uplinkMessage += OnClientLogMessageRecieved;
-        client.EstablishConnection();
+        _quadcopterData = new QuadcopterData();
+        _groundStatationData = new GroundStationData();
 
-        client.onConnectionEstablished += OnConnectedToServer;
+        if (_startServer)
+        {
+            server = new ServerUplink(11001, serverIPAddress);
+            server.uplinkMessage += x => Debug.Log("Server Log : " + x);
+            server.EstablishConnection();
+        }
+        if (_startClient)
+        {
+            client = new ClientUplink(11000, ipAddress);
+            client.uplinkMessage += x => Debug.Log("Client Log : " + x);
+            // client.uplinkMessage += OnClientLogMessageRecieved;
+            client.onConnectionEstablished += OnConnectedToServer;
+            client.EstablishConnection();
+        }
+        _motorCalculator = new MotorThrustCalculator();
+        _motorCalculator.Initialize(0);
 
-  
         _isInitialized = true;
     }
 
     private void OnConnectedToServer(string obj)
     {
+        _serverConnected = true;
         client.ListenForServerData(CommunicationUtilities.TypeToByte(new QuadcopterData()).Length, OnDataRecievedFromServer);
     }
 
+    [SerializeField]
+    private float _rawYaw;
+    [SerializeField]
+    private float _rawPitch;
+    [SerializeField]
+    private float _rawRoll;
     private byte[] OnDataRecievedFromServer(byte[] arg)
     {
         _quadcopterData = (QuadcopterData)CommunicationUtilities.ByteToType<QuadcopterData>(arg);
@@ -256,6 +288,11 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
             _pitchOffset = _quadcopterData.gyroPitch;
             _yawOffset = _quadcopterData.gyroYaw;
         }
+
+        _rawYaw = _quadcopterData.gyroYaw;
+        _rawPitch = _quadcopterData.gyroPitch;
+        _rawRoll = _quadcopterData.gyroRoll;
+
         gyroPitch = _quadcopterData.gyroPitch - _pitchOffset;
         gyroRoll = _quadcopterData.gyroRoll - _rollOffset;
         gyroYaw = _quadcopterData.gyroYaw - _yawOffset;
@@ -273,40 +310,35 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
         return false;
     }
 
-    private void OnDestroy()
-    {
-        if (_isInitialized)
-        {
-            client.onConnectionEstablished -= OnConnectedToServer;
-            client.ShutDown();
-            server.ShutDown();
-        }
-   
-    }
-
     public void Run(FlightStatus flightStatus, IInputs.FlightControlValues desiredInputs)
     {
-        _groundStatationData.yaw = desiredInputs.yaw;
-        _groundStatationData.pitch = desiredInputs.pitch;
-        _groundStatationData.roll = desiredInputs.roll;
-        _groundStatationData.throttle = desiredInputs.throttle;
+        if (Time.frameCount > 500)
+        {
+            _groundStatationData.yaw = desiredInputs.yaw;
+            _groundStatationData.pitch = desiredInputs.pitch;
+            _groundStatationData.roll = desiredInputs.roll;
+            _groundStatationData.throttle = desiredInputs.throttle;
 
 
-        //  var motorValues = _motorCalculator.Run(0,new Vector3(_quadcopterData.gyroYaw, _quadcopterData.gyroPitch, _quadcopterData.gyroRoll),Vector3.zero);
+            var motorValues = _motorCalculator.Run(new Vector3(_quadcopterData.posX, _quadcopterData.posY, _quadcopterData.posZ), new Vector3(_quadcopterData.gyroPitch, _quadcopterData.gyroYaw, _quadcopterData.gyroRoll), desiredInputs);
 
-        //_groundStatationData.motorBRSpeed = motorValues.motorBR;
-        //_groundStatationData.motorBLSpeed = motorValues.motorBL;
-        //_groundStatationData.motorFRSpeed = motorValues.motorFR;
-        //_groundStatationData.motorFLSpeed = motorValues.motorFL;
+            _groundStatationData.motorBRSpeed = Math.Round(motorValues.motorBR);
+            _groundStatationData.motorBLSpeed = Math.Round(motorValues.motorBL);
+            _groundStatationData.motorFRSpeed = Math.Round(motorValues.motorFR);
+            _groundStatationData.motorFLSpeed = Math.Round(motorValues.motorFL);
 
-
-        byte[] json = CommunicationUtilities.TypeToByte(_groundStatationData);
-        byte[] responce = server.SendMessage(json, json.Length);
+            byte[] json = CommunicationUtilities.TypeToByte(_groundStatationData);
+            if (_startServer)
+            {
+                //byte[] responce = server.SendMessage(json, json.Length);
+                byte[] responce = server.SendMessageWithHeader(json, json.Length);
+            }                
+        }
     }
 
     public void Takeoff()
     {
-        _motorCalculator = new MotorThrustCalculator();
+
         _motorCalculator.Initialize(_quadToControl.GetGameObject().transform.eulerAngles.y);
         _motorCalculator.SetAltitudeHold(1);
         _onFlightStatusChanged.Invoke(FlightStatus.Launching);
@@ -315,5 +347,22 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     public void Land()
     {
         throw new System.NotImplementedException();
+    }
+
+    private void OnDestroy()
+    {
+        if (_isInitialized)
+        {
+            if (client != null)
+            {
+                client.onConnectionEstablished -= OnConnectedToServer;
+                client.ShutDown();
+            }
+            if (server != null)
+            {
+                server.ShutDown();
+            }
+
+        }
     }
 }

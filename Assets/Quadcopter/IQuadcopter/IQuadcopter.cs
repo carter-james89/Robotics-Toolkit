@@ -31,17 +31,18 @@ namespace QuadcopterUtilities
 
             public float height;
         }
-        public class GroundStationData : IUplinkData
+       
+        public class GroundStationData 
         {
-            public double throttle;
-            public double yaw;
-            public double pitch;
-            public double roll;
+            public double throttle = 0.0;
+            public double yaw = 0.0;
+            public double pitch = 0.0;
+            public double roll = 0.0;
 
-            public double motorFRSpeed;
-            public double motorFLSpeed;
-            public double motorBRSpeed;
-            public double motorBLSpeed;
+            public double motorFRSpeed = 0.0;
+            public double motorFLSpeed = 0.0;
+            public double motorBRSpeed = 0.0;
+            public double motorBLSpeed = 0.0;
         }
         public enum FlightStatus
         {

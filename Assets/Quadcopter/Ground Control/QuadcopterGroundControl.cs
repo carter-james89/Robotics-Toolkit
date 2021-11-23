@@ -11,16 +11,20 @@ namespace QuadcopterUtilities
             Tello,
             TelloSim,
             Picopter,
-            PicopterSim
+            PicopterSim,
+            Ardupilot,
+            ArdupilotSim
         }
         [SerializeField] private GroundControlMode _controlMode;
         [SerializeField] private Quadcopter _tello;
         [SerializeField] private Quadcopter _picopter;
+        [SerializeField] private Quadcopter _ardupilot;
         public Quadcopter activeQuad { get; private set; }
 
         [SerializeField] private SimulatedLocalFlightController _simulatedLocalFlightController;
         [SerializeField] private TelloFlightController _telloFlightController;
         [SerializeField] private PiCopterFlightController _picopterFlightController;
+        [SerializeField] private PiCopterFlightController _ardupilotFlightController;
         private IFlightController _flightController;
 
 
@@ -55,6 +59,10 @@ namespace QuadcopterUtilities
                 case GroundControlMode.PicopterSim:
                     activeQuad = _picopter;
                     _flightController = activeQuad.gameObject.GetComponent<SimulatedLocalFlightController>();
+                    break;
+                case GroundControlMode.Ardupilot:
+                    activeQuad = _ardupilot;
+                    _flightController = activeQuad.gameObject.GetComponent<ArduPilotFlightController>();
                     break;
                 default:
                     break;

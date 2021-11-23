@@ -251,10 +251,19 @@ namespace QuadcopterUtilities
         {
             if (_flightController != null && _flightController.IsInitialized())
             {
-                var quadData = _flightController.GetSensorData();
-                SetVirtualPosition(quadData);
-                ProcessInputs();
-                _flightController.Run(_flightStatus, currentInputs);
+                if (_flightController.IsReadyToFly())
+                {
+                    var quadData = _flightController.GetSensorData();
+                    SetVirtualPosition(quadData);
+                    ProcessInputs();
+                    //if (_flightStatus != IQuadcopter.FlightStatus.PreLaunch)
+                        _flightController.Run(_flightStatus, currentInputs);
+                }
+                else
+                {
+
+                   // Debug.Log("not ready to fly");
+                }
             }
         }
 

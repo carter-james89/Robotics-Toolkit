@@ -32,6 +32,10 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
     {
         return _isInitialized;
     }
+    public bool IsReadyToFly()
+    {
+        return true;
+    }
 
     public Quaternion GetGyroRotation()
     {

@@ -47,6 +47,14 @@ public class TelloFlightController : MonoBehaviour, IFlightController
     {
         return _isInitialized;
     }
+    public bool IsReadyToFly()
+    {
+        if(connectionState == Tello.ConnectionState.Connected)
+        {
+            return true;
+        }
+        return false;
+    }
 
     public Quaternion GetGyroRotation()
     {

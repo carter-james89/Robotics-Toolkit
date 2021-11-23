@@ -31,6 +31,10 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
     {
         return _isInitialized;
     }
+    public bool IsReadyToFly()
+    {
+        return true;
+    }
 
     public void Initialize(IQuadcopter quadToControl, Action<IQuadcopter.FlightStatus> onFlightStatusChanged)
     {

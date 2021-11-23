@@ -8,6 +8,8 @@ using static QuadcopterUtilities.IQuadcopter;
 public interface IFlightController 
 {
     public bool IsInitialized();
+
+    public bool IsReadyToFly();
     
     public void Initialize(IQuadcopter quadToControl, Action<IQuadcopter.FlightStatus> onFlightStatusChanged);
 
