@@ -5,16 +5,55 @@ using UnityEngine;
 
 public class RoboticServo : MonoBehaviour
 {
+    public float deltaAngle;
+    public float prevAngle = 0;
     [SerializeField]
-    private float _servoAngle;
+    private float _servoAngle
+    {
+        get
+        {
+            return -_servoJoint.angle;
+            // return _servoJoint.angle;
+            if (_servoJoint.axis == new Vector3(0, 1, 0))
+            {
+                return convert360Euler(transform.localEulerAngles.y);
+            }
+            else if (_servoJoint.axis == new Vector3(1, 0, 0))
+            {
+                // Quaternion.
+               // return convert360Euler(transform.localRotation.eulerAngles.x);
+                //var localRot = Quaternion.Inverse(transform.parent.rotation) * transform.rotation;
+                // return localRot.eulerAngles.x;
+
+                var angle = Math.Abs(_servoJoint.angle);
+                var point0 = transform.position + transform.forward * 10;
+                var point1 = transform.position + transform.parent.forward * 10;
+
+                if(point0.y < point1.y)
+                {
+                    angle = -angle;
+                }
+                return angle;
+
+            }
+            return _servoJoint.angle;
+        }
+    }
+    public float ServoAngle;
+    public float adjValue;
+    public float oppositeValue;
+    [SerializeField]
+    private float _angleDif;
+    public float setPoint { get; private set; } = 0;
+
 
     private float _servoForce = 500;
 
-    private float _servoVelocityMax = 10;//500;
+    private float _servoVelocityMax = 500;
     public void SetAngle(float newAngle)
     {
         // setPoint = newAngle;
-        setPoint = newAngle + _endPointOffset;
+        setPoint = newAngle - _endPointOffset;
     }
 
     public Matrix4x4 _base = new Matrix4x4();
@@ -23,7 +62,7 @@ public class RoboticServo : MonoBehaviour
 
     [SerializeField]
     private Transform _endPointPosition;
-    private float _endPointOffset;
+    private float _endPointOffset = 0;
 
     [SerializeField]
     private HingeJoint _servoJoint;
@@ -34,8 +73,7 @@ public class RoboticServo : MonoBehaviour
     private PidController _forcePID;
 
 
-    [SerializeField]
-    private float _angleDif;
+
 
     bool run = false;
     public Transform debugBase;
@@ -45,8 +83,10 @@ public class RoboticServo : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        _servoJoint = GetComponent<HingeJoint>();
+        _rigidbody = GetComponent<Rigidbody>();
+
         //Time.timeScale = .06f;
-        // _base.SetTRS(transform.position, transform.rotation, Vector3.one);
 
         _basePosOffset = transform.parent.InverseTransformPoint(transform.position);
         _baseRotOffset = Quaternion.Inverse(transform.parent.rotation) * transform.rotation;
@@ -57,11 +97,22 @@ public class RoboticServo : MonoBehaviour
             var d1 = Math.Atan(offset.y / offset.z);
             _endPointOffset = (float)(d1 * (180 / Math.PI));
         }
-
-        _servoJoint = GetComponent<HingeJoint>();
-        _rigidbody = GetComponent<Rigidbody>();
-        _velocityPID = new PidController(1, 1, .1f, _servoVelocityMax, -_servoVelocityMax);
+       
+        _velocityPID = new PidController(10, 10, .1f, _servoVelocityMax, -_servoVelocityMax);
         _forcePID = new PidController(0, 50, 0, 1000, 100);
+    }
+
+    private float convert360Euler(float euler)
+    {
+        if (euler > 180)
+        {
+            euler = (360 - euler);
+        }
+        else
+        {
+            euler = -euler;
+        }
+        return euler;
     }
 
     /// <summary>
@@ -77,7 +128,7 @@ public class RoboticServo : MonoBehaviour
     /// </summary>
     private float prevDeltaTime = 0;
 
-    public float setPoint { get; private set; } = 0;
+
 
     public float trgtVelocity;
     public float trgtForce;
@@ -94,23 +145,22 @@ public class RoboticServo : MonoBehaviour
         }
         else
         {
-           // motor.force = trgtForce;
-           // motor.targetVelocity = trgtVelocity;
+            // motor.force = trgtForce;
+            // motor.targetVelocity = trgtVelocity;
         }
     }
 
     public void UpdateBase()
     {
         var basePos = transform.parent.TransformPoint(_basePosOffset);
-        var baseRot = transform.parent.rotation * _baseRotOffset;
+        var baseRot = transform.parent.rotation;// * _baseRotOffset;
 
         if (debugBase)
         {
             debugBase.transform.position = basePos;
             debugBase.transform.rotation = baseRot;
         }
-        _base.SetTRS(transform.position, baseRot, Vector3.one);      
-        //s_targetOffset = transform.InverseTransformPoint(_endPointTarget.position);
+        _base.SetTRS(transform.position, baseRot, Vector3.one);
     }
 
     public float CalculateIKPosition(Vector3 point, Vector3 targetPoint, RoboticServo childServo = null)
@@ -118,10 +168,13 @@ public class RoboticServo : MonoBehaviour
         _targetOffset = _base.inverse.MultiplyPoint(targetPoint);
         if (childServo)
         {
-            // var targetOffset = _base.inverse.MultiplyPoint(targetPoint);
             var childTargetOffset = childServo._base.inverse.MultiplyPoint(targetPoint);
 
             var d1 = Math.Atan(_targetOffset.y / _targetOffset.z);
+            if (_servoJoint.axis == new Vector3(0, 1, 0))
+            {
+                d1 = Math.Atan(_targetOffset.x / _targetOffset.z);
+            }
             d1 *= (180 / Math.PI);
             var targetDistC = Vector3.Distance(targetPoint, transform.position);
             var childTargetDistB = Vector3.Distance(point, childServo.transform.position);
@@ -131,7 +184,7 @@ public class RoboticServo : MonoBehaviour
             // hipElvAngle += hipElvAngleOffset;
             if (!Double.IsNaN(hipElvAngle))
             {
-                SetAngle(-(float)hipElvAngle);
+                SetAngle((float)hipElvAngle);
             }
             else
             {
@@ -140,7 +193,7 @@ public class RoboticServo : MonoBehaviour
         }
         else
         {
-            CalculateSingleIK(point,targetPoint);
+            CalculateSingleIK(point, targetPoint);
         }
         return setPoint;
     }
@@ -158,50 +211,62 @@ public class RoboticServo : MonoBehaviour
     {
         double jointTwoAngle = 0;
         _targetOffset = _base.inverse.MultiplyPoint(targetPoint);
+
+        adjValue = _targetOffset.z;
+        oppositeValue = _targetOffset.y;
+        if (_servoJoint.axis == new Vector3(0, 1, 0))
+        {
+            adjValue = _targetOffset.z;
+            oppositeValue = _targetOffset.x;
+           
+        }
+
         if (_targetOffset.z > 0)
         {
-            jointTwoAngle = Math.Atan(_targetOffset.y / _targetOffset.z);
-            jointTwoAngle *= (180 / Math.PI);
-            //jointTwoAngle -= 90;
+            jointTwoAngle = radToDegree(Math.Atan(oppositeValue / adjValue));
         }
         else
         {
-            jointTwoAngle = Math.Atan(_targetOffset.z / _targetOffset.y);
-            jointTwoAngle *= -(180 / Math.PI);
+            jointTwoAngle = radToDegree(Math.Atan(oppositeValue/-adjValue));
             if (_targetOffset.y > 0)
             {
-                jointTwoAngle += 90;
+                jointTwoAngle = 180 - jointTwoAngle;
             }
             else
             {
-                jointTwoAngle -= 90;
+                jointTwoAngle = -180 - jointTwoAngle;
             }
-            //jointTwoAngle = 0;
         }
-
-        //kneeAngle -= kneeAngleOffset;
-        //  if (!Double.IsNaN(jointTwoAngle))
-        //  {
-        // setPoint = -(float)jointTwoAngle;
-        SetAngle(-(float)jointTwoAngle);
-        // }
-        //setServoVelocity();
+        if (_servoJoint.axis == new Vector3(0, 1, 0))
+        {
+            SetAngle(-(float)jointTwoAngle);
+            return;
+        }
+        SetAngle((float)jointTwoAngle);
     }
+
+    private float radToDegree(double radian)
+    {
+        return (float)(radian * (180 / Math.PI));
+    }
+
+    //private enum AngleAxis
+    //{
+    //    X,Y,Z,ServoAngle
+    //}
+    //[SerializeField]
+    //private AngleAxis _angleAxis = AngleAxis.ServoAngle;
 
     private void setServoVelocity()
     {
-        _servoAngle = _servoJoint.angle;
         var motor = _servoJoint.motor;
-        motor.force = _servoForce;
-
-        // motor.
 
         _timeSinceLastUpdate = Time.time - prevDeltaTime;
         prevDeltaTime = Time.time;
         var deltaTime1 = (int)(_timeSinceLastUpdate * 1000);
         var deltaTime = new System.TimeSpan(0, 0, 0, 0, (deltaTime1));
 
-        _angleDif = _servoAngle - setPoint;
+        _angleDif = setPoint - _servoAngle;
 
         _velocityPID.ProcessVariable = _angleDif;
         trgtVelocity = (float)_velocityPID.ControlVariable(deltaTime);
@@ -211,70 +276,21 @@ public class RoboticServo : MonoBehaviour
 
         motor.force = trgtForce;
         motor.targetVelocity = trgtVelocity;
-
-        //motor.
-
         _servoJoint.motor = motor;
-
-
-        // motor.targetVelocity = trgtVelocity;
     }
 
-    // Update is called once per frame
+  
+
     void Update()
     {
-        //_base.SetTRS(transform.position, transform.rotation, Vector3.one);
-
-        // _targetOffset = _base.inverse.MultiplyPoint( _endPointTarget.position);
-        // var motor = _servoJoint.motor;
-        // //   setServoVelocity();
-
+       
         UpdateBase();
-
-
-        // // _servo.transform.position = transform.position;
-        // _servoAngle = _servoJoint.angle;
-        // //var dir = transform.position - _target.position;
-
-        //// motor.force = 10000000000000;
-        // //motor.targetVelocity = 0;
-        // //transform.rotation = Quaternion.LookRotation(dir);
-        // // _target.GetComponent<Rigidbody>().useGravity = true;
 
         if (Input.GetKey(KeyCode.UpArrow) && runMotor)
         {
-            // _target.GetComponent<Rigidbody>().useGravity = false;
-            // _rigidbody.AddTorque(transform.right * 100000);
-            // _servoJoint.
-            // Debug.Log("motor");
             run = true;
             prevDeltaTime = Time.time;
-            //motor.targetVelocity = trgtVelocity;
-
-
-            // _target.GetComponent<HingeJoint>().motor = motor;
         }
-
-        // else if (Input.GetKey(KeyCode.DownArrow) && runMotor)
-        // {
-        //     motor.targetVelocity = -100;
-        //     // _rigidbody.AddTorque(-transform.right * 100000);
-        //     // _target.GetComponent<Rigidbody>().useGravity = false;
-        //     // _target.GetComponent<Rigidbody>().AddTorque(-_servo.right);
-        //     // _servo.GetComponent<Rigidbody>().AddTorque(_servo.right * .2f);
-        //     //_target.GetComponent<Rigidbody>().AddTorque(transform.right *5000,ForceMode.VelocityChange );
-        //     // _target.GetComponent<Rigidbody>().AddForce(transform.forward *1, ForceMode.Force);
-        //     //_target.GetComponent<Rigidbody>().AddRelativeTorque(-transform.right * 100000);
-        // }
-
-        //// _servoJoint.motor = motor;
-
-        // //    _servo.LookAt(_target);
-
-        // //   var tempEuler = _servo.localEulerAngles;
-        // // tempEuler.y = 0;
-        // // tempEuler.z = 0;
-        // //_servo.localEulerAngles = tempEuler;
-
+        ServoAngle = _servoAngle;
     }
 }

@@ -63,8 +63,8 @@ public class HexapodLeg : MonoBehaviour
         //// hipElvAngle += hipElvAngleOffset;
         //if (!Double.IsNaN(hipElvAngle))
         _hipServo.CalculateIKPosition(_endPoint.position, _endPointTarget.position);
-        //_kneeServo.CalculateIKPosition(_endPoint.position, _endPointTarget.position, _footServo);
-        _kneeServo.SetAngle(0);
+        _kneeServo.CalculateIKPosition(_endPoint.position, _endPointTarget.position, _footServo);
+       // _kneeServo.SetAngle(0);
         _footServo.CalculateIKPosition(_endPoint.position, _endPointTarget.position);
         //_kneeServo.CalculateIKPosition(0);
 

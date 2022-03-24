@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static QuadcopterUtilities.IQuadcopter;
 
-public class MotorThrustCalculator
+public class MotorThrustCalculator : IMotorThrustCalculator
 {
     private PidController _elevationPid;
     private PidController _pitchPid;
@@ -30,13 +30,7 @@ public class MotorThrustCalculator
     /// </summary>
     private float prevDeltaTime = 0;
 
-    public struct MotorValues
-    {
-        public float motorFL;
-        public float motorFR;
-        public float motorBR;
-        public float motorBL;
-    }
+
 
     public float altitudeHoldPos { get; private set; }
     public void SetAltitudeHold(float newHoldHeight)
@@ -68,7 +62,7 @@ public class MotorThrustCalculator
     }
 
     private float _yawHoldHeading;
-    public MotorValues Run(Vector3 currentPos, Vector3 currentEuler, IInputs.FlightControlValues inputs)
+    public IMotorThrustCalculator.MotorThrustValues Run(Vector3 currentPos, Vector3 currentEuler, IInputs.FlightControlValues inputs)
     {
         _timeSinceLastUpdate = Time.time - prevDeltaTime;
         prevDeltaTime = Time.time;
@@ -115,7 +109,7 @@ public class MotorThrustCalculator
         var trgtyaw = _yawPid.ControlVariable(deltaTime);
         float yawValue = (float)trgtyaw;
 
-        var motorValues = new MotorValues();
+        var motorValues = new IMotorThrustCalculator.MotorThrustValues();
         motorValues.motorFR = throttleValue + pitchValue - rollValue + yawValue;
         motorValues.motorFL = throttleValue + pitchValue + rollValue - yawValue;
         motorValues.motorBR = throttleValue - pitchValue - rollValue - yawValue;
@@ -204,7 +198,8 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     private QuadcopterData _quadcopterData;
     private GroundStationData _groundStatationData;
 
-    private MotorThrustCalculator _motorCalculator;
+    //private MotorThrustCalculatorGameObject _motorCalculator;
+    private IMotorThrustCalculator _motorThrustCalculator;
 
     private IQuadcopter _quadToControl;
 
@@ -217,10 +212,10 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     }
     public bool IsReadyToFly()
     {
-        if ((!_startServer || server.uplinkStatus == SocketUplink.Status.Connected) && (!_startClient || client.uplinkStatus == SocketUplink.Status.Connected))
-        {
-            return true;
-        }
+        //if ((!_startServer || server.uplinkStatus == SocketUplink.Status.Connected) && (!_startClient || client.uplinkStatus == SocketUplink.Status.Connected))
+        //{
+        //    return true;
+        //}
         //Debug.Log(server.uplinkStatus);
         //Debug.Log(_clientConnected);
         return false;
@@ -228,9 +223,9 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
 
 
     private const string ipAddress = "192.168.86.41";// "192.168.86.50";
-    private const string serverIPAddress = "192.168.86.27";
+    private const string serverIPAddress = "192.168.86.46";
 
-    private bool _startServer = true;
+    private bool _startServer = false;
     private bool _startClient = true;
 
     public Quaternion GetGyroRotation()
@@ -242,6 +237,8 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     {
         _quadToControl = quadToControl;
         _onFlightStatusChanged = onFlightStatusChanged;
+
+    
 
         _quadcopterData = new QuadcopterData();
         _groundStatationData = new GroundStationData();
@@ -260,8 +257,9 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
             client.onConnectionEstablished += OnConnectedToServer;
             client.EstablishConnection();
         }
-        _motorCalculator = new MotorThrustCalculator();
-        _motorCalculator.Initialize(0);
+        //_motorCalculator = new MotorThrustCalculator();
+        _motorThrustCalculator = GetComponent<IMotorThrustCalculator>();
+        _motorThrustCalculator.Initialize(0);
 
         _isInitialized = true;
     }
@@ -269,7 +267,7 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     private void OnConnectedToServer(string obj)
     {
         _serverConnected = true;
-        client.ListenForServerData(CommunicationUtilities.TypeToByte(new QuadcopterData()).Length, OnDataRecievedFromServer);
+        client.ListenForServerDataWithHeader(OnDataRecievedFromServer);
     }
 
     [SerializeField]
@@ -281,6 +279,8 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     private byte[] OnDataRecievedFromServer(byte[] arg)
     {
         _quadcopterData = (QuadcopterData)CommunicationUtilities.ByteToType<QuadcopterData>(arg);
+
+      //  Debug.Log(_quadcopterData.gyroPitch);
         //run calculations and return
         if (_rollOffset == 0)
         {
@@ -320,7 +320,7 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
             _groundStatationData.throttle = desiredInputs.throttle;
 
 
-            var motorValues = _motorCalculator.Run(new Vector3(_quadcopterData.posX, _quadcopterData.posY, _quadcopterData.posZ), new Vector3(_quadcopterData.gyroPitch, _quadcopterData.gyroYaw, _quadcopterData.gyroRoll), desiredInputs);
+            var motorValues = _motorThrustCalculator.Run(new Vector3(_quadcopterData.posX, _quadcopterData.posY, _quadcopterData.posZ), new Vector3(_quadcopterData.gyroPitch, _quadcopterData.gyroYaw, _quadcopterData.gyroRoll), desiredInputs);
 
             _groundStatationData.motorBRSpeed = Math.Round(motorValues.motorBR);
             _groundStatationData.motorBLSpeed = Math.Round(motorValues.motorBL);
@@ -339,8 +339,8 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
     public void Takeoff()
     {
 
-        _motorCalculator.Initialize(_quadToControl.GetGameObject().transform.eulerAngles.y);
-        _motorCalculator.SetAltitudeHold(1);
+        _motorThrustCalculator.Initialize(_quadToControl.GetGameObject().transform.eulerAngles.y);
+        _motorThrustCalculator.SetAltitudeHold(1);
         _onFlightStatusChanged.Invoke(FlightStatus.Launching);
     }
 

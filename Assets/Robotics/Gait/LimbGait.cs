@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class LimbGait : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField]
+    private Transform posPosition;
+    [SerializeField]
+    private Transform negPosition;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [SerializeField]
+    private Transform legTarget;
+
+    [SerializeField]
+    private Transform targetPivot;
+
+
+
 }

@@ -5,6 +5,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using static QuadcopterUtilities.IQuadcopter;
 
+public interface IMotorThrustCalculator
+{
+    public struct MotorThrustValues
+    {
+        public float motorFL;
+        public float motorFR;
+        public float motorBR;
+        public float motorBL;
+    }
+    public void SetAltitudeHold(float newHoldHeight);
+
+    public void Initialize(float currentHeading);
+    public MotorThrustValues Run(Vector3 currentPos, Vector3 currentEuler, IInputs.FlightControlValues inputs);
+}
+
 public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
 {
     private MotorThrustCalculator _motorCalculator;
