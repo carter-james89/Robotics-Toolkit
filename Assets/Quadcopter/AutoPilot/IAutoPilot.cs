@@ -16,6 +16,13 @@ namespace  QuadcopterUtilities
         /// <param name="quadToControl">The quadcopter this autopilot will control</param>
         public void Initialize(IQuadcopter quadToControl);
 
+
+        /// <summary>
+        /// Get the <see cref="IQuadcopter"/> this <see cref="IAutoPilot"/> is set to control
+        /// </summary>
+        /// <returns>The <see cref="IQuadcopter"/> being controllee</returns>
+        public IQuadcopter GetQuadcopterToControl();
+
         /// <summary>
         /// Set the autopilot to its opposite state
         /// </summary>

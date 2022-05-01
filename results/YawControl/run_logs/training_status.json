@@ -1,0 +1,65 @@
+{
+    "OnboardControllerMLAutoPilot": {
+        "checkpoints": [
+            {
+                "steps": 7999987,
+                "file_path": "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-7999987.onnx",
+                "reward": null,
+                "creation_time": 1649955434.7061448,
+                "auxillary_file_paths": [
+                    "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-7999987.pt"
+                ]
+            },
+            {
+                "steps": 8499939,
+                "file_path": "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8499939.onnx",
+                "reward": null,
+                "creation_time": 1649955869.1887848,
+                "auxillary_file_paths": [
+                    "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8499939.pt"
+                ]
+            },
+            {
+                "steps": 8976339,
+                "file_path": "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8976339.onnx",
+                "reward": null,
+                "creation_time": 1649956276.7714999,
+                "auxillary_file_paths": [
+                    "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8976339.pt"
+                ]
+            },
+            {
+                "steps": 8999955,
+                "file_path": "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8999955.onnx",
+                "reward": null,
+                "creation_time": 1649956490.0757694,
+                "auxillary_file_paths": [
+                    "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8999955.pt"
+                ]
+            },
+            {
+                "steps": 8999955,
+                "file_path": "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8999955.onnx",
+                "reward": null,
+                "creation_time": 1649956569.4981987,
+                "auxillary_file_paths": [
+                    "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8999955.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 8976339,
+            "file_path": "results\\YawControl\\OnboardControllerMLAutoPilot.onnx",
+            "reward": null,
+            "creation_time": 1649956276.7714999,
+            "auxillary_file_paths": [
+                "results\\YawControl\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8976339.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

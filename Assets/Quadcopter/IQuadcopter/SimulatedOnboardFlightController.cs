@@ -1,7 +1,5 @@
 using QuadcopterUtilities;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
@@ -25,6 +23,7 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
     public float timeSpeed = 1;
 
     private Action<IQuadcopter.FlightStatus> _onFlightStatusChanged;
+
 
     private bool _isInitialized;
     public bool IsInitialized()
@@ -68,10 +67,10 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
     {
         RaycastHit hit;
         // Does the ray intersect any objects excluding the player layer
-        if (Physics.Raycast(rigidBody.transform.localPosition, rigidBody.transform.TransformDirection(Vector3.down), out hit, Mathf.Infinity))
-        {
-            Debug.DrawRay(rigidBody.transform.localPosition, Vector3.down * hit.distance, Color.yellow);
-        }
+        //if (Physics.Raycast(rigidBody.transform.localPosition, rigidBody.transform.TransformDirection(Vector3.down), out hit, Mathf.Infinity))
+        //{
+        //    Debug.DrawRay(rigidBody.transform.localPosition, Vector3.down * hit.distance, Color.yellow);
+        //}
       //  new Vector3(rigidBody.transform.localPosition.x, rigidBody.transform.localPosition.z), hit.distance, rigidBody.transform.rotation, rigidBody.velocity.y);
 
         var data = new IQuadcopter.QuadcopterData();
@@ -87,6 +86,8 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
         // data.height = hit.distance;
         data.height = data.posY;
 
+        data.VelocityVector = rigidBody.angularVelocity;
+
         return data;
     }
 
@@ -96,7 +97,7 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
     /// <remarks>
     /// Tried my best to tune the simulator to match real life Tello, but dont expect PID tunings for simulator to work for Tello
     /// </remarks>
-    public void FixedUpdate()
+    public void RunFixedUpdate()
     {
         if (_flightStatus != IQuadcopter.FlightStatus.PreLaunch)
         {
@@ -151,6 +152,8 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
 
     public void Land()
     {
+        rigidBody.transform.position = _quadToControl.GetGameObject().transform.position;
+
         _onFlightStatusChanged.Invoke(IQuadcopter.FlightStatus.Landing);
         _onFlightStatusChanged.Invoke(IQuadcopter.FlightStatus.PreLaunch);
     }
@@ -161,16 +164,19 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
     {
         _craftInputs = craftInputs;
         _flightStatus = flightStatus;
+        RunFixedUpdate();
        // SetVirtualPosition(new Vector3(rigidBody.transform.localPosition.x, rigidBody.transform.localPosition.z), hit.distance, rigidBody.transform.localRotation, rigidBody.velocity.y);
     }
 
     public void Takeoff()
     {
-        Debug.Log("Simulator TakeOff");
-        rigidBody.transform.localPosition += new Vector3(0, .8f, 0);
+       // Debug.Log("Simulator TakeOff");
+        //  rigidBody.transform.localPosition += new Vector3(0, .8f, 0);
         //.localPosition = rigidBody.transform.localPosition;
-
+        rigidBody.transform.position = _quadToControl.GetGameObject().transform.position;
         rigidBody.useGravity = true;
+        rigidBody.velocity = Vector3.zero;
+        rigidBody.angularVelocity = Vector3.zero;
 
         _onFlightStatusChanged.Invoke(IQuadcopter.FlightStatus.Launching);
         _onFlightStatusChanged.Invoke(IQuadcopter.FlightStatus.Flying);

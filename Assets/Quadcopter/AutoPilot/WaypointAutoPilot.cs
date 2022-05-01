@@ -36,7 +36,8 @@ namespace  QuadcopterUtilities
         /// <summary>
         /// The <see cref="TranslationStyle"/> that will be used to move this objects transform, can be updated on the fly via <see cref="SetTransitionSytle(TranslationStyle)"/>
         /// </summary>
-        public TranslationStyle translationStyle { get; private set; } = TranslationStyle.Linear;
+        [SerializeField]
+        public TranslationStyle translationStyle = TranslationStyle.Linear;
 
         /// <summary>
         /// <see cref="PIDProfile"/> to be used in <see cref="TranslationStyle.Linear"/>
@@ -109,6 +110,7 @@ namespace  QuadcopterUtilities
         /// <summary>
         /// The distance need to consider <see cref="_quadToControl"/> at <see cref="currentWaypoint"/>
         /// </summary>
+        [SerializeField]
         private float _achieveTargetDist = .15f;
         /// <summary>
         /// Event to be raised when <see cref="_achieveTargetDist"/> is reached
@@ -130,16 +132,21 @@ namespace  QuadcopterUtilities
             SetTransitionSytle(translationStyle);
             base.OnAutoPilotActivated();
         }
+        protected override void OnAutoPilotDeactivated()
+        {
+            base.OnAutoPilotDeactivated();
+            EndMission();
+        }
+
         /// <summary>
         /// Calculate the <see cref="PilotInputs.FlightControlValues"/> needed to make <see cref="_quadToControl"/> match this Objects transform.position
         /// Values are calculated in global space, so they are converted via <see cref="IQuadcopter.ConvertToHeadlessInputs(PilotInputs.FlightControlValues)"/> before being returned
         /// </summary>
-        /// <param name="deltaTime">The timespan since Run was called last, required for <see cref="PidController"/></param>
         /// <returns>The appropriate Yaw,Pitch,Roll, to achieve the target, in Headless space in regards to <see cref="_quadToControl"/></returns>
         public override IInputs.FlightControlValues Run()
-        {
+        {        
             if (currentWaypoint)
-            {
+            {              
                 switch (translationStyle)
                 {
                     case TranslationStyle.Linear:
@@ -147,12 +154,14 @@ namespace  QuadcopterUtilities
                         var distTraveled = _originalDistToTarget - currentDist;
                         var fractTraveled = distTraveled / _originalDistToTarget;
                         transform.position = Vector3.Lerp(_originalQuadPos, currentWaypoint.transform.position, fractTraveled + (Time.deltaTime * _linearSpeed));
+                        Debug.Log("run waypoint autopilot");
                         break;
                     case TranslationStyle.NonLinear:
                         transform.position = Vector3.Lerp(transform.position, currentWaypoint.transform.position, Time.deltaTime * _nonLinearSpeed);
                         break;
                     case TranslationStyle.Instant:
                         transform.position = currentWaypoint.transform.position;
+                        transform.rotation = currentWaypoint.transform.rotation;
                         break;
                     default:
                         break;
@@ -183,7 +192,7 @@ namespace  QuadcopterUtilities
         {
             if (enabled)
             {
-                Debug.Log("Set new target point");
+                Debug.Log("Set new target point : " + newWaypoint.gameObject.name);
                 atWaypoint = false;
                 MatchQuadTransform();
                 currentWaypoint = newWaypoint;
@@ -203,6 +212,15 @@ namespace  QuadcopterUtilities
         {
             newMission.OnMissionBegun(this);
             currentMission = newMission;
+        }
+        public void EndMission()
+        {
+            if (currentMission)
+            {
+                currentWaypoint = null;
+                currentMission.EndMission();
+                currentMission = null;
+            }
         }
     }
 }

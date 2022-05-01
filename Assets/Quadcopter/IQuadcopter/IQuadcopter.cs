@@ -30,6 +30,8 @@ namespace QuadcopterUtilities
             public float posZ;
 
             public float height;
+
+            public Vector3 VelocityVector;
         }
        
         public class GroundStationData 
@@ -125,6 +127,12 @@ namespace QuadcopterUtilities
         /// </summary>
         /// <returns>The current flight status</returns>
         public FlightStatus GetFlightStatus();
+
+        /// <summary>
+        /// Get the <see cref="QuadcopterData"/> for this frame. Usually comes from <see cref="IFlightController"/>
+        /// </summary>
+        /// <returns>Data for this frame</returns>
+        public QuadcopterData GetSensorData();
 
         /// <summary>
         /// Is the quadcopter currently experiencing valid tracking

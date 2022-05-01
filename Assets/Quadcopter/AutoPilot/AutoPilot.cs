@@ -37,6 +37,11 @@ namespace  QuadcopterUtilities
             this.quadToControl = quadToControl;
         }
 
+        public IQuadcopter GetQuadcopterToControl()
+        {
+            return this.quadToControl;
+        }
+
         /// <summary>
         /// Get the <see cref="IInputs.FlightControlValues"/> from <see cref="Run"/>
         /// </summary>
@@ -78,7 +83,7 @@ namespace  QuadcopterUtilities
         {
             if (!autoPilotActive)
             {
-                Debug.Log("AutoPilot Enabled");
+               // Debug.Log("AutoPilot Enabled");
                 autoPilotActive = true;
                 gameObject.SetActive(true);
                 MatchQuadTransform();
@@ -99,7 +104,7 @@ namespace  QuadcopterUtilities
         {
             if (autoPilotActive)
             {
-                Debug.Log("AutoPilot Disabled");
+                //Debug.Log("AutoPilot Disabled");
                 autoPilotActive = false;
                 quadToControl.RemoveInputOverride(GetInputValues, DeactivateAutoPilot);
                 quadToControl.UnsubscribeFromAbort(DeactivateAutoPilot);

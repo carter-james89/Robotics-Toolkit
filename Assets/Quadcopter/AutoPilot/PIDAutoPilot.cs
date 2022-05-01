@@ -55,6 +55,8 @@ namespace  QuadcopterUtilities
             _proximityPIDY.SetPoint = 0;
             _proximityPIDZ.SetPoint = 0;
             _yawPID.SetPoint = 0;
+
+            prevDeltaTime = Time.time;
         }
 
 
@@ -75,6 +77,11 @@ namespace  QuadcopterUtilities
         /// </summary>
        // private System.TimeSpan telloDeltaTime;
 
+        public float DebugPitch = 0;
+        public float DebugYaw = 0;
+        public float DebugRoll = 0;
+        public float DebugElv = 0;
+        public Vector3 targetOffset;
 
         /// <summary>
         /// Calculate the <see cref="IInputs.FlightControlValues"/> needed to make <see cref="_quadToControl"/> match this Objects transform.position
@@ -91,11 +98,10 @@ namespace  QuadcopterUtilities
 
             IInputs.FlightControlValues returnValues = new IInputs.FlightControlValues();
 
-            var targetOffset = quadToControl.GetGameObject().transform.position - transform.position;
-
+            targetOffset = quadToControl.GetGameObject().transform.position - transform.position;
+         
             _proximityPIDX.ProcessVariable = targetOffset.x;
-            double trgtRoll = _proximityPIDX.ControlVariable(deltaTime);
-
+            double trgtRoll = _proximityPIDX.ControlVariable(deltaTime);    
             _proximityPIDY.ProcessVariable = targetOffset.y;
             double trgtElv = _proximityPIDY.ControlVariable(deltaTime);
             _proximityPIDZ.ProcessVariable = targetOffset.z;
@@ -108,13 +114,20 @@ namespace  QuadcopterUtilities
             else if (yawError > 180)
                 yawError = -(360 - yawError);
 
+            //Debug.Log(yawError);
             _yawPID.ProcessVariable = yawError;
             double trgtYaw = _yawPID.ControlVariable(deltaTime);
 
+        
             returnValues.yaw = (float)trgtYaw;
             returnValues.pitch = (float)trgtPitch;
             returnValues.roll = (float)trgtRoll;
             returnValues.throttle = (float)trgtElv;
+
+            DebugElv = returnValues.throttle;
+            DebugYaw = returnValues.yaw;
+            DebugPitch = returnValues.pitch;
+            DebugRoll = returnValues.roll;
             return quadToControl.ConvertToHeadlessInputs(returnValues);
         }
 

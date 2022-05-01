@@ -62,6 +62,7 @@ public class WaypointMission : MonoBehaviour
         {
             Debug.Log("End Mission : " + name);
             missionActive = false;
+            currentWaypoint = null;
             _autoPilot.onWaypointAchieved -= OnQuadcopterAtTarget;
             _autoPilot.onWaypointSet -= OnNewWaypointSet;
         }

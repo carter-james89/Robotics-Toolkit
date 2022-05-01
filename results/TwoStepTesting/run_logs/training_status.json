@@ -1,0 +1,65 @@
+{
+    "OnboardControllerMLAutoPilot": {
+        "checkpoints": [
+            {
+                "steps": 8499981,
+                "file_path": "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8499981.onnx",
+                "reward": 54.758773658010696,
+                "creation_time": 1650481900.7694194,
+                "auxillary_file_paths": [
+                    "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8499981.pt"
+                ]
+            },
+            {
+                "steps": 8999957,
+                "file_path": "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8999957.onnx",
+                "reward": 15.429155826568604,
+                "creation_time": 1650482294.8909338,
+                "auxillary_file_paths": [
+                    "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8999957.pt"
+                ]
+            },
+            {
+                "steps": 9499968,
+                "file_path": "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-9499968.onnx",
+                "reward": 74.48058081593584,
+                "creation_time": 1650482619.4348614,
+                "auxillary_file_paths": [
+                    "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-9499968.pt"
+                ]
+            },
+            {
+                "steps": 9999969,
+                "file_path": "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-9999969.onnx",
+                "reward": 43.65665628761053,
+                "creation_time": 1650482939.0185862,
+                "auxillary_file_paths": [
+                    "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-9999969.pt"
+                ]
+            },
+            {
+                "steps": 10000033,
+                "file_path": "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-10000033.onnx",
+                "reward": 43.65665628761053,
+                "creation_time": 1650482939.0524724,
+                "auxillary_file_paths": [
+                    "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-10000033.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 10000033,
+            "file_path": "results\\TwoStepTesting\\OnboardControllerMLAutoPilot.onnx",
+            "reward": 43.65665628761053,
+            "creation_time": 1650482939.0524724,
+            "auxillary_file_paths": [
+                "results\\TwoStepTesting\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-10000033.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

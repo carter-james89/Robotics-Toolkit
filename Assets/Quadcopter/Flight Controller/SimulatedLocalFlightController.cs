@@ -22,7 +22,7 @@ public interface IMotorThrustCalculator
 
 public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
 {
-    private MotorThrustCalculator _motorCalculator;
+    private IMotorThrustCalculator _motorCalculator;
 
     private IQuadcopter _quadToControl;
 
@@ -34,6 +34,19 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
     private Motor blMotor;
     [SerializeField]
     private Motor brMotor;
+
+    [SerializeField]
+    private float _debugFLValue;
+    [SerializeField]
+    private float _debugFRValue;
+    [SerializeField]
+    private float _debugBLValue;
+    [SerializeField]
+    private float _debugBRValue;
+
+    [SerializeField]
+    private float _debugThrottleValue;
+
 
     private QuadcopterData _quadcopterData;
     private GroundStationData _groundStatationData;
@@ -68,12 +81,12 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
         _quadcopterData.posY = transform.localPosition.y;
         _quadcopterData.posZ = transform.localPosition.z;
 
-        RaycastHit hit;
-        // Does the ray intersect any objects excluding the player layer
-        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out hit, Mathf.Infinity))
-        {
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * hit.distance, Color.yellow);
-        }
+        //RaycastHit hit;
+        //// Does the ray intersect any objects excluding the player layer
+        //if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out hit, Mathf.Infinity))
+        //{
+        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * hit.distance, Color.yellow);
+        //}
         // _quadcopterData.height = hit.distance;
         _quadcopterData.height = transform.localPosition.y;
 
@@ -84,7 +97,9 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
 
     public void Initialize(IQuadcopter quadToControl, Action<IQuadcopter.FlightStatus> onFlightStatusChanged)
     {
+        Debug.Log("Initialize Local Fligth Controller");
         _quadToControl = quadToControl;
+        _motorCalculator = GetComponent<IMotorThrustCalculator>();
         //new PidController(.14f, .03f, 0.04f, .8f, .1f);
         _rigidBody = quadToControl.GetGameObject().GetComponent<Rigidbody>();
         _rigidBody.useGravity = false;
@@ -102,7 +117,12 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
 
     public void Land()
     {
-        throw new NotImplementedException();
+        _groundStatationData = new GroundStationData();
+        frMotor.SetThrottle(0);
+        flMotor.SetThrottle(0);
+
+        brMotor.SetThrottle(0);
+        blMotor.SetThrottle(0);
     }
 
 
@@ -119,10 +139,18 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
         {
             var motorValues = _motorCalculator.Run(new Vector3(_quadcopterData.posX,_quadcopterData.posY,_quadcopterData.posZ), new Vector3(_quadcopterData.gyroPitch, _quadcopterData.gyroYaw, _quadcopterData.gyroRoll), craftInputs);
 
+            _debugThrottleValue = craftInputs.throttle;
+           // Debug.Log(motorValues.motorBL + " " + motorValues.motorFR);
+
             _groundStatationData.motorBRSpeed = motorValues.motorBR;
             _groundStatationData.motorBLSpeed = motorValues.motorBL;
             _groundStatationData.motorFRSpeed = motorValues.motorFR;
             _groundStatationData.motorFLSpeed = motorValues.motorFL;
+
+            _debugBLValue = motorValues.motorBL;
+            _debugBRValue = motorValues.motorBR;
+            _debugFLValue = motorValues.motorFL;
+            _debugFRValue = motorValues.motorFR;
 
             frMotor.SetThrottle((float)_groundStatationData.motorFRSpeed);
             flMotor.SetThrottle((float)_groundStatationData.motorFLSpeed);
@@ -134,8 +162,8 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
 
     public void Takeoff()
     {
-        Debug.Log("Simulator TakeOff");
-        _motorCalculator = new MotorThrustCalculator();
+       // Debug.Log("Simulator TakeOff");
+       // _motorCalculator = new MotorThrustCalculator();
         _motorCalculator.Initialize(_quadToControl.GetGameObject().transform.eulerAngles.y);
         _motorCalculator.SetAltitudeHold(1);
         _onFlightStatusChanged.Invoke(FlightStatus.Launching);

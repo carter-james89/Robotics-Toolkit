@@ -1,0 +1,29 @@
+{
+    "QuadThrustController": {
+        "checkpoints": [
+            {
+                "steps": 105,
+                "file_path": "results\\PIDTrainer1--force\\QuadThrustController\\QuadThrustController-105.onnx",
+                "reward": null,
+                "creation_time": 1649011650.1466918,
+                "auxillary_file_paths": [
+                    "results\\PIDTrainer1--force\\QuadThrustController\\QuadThrustController-105.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 105,
+            "file_path": "results\\PIDTrainer1--force\\QuadThrustController.onnx",
+            "reward": null,
+            "creation_time": 1649011650.1466918,
+            "auxillary_file_paths": [
+                "results\\PIDTrainer1--force\\QuadThrustController\\QuadThrustController-105.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

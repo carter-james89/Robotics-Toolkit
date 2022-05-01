@@ -26,7 +26,7 @@ public class Motor : MonoBehaviour
         _quadBody = quadBody;
     }
 
-    private void FixedUpdate()
+    private void RunFixedUpdate()
     {
 
 
@@ -63,6 +63,7 @@ public class Motor : MonoBehaviour
     {
         newThrottle = Mathf.Clamp(newThrottle, 0, 1);
           motorSpeed = newThrottle;
+        RunFixedUpdate();
     }
 
     // Start is called before the first frame update

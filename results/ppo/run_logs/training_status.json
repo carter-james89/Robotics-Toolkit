@@ -1,0 +1,65 @@
+{
+    "OnboardControllerMLAutoPilot": {
+        "checkpoints": [
+            {
+                "steps": 1999971,
+                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-1999971.onnx",
+                "reward": null,
+                "creation_time": 1649946509.8768556,
+                "auxillary_file_paths": [
+                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-1999971.pt"
+                ]
+            },
+            {
+                "steps": 2499987,
+                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-2499987.onnx",
+                "reward": null,
+                "creation_time": 1649946925.5372512,
+                "auxillary_file_paths": [
+                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-2499987.pt"
+                ]
+            },
+            {
+                "steps": 2999991,
+                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-2999991.onnx",
+                "reward": -32.979015012582146,
+                "creation_time": 1649947375.7125072,
+                "auxillary_file_paths": [
+                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-2999991.pt"
+                ]
+            },
+            {
+                "steps": 3499943,
+                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3499943.onnx",
+                "reward": null,
+                "creation_time": 1649947791.339175,
+                "auxillary_file_paths": [
+                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3499943.pt"
+                ]
+            },
+            {
+                "steps": 3943971,
+                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3943971.onnx",
+                "reward": null,
+                "creation_time": 1649948175.216694,
+                "auxillary_file_paths": [
+                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3943971.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 3943971,
+            "file_path": "results\\ppo\\OnboardControllerMLAutoPilot.onnx",
+            "reward": null,
+            "creation_time": 1649948175.216694,
+            "auxillary_file_paths": [
+                "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3943971.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

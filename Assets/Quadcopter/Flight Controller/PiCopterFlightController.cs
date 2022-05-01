@@ -40,9 +40,12 @@ public class MotorThrustCalculator : IMotorThrustCalculator
 
     public void Initialize(float currentHeading)
     {
+        Debug.Log("Initialize PID Motor Thrust Calculator");
         _yawHoldHeading = currentHeading;
         _elevationPid = new PidController(.03f, .04f, 0.04f, .8f, .1f);
         _elevationPid.SetPoint = 0;
+
+       // _targetGimbal.transform.localEulerAngles = Vector3.zero;
 
         var translateP = .001f;
         var translateI = 0;
@@ -69,8 +72,14 @@ public class MotorThrustCalculator : IMotorThrustCalculator
         var deltaTime1 = (int)(_timeSinceLastUpdate * 1000);
         var deltaTime = new System.TimeSpan(0, 0, 0, 0, (deltaTime1));
 
-
         var throttleValue = calculateThrottle(inputs.throttle, currentPos.y, deltaTime);
+        if (CheckIsNAN(throttleValue))
+        {
+            Debug.LogWarning("Throttle value is NAN");
+            throttleValue = 0;
+            return new IMotorThrustCalculator.MotorThrustValues();
+        }
+
         var eulerDif = currentEuler - calculateDesiredAngle(inputs);
         var pitchOffset = eulerDif.x;
 
@@ -79,23 +88,58 @@ public class MotorThrustCalculator : IMotorThrustCalculator
         else if (pitchOffset > 180)
             pitchOffset = -(360 - pitchOffset);
 
-        _pitchPid.ProcessVariable = -pitchOffset;
+        float pitchValue = 0;
+        if (!CheckIsNAN(pitchOffset))
+        {
+            _pitchPid.ProcessVariable = -pitchOffset;
+            double trgtPitch = _pitchPid.ControlVariable(deltaTime);
+            pitchValue = (float)trgtPitch;
 
-        double trgtPitch = _pitchPid.ControlVariable(deltaTime);
-        float pitchValue = (float)trgtPitch;
+            if (CheckIsNAN(pitchValue))
+            {
+                Debug.LogWarning("Pitch value is NAN");
+                Debug.Log(pitchValue);
+                pitchValue = 0;
+                return new IMotorThrustCalculator.MotorThrustValues();
+            }
+        }
+        else
+        {
+            return new IMotorThrustCalculator.MotorThrustValues();
+        }
+
 
         //ROLL
         var rollOffset = eulerDif.z;
-
         if (rollOffset < -180)
             rollOffset = 360 - System.Math.Abs(rollOffset);
         else if (rollOffset > 180)
             rollOffset = -(360 - rollOffset);
 
-        _rollPid.ProcessVariable = -rollOffset;
+        float rollValue = 0;
+        if (!CheckIsNAN(rollOffset))
+        {
+         //   Debug.Log("Roll Offset : " + rollOffset);
+            _rollPid.ProcessVariable = -rollOffset;
 
-        double trgtRoll = _rollPid.ControlVariable(deltaTime);
-        float rollValue = (float)trgtRoll;
+            double trgtRoll = _rollPid.ControlVariable(deltaTime);
+            rollValue = (float)trgtRoll;
+
+            if (CheckIsNAN(rollValue))
+            {
+                Debug.LogWarning("Roll value is NAN");
+                Debug.Log("Roll Offset " + rollOffset);
+                rollValue = 0;
+                return new IMotorThrustCalculator.MotorThrustValues();
+            }
+         
+        }
+        else
+        {
+            return new IMotorThrustCalculator.MotorThrustValues();
+        }
+
+
 
         //yaw
         var yawOffset = eulerDif.y;
@@ -109,13 +153,45 @@ public class MotorThrustCalculator : IMotorThrustCalculator
         var trgtyaw = _yawPid.ControlVariable(deltaTime);
         float yawValue = (float)trgtyaw;
 
+
+
+    
+        if (CheckIsNAN(yawValue))
+        {
+            Debug.LogWarning("YAw value is NAN");
+            yawValue = 0;
+        }
+
         var motorValues = new IMotorThrustCalculator.MotorThrustValues();
         motorValues.motorFR = throttleValue + pitchValue - rollValue + yawValue;
         motorValues.motorFL = throttleValue + pitchValue + rollValue - yawValue;
         motorValues.motorBR = throttleValue - pitchValue - rollValue - yawValue;
         motorValues.motorBL = throttleValue - pitchValue + rollValue + yawValue;
 
+       // Debug.Log(motorValues.motorFR);
+        //Debug.Log(throttleValue);
+        //Debug.Log(pitchValue);
+        //Debug.Log(rollValue);
+        //Debug.Log(yawValue)/*;*/
+
+        //if (CheckIsNAN(motorValues.motorFR) || CheckIsNAN(motorValues.motorFL)||
+        //    CheckIsNAN(motorValues.motorBR) || CheckIsNAN(motorValues.motorBL))
+        //{
+        //    Debug.LogWarning("NAN values at Motor Thrust Controller");
+        //    motorValues = new IMotorThrustCalculator.MotorThrustValues();
+        
+        //}
+        //else
+        //{
+        //    //motorValues = new IMotorThrustCalculator.MotorThrustValues();
+        //}
+
         return motorValues;
+    }
+
+    private bool CheckIsNAN(float value)
+    {
+        return float.IsNaN(value);
     }
 
     private Vector3 calculateDesiredAngle(IInputs.FlightControlValues inputs)

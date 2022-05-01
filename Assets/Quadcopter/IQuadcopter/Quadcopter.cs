@@ -12,6 +12,44 @@ namespace QuadcopterUtilities
     public class Quadcopter : MonoBehaviour, IQuadcopter
     {
         /// <summary>
+        /// Event that is called whenever the GameObjects <see cref="Transform"/> is changed
+        /// </summary>
+        /// <remarks>
+        /// This needs to be called manually in <see cref="onTransformChanged"/> for all inherited classes
+        /// </remarks>
+        public Action<Vector3, Quaternion> onTransformChanged;
+
+        /// <summary>
+        /// The point the Quad took off from, can be updated on the fly
+        /// </summary>
+        public Vector3 homePoint { get; private set; }
+
+        /// <summary>
+        /// The updates supplied by either the Pilot or the AutoPilot for this frame
+        /// </summary>
+        protected Func<IInputs.FlightControlValues> defaultInputSource;
+        /// <summary>
+        /// The updates supplied by either the Pilot or the AutoPilot for this frame
+        /// </summary>
+        protected Func<IInputs.FlightControlValues> overrideInputSource;
+
+        public float deltaHeight;
+        private float _prevHeight = 0;
+        [SerializeField]
+        private float heightOffset = 0;
+        [SerializeField]
+        private float elvInput;
+        [SerializeField]
+        private float yawInput;
+
+        [SerializeField]
+        private float assumedHeightOffset = 0;
+
+        public float vertSpeed;
+
+        private List<GameObject> sensorPoints;
+
+        /// <summary>
         /// The current inputs for this Frame from either <see cref="defaultInputSource"/> or <see cref="overrideInputSource"/>, set in <see cref="ProcessInputs"/>
         /// </summary>
         protected IInputs.FlightControlValues currentInputs;
@@ -55,7 +93,7 @@ namespace QuadcopterUtilities
         {
             if (_selfInitialize)
             {
-                //Initialize(GetComponent<IFlightController>(), GetComponent<IInputs>().GetInputValues);
+              //  Initialize(GetComponent<IFlightController>(), GetComponent<IInputs>().GetInputValues);
             }
         }
 
@@ -64,7 +102,7 @@ namespace QuadcopterUtilities
         /// </summary>
         public virtual void Takeoff()
         {
-            Debug.Log("Takeoff");
+           // Debug.Log("Takeoff");
             _flightController.Takeoff();
 
             //Update();
@@ -80,7 +118,9 @@ namespace QuadcopterUtilities
         /// </summary>
         public virtual void Land()
         {
+          //  Debug.Log("Land");
             _flightController.Land();
+            _flightStatus = IQuadcopter.FlightStatus.PreLaunch;
         }
         /// <summary>
         /// Is this quadcopter a simulator or a real quadcopter
@@ -91,27 +131,7 @@ namespace QuadcopterUtilities
             return _flightController.IsSimulator();
         }
 
-        /// <summary>
-        /// Event that is called whenever the GameObjects <see cref="Transform"/> is changed
-        /// </summary>
-        /// <remarks>
-        /// This needs to be called manually in <see cref="onTransformChanged"/> for all inherited classes
-        /// </remarks>
-        public Action<Vector3, Quaternion> onTransformChanged;
 
-        /// <summary>
-        /// The point the Quad took off from, can be updated on the fly
-        /// </summary>
-        public Vector3 homePoint { get; private set; }
-
-        /// <summary>
-        /// The updates supplied by either the Pilot or the AutoPilot for this frame
-        /// </summary>
-        protected Func<IInputs.FlightControlValues> defaultInputSource;
-        /// <summary>
-        /// The updates supplied by either the Pilot or the AutoPilot for this frame
-        /// </summary>
-        protected Func<IInputs.FlightControlValues> overrideInputSource;
 
         /// <summary>
         /// Initialize the autopilot, and provide the depenencies it needs. 
@@ -120,6 +140,7 @@ namespace QuadcopterUtilities
         /// <param name="autoPilot">The autopilot module used, activated via <see cref="ActivateAutoPilot"/></param>
         public virtual void Initialize(IFlightController flightController, Func<IInputs.FlightControlValues> defaultInputSource)
         {
+            Debug.Log("Initialize Quadcopter : " + name + " - Flight Controller : " + flightController.ToString());
             if (flightController == null)
             {
                 Debug.Log("what the actual fuck");
@@ -158,28 +179,13 @@ namespace QuadcopterUtilities
             _flightStatus = newStatus;
         }
 
-        public float deltaHeight;
-        private float _prevHeight = 0;
-        [SerializeField]
-        private float heightOffset = 0;
-        [SerializeField]
-        private float elvInput;
-        [SerializeField]
-        private float yawInput;
 
-        [SerializeField]
-        private float assumedHeightOffset = 0;
-
-        public float vertSpeed;
-
-        private List<GameObject> sensorPoints;
 
         public void SetVirtualPosition(IQuadcopter.QuadcopterData quadData)
         {
             deltaHeight = _prevHeight - quadData.height;
             _prevHeight = quadData.height;
-            elvInput = currentInputs.throttle;
-            yawInput = currentInputs.yaw;
+
 
             var tempPos = new Vector3(quadData.posX, quadData.height + heightOffset, quadData.posZ);// rigidBody.transform.position;
 
@@ -249,6 +255,22 @@ namespace QuadcopterUtilities
 
         public void Update()
         {
+            if (!IsSimulator())
+            {
+                RunQuadcopterUpdate();
+            }
+        }
+
+        public void FixedUpdate()
+        {
+            if (IsSimulator())
+            {
+                RunQuadcopterUpdate();
+            }
+        }
+
+        private void RunQuadcopterUpdate()
+        {
             if (_flightController != null && _flightController.IsInitialized())
             {
                 if (_flightController.IsReadyToFly())
@@ -257,12 +279,13 @@ namespace QuadcopterUtilities
                     SetVirtualPosition(quadData);
                     ProcessInputs();
                     //if (_flightStatus != IQuadcopter.FlightStatus.PreLaunch)
-                        _flightController.Run(_flightStatus, currentInputs);
+                     _flightController.Run(_flightStatus, currentInputs);
+                    OnTransformUpdated();
                 }
                 else
                 {
 
-                   // Debug.Log("not ready to fly");
+                    // Debug.Log("not ready to fly");
                 }
             }
         }
@@ -295,6 +318,11 @@ namespace QuadcopterUtilities
             }
 
             currentInputs = overrideInputSource == null ? _headLessMode ? ConvertToHeadlessInputs(defaultInputs) : defaultInputs : overrideInputSource.Invoke();
+          //  Debug.Log("throttle from autopilot : " + currentInputs.throttle);
+            elvInput = currentInputs.throttle;
+            yawInput = currentInputs.yaw;
+            
+
             if (currentInputs.takeOff && _flightStatus == IQuadcopter.FlightStatus.PreLaunch)
             {
                 Takeoff();
@@ -358,6 +386,10 @@ namespace QuadcopterUtilities
         public IQuadcopter.FlightStatus GetFlightStatus()
         {
             return _flightStatus;
+        }
+        public IQuadcopter.QuadcopterData GetSensorData()
+        {
+            return _flightController.GetSensorData();
         }
 
         /// <summary>

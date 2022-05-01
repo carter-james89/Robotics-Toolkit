@@ -1,0 +1,65 @@
+{
+    "OnboardControllerMLAutoPilot": {
+        "checkpoints": [
+            {
+                "steps": 7999953,
+                "file_path": "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-7999953.onnx",
+                "reward": -1.2379795331507921,
+                "creation_time": 1651176636.46141,
+                "auxillary_file_paths": [
+                    "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-7999953.pt"
+                ]
+            },
+            {
+                "steps": 8499991,
+                "file_path": "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8499991.onnx",
+                "reward": 1.713171900808811,
+                "creation_time": 1651177119.2079937,
+                "auxillary_file_paths": [
+                    "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8499991.pt"
+                ]
+            },
+            {
+                "steps": 8999959,
+                "file_path": "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8999959.onnx",
+                "reward": null,
+                "creation_time": 1651177521.21301,
+                "auxillary_file_paths": [
+                    "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-8999959.pt"
+                ]
+            },
+            {
+                "steps": 9499989,
+                "file_path": "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-9499989.onnx",
+                "reward": 18.466246012287836,
+                "creation_time": 1651177904.0826483,
+                "auxillary_file_paths": [
+                    "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-9499989.pt"
+                ]
+            },
+            {
+                "steps": 9752864,
+                "file_path": "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-9752864.onnx",
+                "reward": 21.973876416845165,
+                "creation_time": 1651178101.9854093,
+                "auxillary_file_paths": [
+                    "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-9752864.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 9752864,
+            "file_path": "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot.onnx",
+            "reward": 21.973876416845165,
+            "creation_time": 1651178101.9854093,
+            "auxillary_file_paths": [
+                "results\\DuelStageNonHeadless\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-9752864.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}
