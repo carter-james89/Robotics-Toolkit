@@ -1,59 +1,59 @@
 {
-    "OnboardControllerMLAutoPilot": {
+    "NovaServoSet": {
         "checkpoints": [
             {
-                "steps": 1999971,
-                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-1999971.onnx",
-                "reward": null,
-                "creation_time": 1649946509.8768556,
+                "steps": 8999950,
+                "file_path": "results\\ppo\\NovaServoSet\\NovaServoSet-8999950.onnx",
+                "reward": -0.7199994146823883,
+                "creation_time": 1651620613.8508587,
                 "auxillary_file_paths": [
-                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-1999971.pt"
+                    "results\\ppo\\NovaServoSet\\NovaServoSet-8999950.pt"
                 ]
             },
             {
-                "steps": 2499987,
-                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-2499987.onnx",
-                "reward": null,
-                "creation_time": 1649946925.5372512,
+                "steps": 9499981,
+                "file_path": "results\\ppo\\NovaServoSet\\NovaServoSet-9499981.onnx",
+                "reward": 9.968751348555088,
+                "creation_time": 1651621163.8733442,
                 "auxillary_file_paths": [
-                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-2499987.pt"
+                    "results\\ppo\\NovaServoSet\\NovaServoSet-9499981.pt"
                 ]
             },
             {
-                "steps": 2999991,
-                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-2999991.onnx",
-                "reward": -32.979015012582146,
-                "creation_time": 1649947375.7125072,
+                "steps": 9999973,
+                "file_path": "results\\ppo\\NovaServoSet\\NovaServoSet-9999973.onnx",
+                "reward": -6.1777779592408075,
+                "creation_time": 1651621719.1142106,
                 "auxillary_file_paths": [
-                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-2999991.pt"
+                    "results\\ppo\\NovaServoSet\\NovaServoSet-9999973.pt"
                 ]
             },
             {
-                "steps": 3499943,
-                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3499943.onnx",
-                "reward": null,
-                "creation_time": 1649947791.339175,
+                "steps": 10499980,
+                "file_path": "results\\ppo\\NovaServoSet\\NovaServoSet-10499980.onnx",
+                "reward": 44.26667049527168,
+                "creation_time": 1651622274.660678,
                 "auxillary_file_paths": [
-                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3499943.pt"
+                    "results\\ppo\\NovaServoSet\\NovaServoSet-10499980.pt"
                 ]
             },
             {
-                "steps": 3943971,
-                "file_path": "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3943971.onnx",
+                "steps": 10797098,
+                "file_path": "results\\ppo\\NovaServoSet\\NovaServoSet-10797098.onnx",
                 "reward": null,
-                "creation_time": 1649948175.216694,
+                "creation_time": 1651622603.5131397,
                 "auxillary_file_paths": [
-                    "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3943971.pt"
+                    "results\\ppo\\NovaServoSet\\NovaServoSet-10797098.pt"
                 ]
             }
         ],
         "final_checkpoint": {
-            "steps": 3943971,
-            "file_path": "results\\ppo\\OnboardControllerMLAutoPilot.onnx",
+            "steps": 10797098,
+            "file_path": "results\\ppo\\NovaServoSet.onnx",
             "reward": null,
-            "creation_time": 1649948175.216694,
+            "creation_time": 1651622603.5131397,
             "auxillary_file_paths": [
-                "results\\ppo\\OnboardControllerMLAutoPilot\\OnboardControllerMLAutoPilot-3943971.pt"
+                "results\\ppo\\NovaServoSet\\NovaServoSet-10797098.pt"
             ]
         }
     },

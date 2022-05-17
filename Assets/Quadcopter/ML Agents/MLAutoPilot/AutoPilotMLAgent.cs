@@ -28,9 +28,11 @@ public class AutoPilotMLAgent : Agent
 
     private Vector3 _bounds = new Vector3(1, 1, 1);
 
+
+
     [SerializeField]
     private float m_episodeRewards;
-    private void Awake()
+    private void Start()
     {
         InitializeQuadcopter();
     }
@@ -74,6 +76,12 @@ public class AutoPilotMLAgent : Agent
         //descreteActions[1] = (int)Input.GetAxisRaw("Vertical") * 10; //fl
         //descreteActions[2] = (int)Input.GetAxisRaw("Horizontal") * 10; //br
         //  descreteActions[3] = (int)Input.GetAxisRaw("Vertical") * 10; //bl
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+
+        }
+
     }
     public override void OnEpisodeBegin()
     {
