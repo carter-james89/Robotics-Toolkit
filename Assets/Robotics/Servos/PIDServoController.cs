@@ -10,6 +10,8 @@ namespace RoboticToolKit.Robotics.Servos
         public IServo GetServo();
         public void SetAndRunServo(float desiredAngle);
 
+        public void Reset();
+
     }
     public class PIDServoController : MonoBehaviour, IServoController
     {
@@ -67,6 +69,10 @@ namespace RoboticToolKit.Robotics.Servos
            // m_servoToControl.SetAngleImmediate(DesiredAngle);
            // m_servoToControl.SetAngleImmediate(DesiredAngle);
         }
+        public void Reset()
+        {
+            ResetPid(m_pidP,m_pidI,m_pidD,m_pidMax,m_pidMin);
+        }
         public void ResetPid(float p, float i, float d, float max, float min)
         {
             m_speedPID = new PidController(p, i, d, max, min);
@@ -88,7 +94,7 @@ namespace RoboticToolKit.Robotics.Servos
             if (m_firstFixedUpdate)
             {
                 m_firstFixedUpdate = false;
-             m_servoToControl.SetAngleImmediate(DesiredAngle);
+             m_servoToControl.SetServoPosition(DesiredAngle);
             }
             if (m_autoRun)
             {
@@ -133,8 +139,8 @@ namespace RoboticToolKit.Robotics.Servos
             {
                 m_setSpeed *= -1;
             }
-            //m_servoToControl.RunServo(m_setSpeed);
-            m_servoToControl.RunServo(desiredAngle);
+            m_servoToControl.SetServoSpeed(m_setSpeed);
+            //m_servoToControl.RunServo(desiredAngle);
         }
     }
 }

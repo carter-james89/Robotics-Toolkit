@@ -11,20 +11,17 @@ namespace RoboticToolKit.Robotics.Servos
         public GameObject GetGameObject();
         public float GetCurrentAngle();
 
-
-
-      //  public Matrix4x4 GetGlobalAnchorMatrix();
-
-        public void RunServo(float calculatedSpeed);
-
-        public void SetAngleImmediate(float angle);
-
+        public void SetServoSpeed(float speed);
+        public void SetServoPosition(float position);
+        public void SetServoPosition(float position,float speed);
         public void ResetServo(float resetAngle);
     }
 
     public enum RotationDirection { None = 0, Positive = 1, Negative = -1 };
     public class ArticulationBodyServo : MonoBehaviour, IServo
     {
+        [SerializeField]
+        private float m_servoSpeed = 1;
         public bool IsEnabled() => enabled;
         public GameObject GetGameObject() => gameObject;
         public RotationDirection rotationState = RotationDirection.None;
@@ -42,7 +39,7 @@ namespace RoboticToolKit.Robotics.Servos
         {
             m_articulation = GetComponent<ArticulationBody>();
             var xDrive = m_articulation.xDrive;
-            xDrive.forceLimit *= 2;
+          //  xDrive.forceLimit *= 2;
             m_articulation.xDrive = xDrive;
         }
         private void Start()
@@ -58,25 +55,34 @@ namespace RoboticToolKit.Robotics.Servos
             }
             return m_articulation.jointPosition[0] * Mathf.Rad2Deg;
         }
-        public void RunServo(float calculatedSpeed)
+        public void SetServoSpeed(float speed)
         {
-            //if (m_firstSet)
-            //{
-            //    m_firstSet = false;
-            //}
-            //float rotationChange = calculatedSpeed * Time.fixedDeltaTime;
-            //float rotationGoal = GetCurrentAngle() + rotationChange;
-            //RotateTo(rotationGoal);
-
-            var dif = calculatedSpeed - GetCurrentAngle();
-            float rotationGoal = GetCurrentAngle() +  (dif * Time.deltaTime * 10);
+            float rotationChange = speed * Time.fixedDeltaTime;
+            float rotationGoal = GetCurrentAngle() + rotationChange;
             RotateTo(rotationGoal);
+        }
+        public void SetServoPosition(float position, float speed)
+        {
+            var dif = position- GetCurrentAngle();
+            float rotationGoal = GetCurrentAngle() + (dif * Time.deltaTime * speed);
+            RotateTo(rotationGoal);
+        }
+        public void SetServoPosition(float position)
+        {
+            SetServoPosition(position, m_servoSpeed);
+        }
+
+        private void RotateTo(float angle)
+        {
+            var drive = m_articulation.xDrive;
+            drive.target = angle;
+            m_articulation.xDrive = drive;
         }
 
         public void ResetServo(float resetAngle)
         {
-          //  SetAngleImmediate(resetAngle);
-          //  m_articulation.jointR
+            //  SetAngleImmediate(resetAngle);
+            //  m_articulation.jointR
             // m_articulation.jointPosition = new ArticulationReducedSpace(resetAngle, 0f, 0f);
             //m_articulation.jointAcceleration = new ArticulationReducedSpace(0f, 0f, 0f);
             //m_articulation.jointForce = new ArticulationReducedSpace(0f, 0f, 0f);
@@ -89,18 +95,10 @@ namespace RoboticToolKit.Robotics.Servos
             //m_articulation.jointVelocity = new ArticulationReducedSpace(0f, 0f, 0f);
             //m_articulation.ResetInertiaTensor();
             //m_articulation.ResetCenterOfMass();
+            RotateTo(resetAngle);   
         }
         
 
-        public void SetAngleImmediate(float angle)
-        {
-            Debug.Log(name + " Force To Angle : " + angle);
-            
-            var drive = m_articulation.xDrive;
-            drive.target = angle;
-            m_articulation.xDrive = drive;
-            Debug.Log(name + " Angle : " + GetCurrentAngle());
-        }
 
 
         private void Update()
@@ -115,13 +113,5 @@ namespace RoboticToolKit.Robotics.Servos
         //    float currentRotation = Mathf.Rad2Deg * currentRotationRads;
         //    return currentRotation;
         //}
-
-        private void RotateTo(float primaryAxisRotation)
-        {
-            var drive = m_articulation.xDrive;
-            drive.target = primaryAxisRotation;
-         
-            m_articulation.xDrive = drive;
-        }
     }
 }

@@ -1,3 +1,4 @@
+using RoboticToolkit.Robotics.Gaits;
 using System;
 using System.Collections;
 using System.Collections.Generic;

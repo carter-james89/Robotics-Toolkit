@@ -2,17 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RoboticToolKit.Robotics.Limbs
+namespace RoboticToolkit.Robotics.Gaits
 {
     public interface IGaitEventListener
     {
         public void OnLimbAchievedTarget(Vector3 currentTarget);
+
+      
     }
     public interface IGait
     {
         public enum MovementStyle { None, Rotate, Translate }
         public Transform GetTarget();
         public MovementStyle GetMovementStyle();
+        public void RotateToPosition(Vector3 position, float speed, float height);
+        public void TranslateToPosition(Vector3 position, float speed);
+
+        public void SetTargetPosition(Vector3 localPosition);
+
+        public void SetGaitProvider(IGateProvider provider);
     }
     public class LimbGait : MonoBehaviour, IGait
     {
@@ -34,7 +42,7 @@ namespace RoboticToolKit.Robotics.Limbs
         private Vector3 m_currentDesiredPosition;
         private float m_currentDesiredSpeed;
         private IGait.MovementStyle m_currentMovementStyle = IGait.MovementStyle.None;
-
+        private IGateProvider m_gateProvider;
         public IGait.MovementStyle GetMovementStyle() => m_currentMovementStyle;
 
         private void Awake()
@@ -42,6 +50,10 @@ namespace RoboticToolKit.Robotics.Limbs
             m_currentDesiredPosition = Vector3.zero;
             m_pivotTransform = new GameObject("Pivot").transform;
             m_pivotTransform.SetParent(transform);
+        }
+        public void SetGaitProvider(IGateProvider gateProvider)
+        {
+            m_gateProvider = gateProvider;
         }
         public Transform GetTarget()
         {
@@ -53,9 +65,14 @@ namespace RoboticToolKit.Robotics.Limbs
         {
             m_listeners.Add(listener);
         }
+        public void SetTargetPosition(Vector3 localPosition)
+        {
+            m_target.position = localPosition;
+        }
         private float m_strideHeight = .103f;
         public void RotateToPosition(Vector3 position, float speed, float height)
         {
+            Debug.Log(name + " set new rotate position : " + position);
             m_currentMovementStyle = IGait.MovementStyle.Rotate;
             m_pivotTransform.localPosition = Vector3.Lerp(m_target.localPosition, position, .5f);
             m_pivotTransform.LookAt(m_target, Vector3.up);
@@ -65,12 +82,10 @@ namespace RoboticToolKit.Robotics.Limbs
         }
         public void TranslateToPosition(Vector3 position, float speed)
         {
-            Debug.Log(name + " set new target position : " + position);
+            Debug.Log(name + " set new translate position : " + position);
            
             m_currentMovementStyle = IGait.MovementStyle.Translate;
-
-            SetStrideValues(position, speed);
-          
+            SetStrideValues(position, speed);         
         }
         private void SetStrideValues(Vector3 position, float speed)
         {
@@ -81,9 +96,8 @@ namespace RoboticToolKit.Robotics.Limbs
         }
         [SerializeField]
         private float m_rotationPercentage;
-        private void Update()
+        public void RunGait()
         {
-
             if (!AtTarget)
             {
                 CheckAtTarget();

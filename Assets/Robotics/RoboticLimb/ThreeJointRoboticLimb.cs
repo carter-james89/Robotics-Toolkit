@@ -1,3 +1,4 @@
+using RoboticToolkit.Robotics.Gaits;
 using RoboticToolKit.Robotics.Servos;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,7 +6,11 @@ using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Limbs
 {
-    public class ThreeJointRoboticLimb : MonoBehaviour
+    public interface IRoboticLimb
+    {
+        public void Reset();
+    }
+    public class ThreeJointRoboticLimb : MonoBehaviour, IRoboticLimb
     {
         [SerializeField]
         private GameObject m_shoulderServoObject;
@@ -30,7 +35,7 @@ namespace RoboticToolkit.Robotics.Limbs
         private Transform m_shoulderTarget;
 
         [SerializeField]
-        private RoboticToolKit.Robotics.Limbs.LimbGait m_gait;
+        private LimbGait m_gait;
 
         [SerializeField]
         private Transform m_baseTarget;
@@ -43,13 +48,20 @@ namespace RoboticToolkit.Robotics.Limbs
             m_desiredLimbHeight = desiredHeight;
         }
 
+        public void Reset()
+        {
+            m_shoulderServoController.Reset();
+            m_elbowServoController.Reset();
+            m_wristServoController.Reset();
+        }
+
         public bool LimbAtTarget()
         {
             if (!m_gait.AtTarget)
             {
                 return false;
             }
-            if (Vector3.Distance(m_endPoint.position, GetGait().GetTargetOffset().position) < .01f)
+            if (Vector3.Distance(m_endPoint.position, GetGait().GetTargetOffset().position) < .007f)
             {
                 return true;
             }
@@ -57,7 +69,7 @@ namespace RoboticToolkit.Robotics.Limbs
         }
         private Vector3 m_gaitOffset;
 
-        public RoboticToolKit.Robotics.Limbs.LimbGait GetGait()
+        public LimbGait GetGait()
         {
             return m_gait;
         }
@@ -78,7 +90,7 @@ namespace RoboticToolkit.Robotics.Limbs
 
         private void FixedUpdate()
         {
-            if (m_gait.GetMovementStyle() != RoboticToolKit.Robotics.Limbs.IGait.MovementStyle.Rotate)
+            if (m_gait.GetMovementStyle() != IGait.MovementStyle.Rotate)
             {
                 // heightOffset = m_baseTarget.position.y - m_shoulderServoController.GetServo().GetGameObject().transform.position.y;
                 heightOffset = transform.InverseTransformPoint(m_baseTarget.position).y;
