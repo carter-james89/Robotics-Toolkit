@@ -484,6 +484,10 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 1882999380, guid: 761d054b8e64c9945a781ec21830677c, type: 3}
+      propertyPath: m_ground
+      value: 
+      objectReference: {fileID: 1388336583}
+    - target: {fileID: 1882999380, guid: 761d054b8e64c9945a781ec21830677c, type: 3}
       propertyPath: m_strideHeight
       value: 0.12
       objectReference: {fileID: 0}
@@ -798,7 +802,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.2232769, y: 0.07235964, z: 0.26628444}
   m_Center: {x: 0, y: -0.0036132596, z: -0.024119478}
---- !u!114 &1882999384
+--- !u!114 &1882999387
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -807,10 +811,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1882999376}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4919de9195e7094593eda5fe572bb14, type: 3}
+  m_Script: {fileID: 11500000, guid: 2b7c5aa502d6da943806bda0abd5697c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_strideLength: 0.02
-  m_strideHeight: 0.101
-  m_gaitTranslateSpeed: 2
-  m_mGaitRotationSpeed: 340
+  m_strideLength: 0.05
+  m_strideHeight: 0.1
+  m_gaitTranslateSpeed: 0.1
+  m_mGaitRotationSpeed: 25

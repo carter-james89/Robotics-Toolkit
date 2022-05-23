@@ -11,6 +11,7 @@ namespace RoboticsToolkit.Robotics
 {
     public interface IRoboticController
     {
+        public IRoboticLimb[] GetLimbs();
         public void Reset();
     }
     public class NovaRoboticController : MonoBehaviour, IRoboticController
@@ -30,6 +31,7 @@ namespace RoboticsToolkit.Robotics
         // private List<ThreeJointRoboticLimb> m_limbs = new List<ThreeJointRoboticLimb>();
 
 
+
         [SerializeField]
         private Transform m_gaits;
         [SerializeField]
@@ -37,40 +39,41 @@ namespace RoboticsToolkit.Robotics
 
         private ArticulationBody m_articulationBody;
 
-        private IGateProvider m_gaitProvider;
+        private IGait m_gait;
         private float m_startHeight;
 
-        public bool Walking { get; private set; } = false;
+    
 
-        private Dictionary<ThreeJointRoboticLimb, LimbGait> m_limbs = new Dictionary<ThreeJointRoboticLimb, LimbGait>();
+        private List<ThreeJointRoboticLimb> m_limbs = new List<ThreeJointRoboticLimb>();
+        public IRoboticLimb[] GetLimbs() => m_limbs.ToArray();
 
         // Start is called before the first frame update
         void Start()
         {
             m_startHeight = transform.localPosition.y;
-            m_gaitProvider = GetComponent<IGateProvider>();
+            m_gait = GetComponent<IGait>();
             m_articulationBody = GetComponent<ArticulationBody>();
-            m_limbs.Add(m_flLimb, m_flLimb.GetGait());
-            m_limbs.Add(m_frLimb, m_frLimb.GetGait());
-            m_limbs.Add(m_brLimb, m_brLimb.GetGait());
-            m_limbs.Add(m_blLimb, m_blLimb.GetGait());
+            m_limbs.Add(m_flLimb);
+            m_limbs.Add(m_frLimb);
+            m_limbs.Add(m_brLimb);
+            m_limbs.Add(m_blLimb);
 
 
             // m_gaits.transform.position = transform.position;
             m_gaits.transform.SetParent(null);
             m_baseTargets.transform.SetParent(null);
-            foreach (var limbGaitPair in m_limbs)
+            foreach (var limb in m_limbs)
             {
-                limbGaitPair.Value.gameObject.name += "(" + limbGaitPair.Key.name + ")";
+                limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
                 //limb.GetGait().transform.SetParent(m_gaits);
                 //var tempPos = limb.GetGait().transform.localPosition;
                 //tempPos.y = 0;
                 //limb.GetGait().transform.localPosition = tempPos;
 
-                limbGaitPair.Key.GetBaseTarget().SetParent(m_baseTargets);
-                var tempPos = limbGaitPair.Key.GetBaseTarget().localPosition;
+                limb.GetBaseTarget().SetParent(m_baseTargets);
+                var tempPos = limb.GetBaseTarget().localPosition;
                 tempPos.y = 0;
-                limbGaitPair.Key.GetBaseTarget().localPosition = tempPos;
+                limb.GetBaseTarget().localPosition = tempPos;
 
                 //if(limb.ShoulderServoController is PIDServoController)
                 //{
@@ -81,7 +84,7 @@ namespace RoboticsToolkit.Robotics
 
             }
 
-
+            m_gait.Initialize(this);
         }
 
         // Update is called once per frame
@@ -92,34 +95,9 @@ namespace RoboticsToolkit.Robotics
                 m_articulationBody.immovable = false;
             }
             PositionGimble();
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                Walking = true;
-                SetNextGaitCycle();
-                // m_gaitProvider.SetGaitTargets()
-                //  m_stridePosition = 1;
-                //   m_frLimb.GetGait().MoveToPosition(new Vector3(0, 0, .05f), 25f, RoboticToolKit.Robotics.Limbs.IGait.MovementStyle.Rotate);
-                //   m_flLimb.GetGait().MoveToPosition(new Vector3(0, 0, -.05f), .1f, RoboticToolKit.Robotics.Limbs.IGait.MovementStyle.Translate);
-                //   m_rrLimb.GetGait().MoveToPosition(new Vector3(0, 0, -.05f), .1f, RoboticToolKit.Robotics.Limbs.IGait.MovementStyle.Translate);
-                //   m_rlLimb.GetGait().MoveToPosition(new Vector3(0, 0, -.05f), .1f, RoboticToolKit.Robotics.Limbs.IGait.MovementStyle.Translate);
-            }
 
-
-            if (Walking)
-            {
-                bool strideComplete = true;
-                foreach (var limb in m_limbs.Keys)
-                {
-                    if (limb.LimbAtTarget() == false)
-                    {
-                        strideComplete = false;
-                    }
-                }
-                if (strideComplete)
-                {
-                    SetNextGaitCycle();
-                }
-            }
+            m_gait.RunGait();
+          
         }
 
         public void Reset()
@@ -127,17 +105,14 @@ namespace RoboticsToolkit.Robotics
             m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
             m_articulationBody.velocity = Vector3.zero;
             m_articulationBody.angularVelocity = Vector3.zero;
-            foreach (var limbPair in m_limbs)
+            foreach (var limb in m_limbs)
             {
-                limbPair.Key.Reset();
+                limb.Reset();
               
             }      
         }
 
-        private void SetNextGaitCycle()
-        {
-            m_gaitProvider.SetGaitTargets(m_limbs.Values.ToArray(), transform.localPosition, transform.localRotation);
-        }
+
 
         private void FixedUpdate()
         {

@@ -8,13 +8,20 @@ namespace RoboticToolkit.Robotics.Limbs
 {
     public interface IRoboticLimb
     {
+        public GameObject GetGameObject();
         public void Reset();
+
+        public LimbPositioner GetPositioner();
     }
     public class ThreeJointRoboticLimb : MonoBehaviour, IRoboticLimb
     {
+        public GameObject GetGameObject() => gameObject;
         [SerializeField]
         private GameObject m_shoulderServoObject;
         private IServoController m_shoulderServoController;
+
+        [SerializeField]
+        private LimbPositioner m_positioner;
 
         [SerializeField]
         private GameObject m_elbowServoObject;
@@ -34,8 +41,6 @@ namespace RoboticToolkit.Robotics.Limbs
         [SerializeField]
         private Transform m_shoulderTarget;
 
-        [SerializeField]
-        private LimbGait m_gait;
 
         [SerializeField]
         private Transform m_baseTarget;
@@ -55,33 +60,29 @@ namespace RoboticToolkit.Robotics.Limbs
             m_wristServoController.Reset();
         }
 
-        public bool LimbAtTarget()
-        {
-            if (!m_gait.AtTarget)
-            {
-                return false;
-            }
-            if (Vector3.Distance(m_endPoint.position, GetGait().GetTargetOffset().position) < .007f)
-            {
-                return true;
-            }
-            return false;
-        }
-        private Vector3 m_gaitOffset;
+        //public bool LimbAtTarget()
+        //{
+        //    if (!m_positioner.LimbAtTarget)
+        //    {
+        //        return false;
+        //    }
+        //    if (Vector3.Distance(m_endPoint.position, GetPositioner().GetTargetOffset().position) < .007f)
+        //    {
+        //        return true;
+        //    }
+        //    return false;
+        //}
+        private Vector3 m_positionerOffset;
 
-        public LimbGait GetGait()
-        {
-            return m_gait;
-        }
 
         private void Awake()
         {
             m_shoulderServoController = m_shoulderServoObject.GetComponent<IServoController>();
             m_elbowServoController = m_elbowServoObject.GetComponent<IServoController>();
             m_wristServoController = m_wristServoObject.GetComponent<IServoController>();
-            m_gaitOffset = transform.InverseTransformPoint(m_gait.GetTarget().position);
+            m_positionerOffset = transform.InverseTransformPoint(m_positioner.GetTarget().position);
 
-            // m_gait.transform.position = m_endPoint.transform.position;
+            // m_positioner.transform.position = m_endPoint.transform.position;
 
             // m_wristServoController.
         }
@@ -90,7 +91,7 @@ namespace RoboticToolkit.Robotics.Limbs
 
         private void FixedUpdate()
         {
-            if (m_gait.GetMovementStyle() != IGait.MovementStyle.Rotate)
+            if (m_positioner.GetMovementStyle() != LimbPositioner.MovementStyle.Rotate)
             {
                 // heightOffset = m_baseTarget.position.y - m_shoulderServoController.GetServo().GetGameObject().transform.position.y;
                 heightOffset = transform.InverseTransformPoint(m_baseTarget.position).y;
@@ -102,19 +103,19 @@ namespace RoboticToolkit.Robotics.Limbs
                 PositionGaitHeight(0);
             }
 
-            //  m_gait.transform.position = Vector3.Lerp(m_gait.transform.position, m_targetGaitPos, Time.deltaTime * 5);
+            //  m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 5);
 
 
             m_shoulderServoController.SetAndRunServo(
            IKCalculator.CalculateSingleIK(m_shoulderServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
-           m_gait.GetTarget().position,
+           m_positioner.GetTarget().position,
            true));
 
             var elbowWristAngles = IKCalculator.CalculateDuelIK(m_elbowServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
                 m_wristServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
-                m_endPoint.position, m_gait.GetTargetOffset().transform.position);
+                m_endPoint.position, m_positioner.GetTargetOffset().transform.position);
 
-            m_elbowServoController.SetAndRunServo(elbowWristAngles.Key - 8);
+            m_elbowServoController.SetAndRunServo(elbowWristAngles.Key - 8);//hard coded guess for angle offset with elbow
             m_wristServoController.SetAndRunServo(elbowWristAngles.Value);
         }
         private Vector3 m_targetGaitPos;
@@ -124,21 +125,21 @@ namespace RoboticToolkit.Robotics.Limbs
         private Vector3 m_currentGaitLocalOffset;
         public void PositionGaitHeight(float height)
         {
-           // var tempGlobalPos = m_gait.transform.position;
+           // var tempGlobalPos = m_positioner.transform.position;
            // tempGlobalPos.y = height;
 
-           // m_currentGaitLocalOffset = new Vector3(m_gaitOffset.x, m_gaitOffset.y - height, m_gaitOffset.z);
-            //var newGaitPos = transform.InverseTransformPoint(m_gait.transform.position);
-            var gaitPos = transform.TransformPoint(new Vector3(m_gaitOffset.x, 0, m_gaitOffset.z));
+           // m_currentGaitLocalOffset = new Vector3(m_positionerOffset.x, m_positionerOffset.y - height, m_positionerOffset.z);
+            //var newGaitPos = transform.InverseTransformPoint(m_positioner.transform.position);
+            var gaitPos = transform.TransformPoint(new Vector3(m_positionerOffset.x, 0, m_positionerOffset.z));
             gaitPos.y = -height;
-            // m_gait.transform.position = gaitPos;
+            // m_positioner.transform.position = gaitPos;
             m_targetGaitPos = gaitPos;
-            //m_gait.transform.position = m_targetGaitPos;
-              m_gait.transform.position = Vector3.Lerp(m_gait.transform.position, m_targetGaitPos, Time.deltaTime * 3);
-            m_currentGaitOffset = transform.InverseTransformPoint(m_gait.transform.position);
-            //var gatePos = m_gait.transform.localPosition;
+            //m_positioner.transform.position = m_targetGaitPos;
+              m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 3);
+            m_currentGaitOffset = transform.InverseTransformPoint(m_positioner.transform.position);
+            //var gatePos = m_positioner.transform.localPosition;
             //gatePos.y = height;
-            //m_gait.transform.localPosition = gatePos;
+            //m_positioner.transform.localPosition = gatePos;
 
 
 
@@ -154,6 +155,11 @@ namespace RoboticToolkit.Robotics.Limbs
         void Update()
         {
 
+        }
+
+        public LimbPositioner GetPositioner()
+        {
+         return m_positioner;
         }
     }
 }

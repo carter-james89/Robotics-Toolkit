@@ -125,9 +125,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4762177874801120846}
-  - component: {fileID: 2450887770285419417}
+  - component: {fileID: 3099070747384370668}
   m_Layer: 0
-  m_Name: Gait
+  m_Name: Limb Positioner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -150,7 +150,7 @@ Transform:
   m_Father: {fileID: 2951374106571376309}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2450887770285419417
+--- !u!114 &3099070747384370668
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -159,12 +159,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1648673377885070559}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1bb20e521e4282742a4777badce37ec4, type: 3}
+  m_Script: {fileID: 11500000, guid: cede8b132cfb1e9478b37c55b8d6ed44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_target: {fileID: 5311627979520820539}
   m_targetOffset: {fileID: 2587392628959377443}
   m_desiredTargetLocation: {fileID: 4370798069443084379}
+  m_limbEndPoint: {fileID: 7781554031112152011}
   m_rotationPercentage: 0
 --- !u!1 &2951374105031579235
 GameObject:
@@ -1147,6 +1148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732bec42d223af54c88828f7cd122c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_servoSpeed: 1
   rotationState: 0
   speed: 300
 --- !u!114 &3972649039574374235
@@ -1260,6 +1262,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732bec42d223af54c88828f7cd122c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_servoSpeed: 1
   rotationState: 0
   speed: 300
 --- !u!114 &4365310266525724249
@@ -1374,6 +1377,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732bec42d223af54c88828f7cd122c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_servoSpeed: 1
   rotationState: 0
   speed: 1
 --- !u!114 &1010282265198332008
@@ -1574,11 +1578,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_shoulderServoObject: {fileID: 2951374106541493194}
+  m_positioner: {fileID: 3099070747384370668}
   m_elbowServoObject: {fileID: 2951374106170598474}
   m_wristServoObject: {fileID: 2951374106426282894}
   m_endPoint: {fileID: 7781554031112152011}
   m_shoulderTarget: {fileID: 5311627979520820539}
-  m_gait: {fileID: 2450887770285419417}
   m_baseTarget: {fileID: 1030355482583433622}
   heightOffset: 0
   m_currentGaitOffset: {x: 0, y: 0, z: 0}

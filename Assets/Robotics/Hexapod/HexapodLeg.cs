@@ -16,8 +16,7 @@ public class HexapodLeg : MonoBehaviour
     [SerializeField]
     private float _legHeightError;
 
-    [SerializeField]
-    private LimbGait _gait;
+    
 
     private Transform _hipTarget;
     public void SetHipTarget(Transform newTarget)
@@ -75,10 +74,10 @@ public class HexapodLeg : MonoBehaviour
     }
     public void SetGaitHeight()
     {
-        _legHeightError = _hipTarget.position.y - _kneeServo.transform.position.y;
-        var tempPos = _gait.transform.position;
-        tempPos.y = -_legHeightError;
-        _gait.transform.position = tempPos;
+        //_legHeightError = _hipTarget.position.y - _kneeServo.transform.position.y;
+        //var tempPos = _gait.transform.position;
+        //tempPos.y = -_legHeightError;
+        //_gait.transform.position = tempPos;
     }
 
 }

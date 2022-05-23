@@ -27,7 +27,7 @@ namespace RoboticToolKit.Robotics.Servos
 
         public void SetAndRunServo(float desiredAngle)
         {
-            m_servo.SetServoPosition(desiredAngle,15);
+            m_servo.SetServoPosition(desiredAngle);
         }
     }
 }

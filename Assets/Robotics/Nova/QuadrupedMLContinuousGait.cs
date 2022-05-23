@@ -1,4 +1,5 @@
 using RoboticsToolkit.Robotics;
+using RoboticToolkit.Robotics.Limbs;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.MLAgents;
@@ -8,7 +9,7 @@ using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Gaits
 {
-    public class QuadrupedMLGaitProvider : Agent, IGateProvider
+    public class QuadrupedMLContinuousGait : Agent, IGait
     {
         [SerializeField]
         private MonoBehaviour m_robotComponent;
@@ -40,7 +41,7 @@ namespace RoboticToolkit.Robotics.Gaits
         }
 
 
-        public void GetGaitTargets(IGait[] gaits, Vector3 bodyPosition, Quaternion bodyRotation)
+        public void GetGaitTargets(Vector3 bodyPosition, Quaternion bodyRotation)
         {
             Debug.Log("Get Gait Targets");
             if (!m_firstComplition)
@@ -48,7 +49,6 @@ namespace RoboticToolkit.Robotics.Gaits
                 CalculateRewards();
             }
             m_firstComplition = false;
-            m_gaitsToSet = gaits;
             m_currentBodyPosition = bodyPosition;
             m_currentBodyRotation = bodyRotation;
             RequestDecision();
@@ -60,7 +60,7 @@ namespace RoboticToolkit.Robotics.Gaits
             base.CollectObservations(sensor);
             foreach (var gait in m_gaitsToSet)
             {
-                sensor.AddObservation(gait.GetTarget().position);
+               // sensor.AddObservation(gait.GetTarget().position);
             }
             // sensor.AddObservation(CalculateForwardError());
             sensor.AddObservation(m_currentBodyRotation);
@@ -93,11 +93,11 @@ namespace RoboticToolkit.Robotics.Gaits
         {
             if (translate == 0)
             {
-                gait.RotateToPosition(position, m_gaitTranslateSpeed, m_strideHeight);
+               // gait.RotateToPosition(position, m_gaitTranslateSpeed, m_strideHeight);
             }
             else
             {
-                gait.TranslateToPosition(position, m_gaitTranslateSpeed);
+               // gait.TranslateToPosition(position, m_gaitTranslateSpeed);
             }
         }
         private void Update()
@@ -112,8 +112,24 @@ namespace RoboticToolkit.Robotics.Gaits
         }
         private void CalculateRewards()
         {
-          
+
             SetReward(-Vector3.Distance(m_target.localPosition, m_currentBodyPosition));
+        }
+
+        public void Initialize(IRoboticController robot, IRoboticLimb[] limbs)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void RunGait()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Initialize(IRoboticController robot)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
+

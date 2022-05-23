@@ -1,3 +1,5 @@
+using RoboticsToolkit.Robotics;
+using RoboticToolkit.Robotics.Limbs;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,21 +10,14 @@ namespace RoboticToolkit.Robotics.Gaits
     {
         public void OnLimbAchievedTarget(Vector3 currentTarget);
 
-      
+
     }
     public interface IGait
     {
-        public enum MovementStyle { None, Rotate, Translate }
-        public Transform GetTarget();
-        public MovementStyle GetMovementStyle();
-        public void RotateToPosition(Vector3 position, float speed, float height);
-        public void TranslateToPosition(Vector3 position, float speed);
-
-        public void SetTargetPosition(Vector3 localPosition);
-
-        public void SetGaitProvider(IGateProvider provider);
+        public void Initialize(IRoboticController robot);
+        public void RunGait();
     }
-    public class LimbGait : MonoBehaviour, IGait
+    public class LimbPositioner : MonoBehaviour
     {
         [SerializeField]
         private Transform m_target;
@@ -38,22 +33,29 @@ namespace RoboticToolkit.Robotics.Gaits
 
         private List<IGaitEventListener> m_listeners = new List<IGaitEventListener>();
 
-        public bool AtTarget { get; private set; } = true;
+        [SerializeField]
+        private Transform m_limbEndPoint;
+
+        public enum MovementStyle
+        {
+            None,
+            Translate,
+            Rotate,
+        }
+
+        public bool GaitAtTarget { get; private set; } = true;
+        public bool LimbAtTarget { get; private set; } = true;
         private Vector3 m_currentDesiredPosition;
         private float m_currentDesiredSpeed;
-        private IGait.MovementStyle m_currentMovementStyle = IGait.MovementStyle.None;
-        private IGateProvider m_gateProvider;
-        public IGait.MovementStyle GetMovementStyle() => m_currentMovementStyle;
+        private MovementStyle m_currentMovementStyle = MovementStyle.None;
+       // private IGaitProvider m_gateProvider;
+        public MovementStyle GetMovementStyle() => m_currentMovementStyle;
 
         private void Awake()
         {
             m_currentDesiredPosition = Vector3.zero;
             m_pivotTransform = new GameObject("Pivot").transform;
             m_pivotTransform.SetParent(transform);
-        }
-        public void SetGaitProvider(IGateProvider gateProvider)
-        {
-            m_gateProvider = gateProvider;
         }
         public Transform GetTarget()
         {
@@ -73,7 +75,7 @@ namespace RoboticToolkit.Robotics.Gaits
         public void RotateToPosition(Vector3 position, float speed, float height)
         {
             Debug.Log(name + " set new rotate position : " + position);
-            m_currentMovementStyle = IGait.MovementStyle.Rotate;
+            m_currentMovementStyle = MovementStyle.Rotate;
             m_pivotTransform.localPosition = Vector3.Lerp(m_target.localPosition, position, .5f);
             m_pivotTransform.LookAt(m_target, Vector3.up);
             m_targetPivotOffset = m_pivotTransform.InverseTransformPoint(m_target.position);
@@ -83,31 +85,32 @@ namespace RoboticToolkit.Robotics.Gaits
         public void TranslateToPosition(Vector3 position, float speed)
         {
             Debug.Log(name + " set new translate position : " + position);
-           
-            m_currentMovementStyle = IGait.MovementStyle.Translate;
-            SetStrideValues(position, speed);         
+
+            m_currentMovementStyle = MovementStyle.Translate;
+            SetStrideValues(position, speed);
         }
         private void SetStrideValues(Vector3 position, float speed)
         {
             m_currentDesiredPosition = position;
             m_currentDesiredSpeed = speed;
-            AtTarget = false;
+            GaitAtTarget = false;
+            LimbAtTarget = false;
             m_desiredTargetLocation.localPosition = position;
         }
         [SerializeField]
         private float m_rotationPercentage;
-        public void RunGait()
+        public void Run()
         {
-            if (!AtTarget)
+            if (!GaitAtTarget)
             {
-                CheckAtTarget();
-                if (AtTarget)
+                CheckGaitAtTarget();
+                if (GaitAtTarget)
                 {
                     return;
                 }
                 switch (m_currentMovementStyle)
                 {
-                    case IGait.MovementStyle.Rotate:
+                    case MovementStyle.Rotate:
                         m_pivotTransform.Rotate(new Vector3(-m_currentDesiredSpeed * Time.deltaTime, 0, 0));
                         var dir1 = m_pivotTransform.parent.forward;
                         var dir2 = m_pivotTransform.forward;
@@ -122,7 +125,7 @@ namespace RoboticToolkit.Robotics.Gaits
                         newOffset.z += dist;
                         m_target.position = m_pivotTransform.TransformPoint(newOffset);
                         break;
-                    case IGait.MovementStyle.Translate:
+                    case MovementStyle.Translate:
                         Debug.Log("run translation");
                         var dir = m_target.localPosition - m_currentDesiredPosition.normalized;
                         dir = m_currentDesiredPosition - m_target.localPosition;
@@ -135,12 +138,12 @@ namespace RoboticToolkit.Robotics.Gaits
             }
         }
 
-        private void CheckAtTarget()
+        private void CheckGaitAtTarget()
         {
             if (Vector3.Distance(m_target.position, transform.TransformPoint(m_currentDesiredPosition)) < .01f)
             {
                 Debug.Log("AtTarget");
-                AtTarget = true;
+                GaitAtTarget = true;
                 m_target.localPosition = m_currentDesiredPosition;
                 foreach (var listener in m_listeners)
                 {
@@ -148,9 +151,23 @@ namespace RoboticToolkit.Robotics.Gaits
                 }
                 return;
             }
-            AtTarget = false;
+            GaitAtTarget = false;
+        }
+        public bool CheckLimbAtTarget()
+        {
+            CheckGaitAtTarget();
+            if (!GaitAtTarget)
+            {
+                return false;
+            }
+            if(Vector3.Distance(m_targetOffset.position, m_limbEndPoint.position) < .015f)
+            {
+                LimbAtTarget = true;
+            }
+            return LimbAtTarget;
         }
     }
 
 
 }
+

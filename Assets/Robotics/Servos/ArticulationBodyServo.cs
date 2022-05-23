@@ -25,7 +25,7 @@ namespace RoboticToolKit.Robotics.Servos
         public bool IsEnabled() => enabled;
         public GameObject GetGameObject() => gameObject;
         public RotationDirection rotationState = RotationDirection.None;
-        public float speed = 300.0f;
+        //public float speed = 300.0f;
 
         private ArticulationBody m_articulation;
 
