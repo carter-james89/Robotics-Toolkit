@@ -69,9 +69,11 @@ namespace RoboticToolkit.Robotics.Gaits
         }
         public void SetTargetPosition(Vector3 localPosition)
         {
-            m_target.position = localPosition;
+            //Debug.Log(name + " target pos " + localPosition);
+            m_target.localPosition = localPosition;
         }
         private float m_strideHeight = .103f;
+       
         public void RotateToPosition(Vector3 position, float speed, float height)
         {
             Debug.Log(name + " set new rotate position : " + position);
@@ -84,7 +86,7 @@ namespace RoboticToolkit.Robotics.Gaits
         }
         public void TranslateToPosition(Vector3 position, float speed)
         {
-            Debug.Log(name + " set new translate position : " + position);
+          //  Debug.Log(name + " set new translate position : " + position);
 
             m_currentMovementStyle = MovementStyle.Translate;
             SetStrideValues(position, speed);

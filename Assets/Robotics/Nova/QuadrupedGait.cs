@@ -56,9 +56,26 @@ namespace RoboticToolkit.Robotics.Gaits
                     break;
                 default:
                     break;
+                    //case 1:
+                    //    frLimb.RotateToPosition(new Vector3(m_strideLength,0,0), m_mGaitRotationSpeed, m_strideHeight);
+                    //    blLimb.RotateToPosition(new Vector3(-m_strideLength, 0, 0), m_mGaitRotationSpeed, m_strideHeight);
+
+                    //    flLimb.TranslateToPosition(new Vector3(-m_strideLength, 0, 0), m_gaitTranslateSpeed);
+                    //    brLimb.TranslateToPosition(new Vector3(m_strideLength, 0, 0), m_gaitTranslateSpeed);
+                    //    break;
+                    //case 2:
+                    //    flLimb.RotateToPosition(new Vector3(-m_strideLength, 0, 0), m_mGaitRotationSpeed, m_strideHeight);
+                    //    brLimb.RotateToPosition(new Vector3(m_strideLength, 0, 0), m_mGaitRotationSpeed, m_strideHeight);
+
+                    //    frLimb.TranslateToPosition(new Vector3(-m_strideLength, 0, 0), m_gaitTranslateSpeed);
+                    //    blLimb.TranslateToPosition(new Vector3(m_strideLength, 0, 0), m_gaitTranslateSpeed);
+                    //    break;
+                    //default:
+                    //    break;
             }
         }
-        public void RunGait()
+
+        void Update()
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -71,7 +88,11 @@ namespace RoboticToolkit.Robotics.Gaits
                 //   m_rrLimb.GetGait().MoveToPosition(new Vector3(0, 0, -.05f), .1f, RoboticToolKit.Robotics.Limbs.IGait.MovementStyle.Translate);
                 //   m_rlLimb.GetGait().MoveToPosition(new Vector3(0, 0, -.05f), .1f, RoboticToolKit.Robotics.Limbs.IGait.MovementStyle.Translate);
             }
+           
 
+        }
+        public void RunGait()
+        {
             if (Walking)
             {
                 foreach (var limb in m_limbs)
@@ -90,6 +111,11 @@ namespace RoboticToolkit.Robotics.Gaits
                 {
                     SetNextGaitCycle();
                 }
+            }
+
+            foreach (var limb in m_limbs)
+            {
+                limb.RunLimb();
             }
         }
     }

@@ -1,0 +1,65 @@
+{
+    "QuadrupedContinuousGait": {
+        "checkpoints": [
+            {
+                "steps": 2499989,
+                "file_path": "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-2499989.onnx",
+                "reward": -11.918360228241847,
+                "creation_time": 1653709078.2267973,
+                "auxillary_file_paths": [
+                    "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-2499989.pt"
+                ]
+            },
+            {
+                "steps": 2999994,
+                "file_path": "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-2999994.onnx",
+                "reward": -11.550356334028871,
+                "creation_time": 1653709976.6314313,
+                "auxillary_file_paths": [
+                    "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-2999994.pt"
+                ]
+            },
+            {
+                "steps": 3499997,
+                "file_path": "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-3499997.onnx",
+                "reward": -11.586146260683353,
+                "creation_time": 1653710874.696999,
+                "auxillary_file_paths": [
+                    "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-3499997.pt"
+                ]
+            },
+            {
+                "steps": 3999996,
+                "file_path": "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-3999996.onnx",
+                "reward": -11.241114617610464,
+                "creation_time": 1653711774.8135798,
+                "auxillary_file_paths": [
+                    "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-3999996.pt"
+                ]
+            },
+            {
+                "steps": 4225839,
+                "file_path": "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-4225839.onnx",
+                "reward": null,
+                "creation_time": 1653712186.2341816,
+                "auxillary_file_paths": [
+                    "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-4225839.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 4225839,
+            "file_path": "results\\GaitTest\\QuadrupedContinuousGait.onnx",
+            "reward": null,
+            "creation_time": 1653712186.2341816,
+            "auxillary_file_paths": [
+                "results\\GaitTest\\QuadrupedContinuousGait\\QuadrupedContinuousGait-4225839.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "0.28.0",
+        "torch_version": "1.7.1+cu110"
+    }
+}

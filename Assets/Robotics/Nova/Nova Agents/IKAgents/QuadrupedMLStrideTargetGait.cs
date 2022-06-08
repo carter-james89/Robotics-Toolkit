@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Gaits
 {
-    public class QuadrupedMLContinuousGait : Agent, IGait
+    public class QuadrupedMLStrideTargetGait : Agent, IGait
     {
         [SerializeField]
         private MonoBehaviour m_robotComponent;
@@ -22,7 +22,6 @@ namespace RoboticToolkit.Robotics.Gaits
         [SerializeField]
         private Transform m_target;
 
-        private IGait[] m_gaitsToSet;
         private Vector3 m_currentBodyPosition;
         private Quaternion m_currentBodyRotation;
         private bool m_firstComplition = true;
@@ -34,6 +33,17 @@ namespace RoboticToolkit.Robotics.Gaits
             base.Awake();
             m_robot = GetComponent<IRoboticController>();
         }
+        public void Initialize(IRoboticController robot)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void RunGait()
+        {
+            throw new System.NotImplementedException();
+        }
+
+
         public override void OnEpisodeBegin()
         {
             Debug.Log("On Episode begin");
@@ -58,10 +68,10 @@ namespace RoboticToolkit.Robotics.Gaits
             //19
             //  Debug.Log("collect observations");
             base.CollectObservations(sensor);
-            foreach (var gait in m_gaitsToSet)
-            {
-               // sensor.AddObservation(gait.GetTarget().position);
-            }
+            //foreach (var gait in m_gaitsToSet)
+            //{
+            //    // sensor.AddObservation(gait.GetTarget().position);
+            //}
             // sensor.AddObservation(CalculateForwardError());
             sensor.AddObservation(m_currentBodyRotation);
             sensor.AddObservation(m_target.transform.localPosition - m_currentBodyPosition);
@@ -76,28 +86,28 @@ namespace RoboticToolkit.Robotics.Gaits
             int translateBRGait = actions.DiscreteActions[2];
             int translateBLGait = actions.DiscreteActions[3];
 
-            Vector3 flPosition = new Vector3(actions.ContinuousActions[0], 0, actions.ContinuousActions[1]);
-            RunGait(m_gaitsToSet[0], flPosition, translateFLGait);
+            //Vector3 flPosition = new Vector3(actions.ContinuousActions[0], 0, actions.ContinuousActions[1]);
+            //RunGait(m_gaitsToSet[0], flPosition, translateFLGait);
 
-            Vector3 frPosition = new Vector3(actions.ContinuousActions[2], 0, actions.ContinuousActions[3]);
-            RunGait(m_gaitsToSet[1], frPosition, translateFRGait);
+            //Vector3 frPosition = new Vector3(actions.ContinuousActions[2], 0, actions.ContinuousActions[3]);
+            //RunGait(m_gaitsToSet[1], frPosition, translateFRGait);
 
-            Vector3 brPosition = new Vector3(actions.ContinuousActions[4], 0, actions.ContinuousActions[5]);
-            RunGait(m_gaitsToSet[2], brPosition, translateBRGait);
+            //Vector3 brPosition = new Vector3(actions.ContinuousActions[4], 0, actions.ContinuousActions[5]);
+            //RunGait(m_gaitsToSet[2], brPosition, translateBRGait);
 
-            Vector3 blPosition = new Vector3(actions.ContinuousActions[6], 0, actions.ContinuousActions[7]);
-            RunGait(m_gaitsToSet[3], blPosition, translateBLGait);
-            CalculateRewards();
+            //Vector3 blPosition = new Vector3(actions.ContinuousActions[6], 0, actions.ContinuousActions[7]);
+            //RunGait(m_gaitsToSet[3], blPosition, translateBLGait);
+            //CalculateRewards();
         }
         private void RunGait(IGait gait, Vector3 position, int translate)
         {
             if (translate == 0)
             {
-               // gait.RotateToPosition(position, m_gaitTranslateSpeed, m_strideHeight);
+                // gait.RotateToPosition(position, m_gaitTranslateSpeed, m_strideHeight);
             }
             else
             {
-               // gait.TranslateToPosition(position, m_gaitTranslateSpeed);
+                // gait.TranslateToPosition(position, m_gaitTranslateSpeed);
             }
         }
         private void Update()
@@ -116,20 +126,7 @@ namespace RoboticToolkit.Robotics.Gaits
             SetReward(-Vector3.Distance(m_target.localPosition, m_currentBodyPosition));
         }
 
-        public void Initialize(IRoboticController robot, IRoboticLimb[] limbs)
-        {
-            throw new System.NotImplementedException();
-        }
 
-        public void RunGait()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Initialize(IRoboticController robot)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }
 

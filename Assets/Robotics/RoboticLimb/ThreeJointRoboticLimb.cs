@@ -11,6 +11,10 @@ namespace RoboticToolkit.Robotics.Limbs
         public GameObject GetGameObject();
         public void Reset();
 
+        public Transform GetEndPoint();
+
+        public void RunLimb();
+
         public LimbPositioner GetPositioner();
     }
     public class ThreeJointRoboticLimb : MonoBehaviour, IRoboticLimb
@@ -37,6 +41,7 @@ namespace RoboticToolkit.Robotics.Limbs
 
         [SerializeField]
         private Transform m_endPoint;
+        public Transform GetEndPoint() => m_endPoint;
 
         [SerializeField]
         private Transform m_shoulderTarget;
@@ -89,7 +94,7 @@ namespace RoboticToolkit.Robotics.Limbs
 
         public float heightOffset;
 
-        private void FixedUpdate()
+        public void RunLimb()
         {
             if (m_positioner.GetMovementStyle() != LimbPositioner.MovementStyle.Rotate)
             {
@@ -134,8 +139,8 @@ namespace RoboticToolkit.Robotics.Limbs
             gaitPos.y = -height;
             // m_positioner.transform.position = gaitPos;
             m_targetGaitPos = gaitPos;
-            //m_positioner.transform.position = m_targetGaitPos;
-              m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 3);
+           // m_positioner.transform.position = m_targetGaitPos;
+             //m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 3);
             m_currentGaitOffset = transform.InverseTransformPoint(m_positioner.transform.position);
             //var gatePos = m_positioner.transform.localPosition;
             //gatePos.y = height;

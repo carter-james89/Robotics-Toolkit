@@ -11,7 +11,21 @@ namespace RoboticsToolkit.Robotics
 {
     public interface IRoboticController
     {
+        public struct RobotData
+        {
+            public Vector3 Velocity;
+            public Vector3 AngularVelocity;
+
+            public RobotData(Vector3 velocity, Vector3 angularVelocity)
+            {
+                Velocity = velocity;
+                AngularVelocity = angularVelocity;
+            }
+        }
+        public GameObject GetGameObject();
         public IRoboticLimb[] GetLimbs();
+        public RobotData GetRobotData();
+
         public void Reset();
     }
     public class NovaRoboticController : MonoBehaviour, IRoboticController
@@ -30,7 +44,7 @@ namespace RoboticsToolkit.Robotics
 
         // private List<ThreeJointRoboticLimb> m_limbs = new List<ThreeJointRoboticLimb>();
 
-
+        public GameObject GetGameObject() => gameObject;
 
         [SerializeField]
         private Transform m_gaits;
@@ -39,10 +53,15 @@ namespace RoboticsToolkit.Robotics
 
         private ArticulationBody m_articulationBody;
 
+        private bool m_ready =true;
+
         private IGait m_gait;
         private float m_startHeight;
 
-    
+        public IRoboticController.RobotData GetRobotData()
+        {
+            return new IRoboticController.RobotData(m_articulationBody.velocity, m_articulationBody.angularVelocity);
+        }
 
         private List<ThreeJointRoboticLimb> m_limbs = new List<ThreeJointRoboticLimb>();
         public IRoboticLimb[] GetLimbs() => m_limbs.ToArray();
@@ -60,8 +79,8 @@ namespace RoboticsToolkit.Robotics
 
 
             // m_gaits.transform.position = transform.position;
-            m_gaits.transform.SetParent(null);
-            m_baseTargets.transform.SetParent(null);
+            m_gaits.transform.SetParent(transform.parent);
+            m_baseTargets.transform.SetParent(transform.parent);
             foreach (var limb in m_limbs)
             {
                 limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
@@ -96,20 +115,21 @@ namespace RoboticsToolkit.Robotics
             }
             PositionGimble();
 
-            m_gait.RunGait();
-          
+
+
         }
 
         public void Reset()
         {
-            m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
             m_articulationBody.velocity = Vector3.zero;
             m_articulationBody.angularVelocity = Vector3.zero;
             foreach (var limb in m_limbs)
             {
                 limb.Reset();
-              
-            }      
+
+            }
+            m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
+         
         }
 
 
@@ -117,6 +137,7 @@ namespace RoboticsToolkit.Robotics
         private void FixedUpdate()
         {
             PositionGimble();
+            m_gait.RunGait();
         }
 
         private void PositionGimble()
@@ -141,5 +162,5 @@ namespace RoboticsToolkit.Robotics
             //tempEuler.y = transform.eulerAngles.y;
             m_baseTargets.eulerAngles = tempEuler;
         }
-    } 
+    }
 }
