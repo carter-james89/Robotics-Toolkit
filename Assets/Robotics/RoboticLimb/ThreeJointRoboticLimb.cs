@@ -13,6 +13,8 @@ namespace RoboticToolkit.Robotics.Limbs
 
         public Transform GetEndPoint();
 
+        public IServoController[] GetServoControllers();
+
         public void RunLimb();
 
         public LimbPositioner GetPositioner();
@@ -23,6 +25,9 @@ namespace RoboticToolkit.Robotics.Limbs
         [SerializeField]
         private GameObject m_shoulderServoObject;
         private IServoController m_shoulderServoController;
+
+        private IServoController[] m_servoControllers;
+        public IServoController[] GetServoControllers() => m_servoControllers;
 
         [SerializeField]
         private LimbPositioner m_positioner;
@@ -87,6 +92,11 @@ namespace RoboticToolkit.Robotics.Limbs
             m_wristServoController = m_wristServoObject.GetComponent<IServoController>();
             m_positionerOffset = transform.InverseTransformPoint(m_positioner.GetTarget().position);
 
+            m_servoControllers = new IServoController[3];
+            m_servoControllers[0] = m_shoulderServoController;
+            m_servoControllers[1] = m_elbowServoController;
+            m_servoControllers [2] = m_wristServoController;
+
             // m_positioner.transform.position = m_endPoint.transform.position;
 
             // m_wristServoController.
@@ -140,7 +150,7 @@ namespace RoboticToolkit.Robotics.Limbs
             // m_positioner.transform.position = gaitPos;
             m_targetGaitPos = gaitPos;
            // m_positioner.transform.position = m_targetGaitPos;
-             //m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 3);
+             m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 3);
             m_currentGaitOffset = transform.InverseTransformPoint(m_positioner.transform.position);
             //var gatePos = m_positioner.transform.localPosition;
             //gatePos.y = height;

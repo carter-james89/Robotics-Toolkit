@@ -6,7 +6,7 @@ namespace RoboticToolKit.Robotics.Servos
 {
     public class DirectServoController : MonoBehaviour, IServoController
     {
-        private IServo m_servo;
+        private IServo[] m_servos;
         private void Awake()
         {
             GetServo();
@@ -14,20 +14,28 @@ namespace RoboticToolKit.Robotics.Servos
 
         public void Reset()
         {
-            m_servo.ResetServo(0);
+            foreach (var servo in m_servos)
+            {
+                servo.ResetServo(0);
+            }
+           
         }
         public IServo GetServo()
         {
-           if(m_servo == null)
+           if(m_servos == null)
             {
-                m_servo = GetComponent<IServo>();
+                m_servos = GetComponents<IServo>();
             }
-           return m_servo;  
+           return m_servos[0];  
         }
 
         public void SetAndRunServo(float desiredAngle)
         {
-            m_servo.SetServoPosition(desiredAngle);
+            
+            foreach (var servo in m_servos)
+            {
+                servo.SetServoPosition(desiredAngle);
+            }
         }
     }
 }

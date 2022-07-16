@@ -1,3 +1,4 @@
+using RoboticsToolkit.ArduinoUtilities;
 using RoboticToolkit.Robotics.Gaits;
 using RoboticToolkit.Robotics.Limbs;
 using RoboticToolKit.Robotics.Servos;
@@ -5,6 +6,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
+public class NovaDigitalTwinData
+{
+    //public int[] Motors;
+    // public int[] MotorPositions;
+
+    public int FL_CoaxMotorPosition;
+    public int FL_ShoulderMotorPosition;
+    public int FL_ElbowMotorPosition;
+}
 
 
 namespace RoboticsToolkit.Robotics
@@ -115,8 +126,18 @@ namespace RoboticsToolkit.Robotics
             }
             PositionGimble();
 
+            var digitalTwinData = new NovaDigitalTwinData();
+            //digitalTwinData.Motors = new int[12];
+            //digitalTwinData.MotorPositions = new int[12];
 
+            //digitalTwinData.Motors[0] = 0;
 
+            digitalTwinData.FL_CoaxMotorPosition = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            digitalTwinData.FL_ShoulderMotorPosition = -(int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            digitalTwinData.FL_ElbowMotorPosition = -(int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+
+           GetComponent<ArduinoConnection>().WriteToArduino(JsonUtility.ToJson(digitalTwinData));
+            //GetComponent<ArduinoConnection>().WriteToArduino("1");
         }
 
         public void Reset()
