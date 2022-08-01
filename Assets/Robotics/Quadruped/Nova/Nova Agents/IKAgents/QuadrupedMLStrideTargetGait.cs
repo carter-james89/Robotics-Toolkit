@@ -9,6 +9,10 @@ using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Gaits
 {
+    /// <summary>
+    /// Uses Machine learning to try and set the stride target for a limb. the limb then moves to that position
+    /// before where another Decision is requested
+    /// </summary>
     public class QuadrupedMLStrideTargetGait : Agent, IGait
     {
         [SerializeField]
@@ -47,7 +51,7 @@ namespace RoboticToolkit.Robotics.Gaits
         public override void OnEpisodeBegin()
         {
             Debug.Log("On Episode begin");
-            m_robot.Reset();
+            m_robot.ResetController();
         }
 
 

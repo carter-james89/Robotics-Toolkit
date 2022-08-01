@@ -100,6 +100,7 @@ public class IKCalculator : MonoBehaviour
         return (float)jointAngle;
     }
 
+   // public static Transform DebugTransform;
     #region Tools
     private static Vector3 CalculateTargetOffset(ArticulationBody servo, Vector3 targetPoint)
     {
@@ -108,6 +109,13 @@ public class IKCalculator : MonoBehaviour
         var globalPosition = servo.transform.parent.TransformPoint(servo.parentAnchorPosition);
         var globalRotation = servo.transform.parent.rotation * servo.parentAnchorRotation; //articulationBody.transform.TransformVector(articulationBody.anchorRotation.eulerAngles);
 
+        //if(DebugTransform == null)
+        //{
+        //    DebugTransform = new GameObject("Shoulder Debug").transform;
+            
+        //}
+        //DebugTransform.position = globalPosition;
+        //DebugTransform.rotation = globalRotation;
         // globalPosition = articulationBody.transform.TransformPoint(articulationBody.anchorPosition);
         // globalRotation = articulationBody.transform.rotation * articulationBody.anchorRotation; //articulationBody.transform.TransformVector(articulationBody.anchorRotation.eulerAngles);
         //m_transform.position = globalPosition;

@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Gaits
 {
+    /// <summary>
+    /// Gait which uses ML to set the position of the gate ever frame
+    /// </summary>
     public class QuadrupedMLContinuousGait : Agent, IGait
     {
         [SerializeField]
@@ -65,7 +68,7 @@ namespace RoboticToolkit.Robotics.Gaits
 
             if (m_firstComplition)
             {
-                m_robot.Reset();
+                m_robot.ResetController();
                 m_prevDist = Vector3.Distance(m_target.localPosition, transform.localPosition);
                 foreach (var limb in m_limbs)
                 {

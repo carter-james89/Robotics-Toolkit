@@ -9,8 +9,6 @@ namespace RoboticToolkit.Robotics.Gaits
     public interface IGaitEventListener
     {
         public void OnLimbAchievedTarget(Vector3 currentTarget);
-
-
     }
     public interface IGait
     {
@@ -23,18 +21,17 @@ namespace RoboticToolkit.Robotics.Gaits
         private Transform m_target;
         [SerializeField]
         private Transform m_targetOffset;
-
-        [SerializeField]
-        private Transform m_desiredTargetLocation;
-
-        private Transform m_pivotTransform;
-
-        private Vector3 m_targetPivotOffset;
-
-        private List<IGaitEventListener> m_listeners = new List<IGaitEventListener>();
-
         [SerializeField]
         private Transform m_limbEndPoint;
+        [SerializeField]
+        private Transform m_desiredTargetLocation;
+        [SerializeField]
+        private float m_rotationPercentage;
+
+        private Transform m_pivotTransform;
+        private Vector3 m_targetPivotOffset;
+        private List<IGaitEventListener> m_listeners = new List<IGaitEventListener>();
+        private float m_strideHeight = .103f;
 
         public enum MovementStyle
         {
@@ -51,6 +48,8 @@ namespace RoboticToolkit.Robotics.Gaits
        // private IGaitProvider m_gateProvider;
         public MovementStyle GetMovementStyle() => m_currentMovementStyle;
 
+        public Transform GetTargetOffset() => m_targetOffset;
+
         private void Awake()
         {
             m_currentDesiredPosition = Vector3.zero;
@@ -61,7 +60,7 @@ namespace RoboticToolkit.Robotics.Gaits
         {
             return m_target;
         }
-        public Transform GetTargetOffset() => m_targetOffset;
+
 
         public void SubscribeToGaitEvents(IGaitEventListener listener)
         {
@@ -72,7 +71,7 @@ namespace RoboticToolkit.Robotics.Gaits
             //Debug.Log(name + " target pos " + localPosition);
             m_target.localPosition = localPosition;
         }
-        private float m_strideHeight = .103f;
+
        
         public void RotateToPosition(Vector3 position, float speed, float height)
         {
@@ -99,8 +98,7 @@ namespace RoboticToolkit.Robotics.Gaits
             LimbAtTarget = false;
             m_desiredTargetLocation.localPosition = position;
         }
-        [SerializeField]
-        private float m_rotationPercentage;
+
         public void Run()
         {
             if (!GaitAtTarget)
@@ -128,7 +126,7 @@ namespace RoboticToolkit.Robotics.Gaits
                         m_target.position = m_pivotTransform.TransformPoint(newOffset);
                         break;
                     case MovementStyle.Translate:
-                        Debug.Log("run translation");
+                       // Debug.Log("run translation");
                         var dir = m_target.localPosition - m_currentDesiredPosition.normalized;
                         dir = m_currentDesiredPosition - m_target.localPosition;
                         // m_target.transform.Translate(dir * m_currentDesiredSpeed * Time.deltaTime);
@@ -144,7 +142,7 @@ namespace RoboticToolkit.Robotics.Gaits
         {
             if (Vector3.Distance(m_target.position, transform.TransformPoint(m_currentDesiredPosition)) < .01f)
             {
-                Debug.Log("AtTarget");
+                //Debug.Log("AtTarget");
                 GaitAtTarget = true;
                 m_target.localPosition = m_currentDesiredPosition;
                 foreach (var listener in m_listeners)
@@ -169,7 +167,5 @@ namespace RoboticToolkit.Robotics.Gaits
             return LimbAtTarget;
         }
     }
-
-
 }
 

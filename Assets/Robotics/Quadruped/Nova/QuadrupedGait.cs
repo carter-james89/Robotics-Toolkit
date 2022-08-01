@@ -25,6 +25,11 @@ namespace RoboticToolkit.Robotics.Gaits
         public void Initialize(IRoboticController robot)
         {
             m_limbs = robot.GetLimbs();
+
+            foreach (var limb in m_limbs)
+            {
+                //limb.GetPositioner().transform.localPosition -= new Vector3(0, .1f, 0);
+            }
         }
         private void SetNextGaitCycle()
         {

@@ -22,6 +22,11 @@ namespace RoboticsToolkit.ArduinoUtilities
             m_arduinoConnection.serialPortMessage += x => Debug.Log(x);
         }
 
+        private void Start()
+        {
+            
+        }
+
         private void OnDestroy()
         {
             if (m_arduinoConnection != null)

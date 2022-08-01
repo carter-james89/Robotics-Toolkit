@@ -10,7 +10,6 @@ namespace RoboticToolKit.Robotics.Servos
         public bool IsEnabled();
         public GameObject GetGameObject();
         public float GetCurrentAngle();
-
         public void SetServoSpeed(float speed);
         public void SetServoPosition(float position);
         public void SetServoPosition(float position,float speed);
@@ -27,6 +26,7 @@ namespace RoboticToolKit.Robotics.Servos
         public RotationDirection rotationState = RotationDirection.None;
         //public float speed = 300.0f;
 
+        private Transform m_anchorTransform;
         private ArticulationBody m_articulation;
 
         //private float m_startAngle;
@@ -41,6 +41,10 @@ namespace RoboticToolKit.Robotics.Servos
             var xDrive = m_articulation.xDrive;
           //  xDrive.forceLimit *= 2;
             m_articulation.xDrive = xDrive;
+
+            m_anchorTransform = new GameObject("Anchor").transform;
+            m_anchorTransform.SetParent(transform);
+
         }
         private void Start()
         {
@@ -104,6 +108,14 @@ namespace RoboticToolKit.Robotics.Servos
         private void Update()
         {
             //  Debug.Log(GetCurrentAngle());
+            var globalPosition = transform.parent.TransformPoint(m_articulation.parentAnchorPosition);
+            var globalRotation = transform.parent.rotation * m_articulation.parentAnchorRotation;
+
+            m_anchorTransform.position = globalPosition;
+            m_anchorTransform.rotation = globalRotation;
+
+           // m_anchorTransform.position = m_articulation.parentAnchorPosition;
+           // m_anchorTransform.rotation = m_articulation.parentAnchorRotation;
         }
 
         // MOVEMENT HELPERS

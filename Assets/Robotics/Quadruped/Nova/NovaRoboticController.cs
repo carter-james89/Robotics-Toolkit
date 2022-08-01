@@ -20,25 +20,7 @@ public class NovaDigitalTwinData
 
 namespace RoboticsToolkit.Robotics
 {
-    public interface IRoboticController
-    {
-        public struct RobotData
-        {
-            public Vector3 Velocity;
-            public Vector3 AngularVelocity;
-
-            public RobotData(Vector3 velocity, Vector3 angularVelocity)
-            {
-                Velocity = velocity;
-                AngularVelocity = angularVelocity;
-            }
-        }
-        public GameObject GetGameObject();
-        public IRoboticLimb[] GetLimbs();
-        public RobotData GetRobotData();
-
-        public void Reset();
-    }
+  
     public class NovaRoboticController : MonoBehaviour, IRoboticController
     {
         [SerializeField]
@@ -83,10 +65,23 @@ namespace RoboticsToolkit.Robotics
             m_startHeight = transform.localPosition.y;
             m_gait = GetComponent<IGait>();
             m_articulationBody = GetComponent<ArticulationBody>();
-            m_limbs.Add(m_flLimb);
-            m_limbs.Add(m_frLimb);
-            m_limbs.Add(m_brLimb);
-            m_limbs.Add(m_blLimb);
+
+            if (m_flLimb)
+            {
+                m_limbs.Add(m_flLimb);
+            }        
+            if (m_frLimb)
+            {
+                m_limbs.Add(m_frLimb);
+            }
+            if (m_brLimb)
+            {
+                m_limbs.Add(m_brLimb);
+            }
+            if (m_blLimb)
+            {
+                m_limbs.Add(m_blLimb);
+            }
 
 
             // m_gaits.transform.position = transform.position;
@@ -127,11 +122,7 @@ namespace RoboticsToolkit.Robotics
             PositionGimble();
 
             var digitalTwinData = new NovaDigitalTwinData();
-            //digitalTwinData.Motors = new int[12];
-            //digitalTwinData.MotorPositions = new int[12];
-
-            //digitalTwinData.Motors[0] = 0;
-
+       
             digitalTwinData.FL_CoaxMotorPosition = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
             digitalTwinData.FL_ShoulderMotorPosition = -(int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
             digitalTwinData.FL_ElbowMotorPosition = -(int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
@@ -140,13 +131,13 @@ namespace RoboticsToolkit.Robotics
             //GetComponent<ArduinoConnection>().WriteToArduino("1");
         }
 
-        public void Reset()
+        public void ResetController()
         {
             m_articulationBody.velocity = Vector3.zero;
             m_articulationBody.angularVelocity = Vector3.zero;
             foreach (var limb in m_limbs)
             {
-                limb.Reset();
+                limb.ResetLimb();
 
             }
             m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
