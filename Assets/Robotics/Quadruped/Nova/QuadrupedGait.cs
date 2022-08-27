@@ -120,7 +120,20 @@ namespace RoboticToolkit.Robotics.Gaits
 
             foreach (var limb in m_limbs)
             {
-                limb.RunLimb();
+                //if (limb.GetPositioner().GetMovementStyle() != LimbPositioner.MovementStyle.Rotate)
+                //{
+                //    // heightOffset = m_baseTarget.position.y - m_shoulderServoController.GetServo().GetGameObject().transform.position.y;
+                //    // heightOffset = transform.InverseTransformPoint(m_baseTarget.position).y;
+
+                //    var heightOffset = limb.GetGameObject().transform.position.y - limb.GetTargetBasePosition().position.y;
+
+                //    limb.GetPositioner().transform.localPosition PositionGaitHeight(-heightOffset);
+                //}
+                //else
+                //{
+                //    limb.PositionGaitHeight(0);
+                //}
+                limb.RunLimb(true);
             }
         }
     }

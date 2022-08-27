@@ -11,8 +11,9 @@ namespace RoboticToolkit.Robotics.Limbs
         public GameObject GetGameObject();
         public LimbPositioner GetPositioner();
         public Transform GetEndPoint();
+        public Transform GetTargetBasePosition();
         public IServoController[] GetServoControllers();
-        public void RunLimb();
+        public void RunLimb(bool adjustHeight = false);
         public void ResetLimb();
 
     }
@@ -64,13 +65,15 @@ namespace RoboticToolkit.Robotics.Limbs
 
         private Vector3 m_positionerOffset;
 
+        public Transform GetTargetBasePosition() => m_baseTarget;
+
 
         private void Awake()
         {
             m_shoulderServoController = m_shoulderServoObject.GetComponent<IServoController>();
             m_elbowServoController = m_elbowServoObject.GetComponent<IServoController>();
             m_wristServoController = m_wristServoObject.GetComponent<IServoController>();
-            m_positionerOffset = transform.InverseTransformPoint(m_positioner.GetTarget().position);
+            m_positionerOffset = transform.InverseTransformPoint(m_positioner.transform.position);
 
             m_servoControllers = new IServoController[3];
             m_servoControllers[0] = m_shoulderServoController;
@@ -86,19 +89,25 @@ namespace RoboticToolkit.Robotics.Limbs
             m_desiredLimbHeight = desiredHeight;
         }
 
-        public void RunLimb()
+        public void RunLimb(bool adjustHeight = false)
         {
-            if (m_positioner.GetMovementStyle() != LimbPositioner.MovementStyle.Rotate)
+            if (adjustHeight)
             {
-                // heightOffset = m_baseTarget.position.y - m_shoulderServoController.GetServo().GetGameObject().transform.position.y;
-                heightOffset = transform.InverseTransformPoint(m_baseTarget.position).y;
+                if (m_positioner.GetMovementStyle() != LimbPositioner.MovementStyle.Rotate)
+                {
+                    // heightOffset = m_baseTarget.position.y - m_shoulderServoController.GetServo().GetGameObject().transform.position.y;
+                    // heightOffset = transform.InverseTransformPoint(m_baseTarget.position).y;
 
-                PositionGaitHeight(heightOffset);
+                    heightOffset = transform.position.y - m_baseTarget.position.y;
+
+                    PositionGaitHeight(-heightOffset);
+                }
+                else
+                {
+                    PositionGaitHeight(0);
+                }
             }
-            else
-            {
-                PositionGaitHeight(heightOffset);
-            }
+        
 
             //  m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 5);
 
@@ -120,21 +129,18 @@ namespace RoboticToolkit.Robotics.Limbs
       
         public void PositionGaitHeight(float height)
         {
-            // var tempGlobalPos = m_positioner.transform.position;
-            // tempGlobalPos.y = height;
 
-            // m_currentGaitLocalOffset = new Vector3(m_positionerOffset.x, m_positionerOffset.y - height, m_positionerOffset.z);
-            //var newGaitPos = transform.InverseTransformPoint(m_positioner.transform.position);
             var gaitPos = transform.TransformPoint(new Vector3(m_positionerOffset.x, 0, m_positionerOffset.z));
             gaitPos.y = -height;
-            // m_positioner.transform.position = gaitPos;
+       
             m_targetGaitPos = gaitPos;
-            // m_positioner.transform.position = m_targetGaitPos;
-            m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 3);
-            m_currentGaitOffset = transform.InverseTransformPoint(m_positioner.transform.position);
-            //var gatePos = m_positioner.transform.localPosition;
-            //gatePos.y = height;
-            //m_positioner.transform.localPosition = gatePos;
+
+            m_targetGaitPos = m_positioner.transform.localPosition - new Vector3(0,height,0);
+            m_positioner.transform.localPosition = Vector3.Lerp(m_positioner.transform.localPosition, m_targetGaitPos, Time.deltaTime * 2);
+
+             //m_targetGaitPos = m_baseTarget.position - new Vector3(0, .1f, 0);
+
+            // m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 4);
         }
 
         public void ResetLimb()

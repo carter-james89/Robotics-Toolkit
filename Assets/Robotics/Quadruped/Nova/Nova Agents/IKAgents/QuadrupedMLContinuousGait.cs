@@ -131,7 +131,7 @@ namespace RoboticToolkit.Robotics.Gaits
 
             foreach (var limb in m_limbs)
             {
-                limb.RunLimb();
+                limb.RunLimb(true);
             }
             CalculateRewards();
         }

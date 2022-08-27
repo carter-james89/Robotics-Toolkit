@@ -55,6 +55,12 @@ namespace RoboticsToolkit.Robotics
         private IGait m_gait;
         private float m_startHeight;
 
+        [SerializeField]
+        private float m_walkHeight = .2f;
+
+        [SerializeField]
+        private bool m_simulate = false;
+
         public IRoboticController.RobotData GetRobotData()
         {
             return new IRoboticController.RobotData(m_articulationBody.velocity, m_articulationBody.angularVelocity);
@@ -92,6 +98,7 @@ namespace RoboticsToolkit.Robotics
             // m_gaits.transform.position = transform.position;
             m_gaits.transform.SetParent(transform.parent);
             m_baseTargets.transform.SetParent(transform.parent);
+           // m_baseTargets.transform.localPosition = Vector3.zero;
             foreach (var limb in m_limbs)
             {
                 limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
@@ -112,6 +119,26 @@ namespace RoboticsToolkit.Robotics
                 //    (limb.WristServoController as PIDServoController).ResetPid(m_pidD, m_pidI, m_pidD, m_pidMax, m_pidMin);
                 //}
 
+             
+            }
+
+            if (m_simulate)
+            {
+                m_baseTargets.transform.position = transform.position + new Vector3(0, m_walkHeight, 0);
+                m_ground.gameObject.SetActive(true);
+                m_articulationBody.immovable = false;
+            }
+            else
+            {
+                m_ground.gameObject.SetActive(false);
+                m_articulationBody.immovable = true;
+                foreach (var limb in m_limbs)
+                {
+                    var tempPos = limb.GetPositioner().transform.position;
+                    tempPos.y = transform.position.y - m_walkHeight;
+                    limb.GetPositioner().transform.position = tempPos;
+                }
+              
             }
 
             m_gait.Initialize(this);
@@ -134,7 +161,12 @@ namespace RoboticsToolkit.Robotics
         private void FixedUpdate()
         {
             PositionGimble();
-            m_gait.RunGait();
+
+            if(m_gait != null)
+            {
+                m_gait.RunGait();
+            }
+         
 
             if (m_arduinoConnection && m_arduinoConnection.enabled)
             {
@@ -143,6 +175,10 @@ namespace RoboticsToolkit.Robotics
                 digitalTwinData.FL_CoaxMotorPosition = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
                 digitalTwinData.FL_ShoulderMotorPosition = -(int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
                 digitalTwinData.FL_ElbowMotorPosition = (int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+
+                digitalTwinData.FR_CoaxMotorPosition = (int)m_frLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+                digitalTwinData.FR_ShoulderMotorPosition = -(int)m_frLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+                digitalTwinData.FR_ElbowMotorPosition = (int)m_frLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
 
                 m_arduinoConnection.WriteToArduino(JsonUtility.ToJson(digitalTwinData));
             }

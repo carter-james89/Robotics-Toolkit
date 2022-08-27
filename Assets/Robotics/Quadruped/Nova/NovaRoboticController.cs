@@ -15,6 +15,10 @@ public class NovaDigitalTwinData
     public int FL_CoaxMotorPosition;
     public int FL_ShoulderMotorPosition;
     public int FL_ElbowMotorPosition;
+
+    public int FR_CoaxMotorPosition;
+    public int FR_ShoulderMotorPosition;
+    public int FR_ElbowMotorPosition;
 }
 
 
