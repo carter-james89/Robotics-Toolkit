@@ -100,12 +100,9 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
         Debug.Log("Initialize Local Fligth Controller");
         _quadToControl = quadToControl;
         _motorCalculator = GetComponent<IMotorThrustCalculator>();
-        //new PidController(.14f, .03f, 0.04f, .8f, .1f);
         _rigidBody = quadToControl.GetGameObject().GetComponent<Rigidbody>();
         _rigidBody.useGravity = false;
-
         _groundStatationData = new GroundStationData();
-
         _onFlightStatusChanged = onFlightStatusChanged;
         _isInitialized = true;
     }

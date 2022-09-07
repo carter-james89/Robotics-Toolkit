@@ -50,11 +50,9 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
         boxCollider.size = quadToControl.GetGameObject().GetComponent<BoxCollider>().size;
         boxCollider.center = quadToControl.GetGameObject().GetComponent<BoxCollider>().center;
 
-
         _onFlightStatusChanged = onFlightStatusChanged;
 
         Time.timeScale = timeSpeed;
-
         _isInitialized = true;
     }
 
@@ -85,7 +83,6 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
 
         // data.height = hit.distance;
         data.height = data.posY;
-
         data.VelocityVector = rigidBody.angularVelocity;
 
         return data;
@@ -171,7 +168,7 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
     public void Takeoff()
     {
        // Debug.Log("Simulator TakeOff");
-        //  rigidBody.transform.localPosition += new Vector3(0, .8f, 0);
+          rigidBody.transform.localPosition += new Vector3(0, .8f, 0);
         //.localPosition = rigidBody.transform.localPosition;
         rigidBody.transform.position = _quadToControl.GetGameObject().transform.position;
         rigidBody.useGravity = true;

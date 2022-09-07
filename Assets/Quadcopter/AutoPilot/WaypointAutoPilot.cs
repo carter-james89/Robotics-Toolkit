@@ -154,7 +154,6 @@ namespace  QuadcopterUtilities
                         var distTraveled = _originalDistToTarget - currentDist;
                         var fractTraveled = distTraveled / _originalDistToTarget;
                         transform.position = Vector3.Lerp(_originalQuadPos, currentWaypoint.transform.position, fractTraveled + (Time.deltaTime * _linearSpeed));
-                        Debug.Log("run waypoint autopilot");
                         break;
                     case TranslationStyle.NonLinear:
                         transform.position = Vector3.Lerp(transform.position, currentWaypoint.transform.position, Time.deltaTime * _nonLinearSpeed);

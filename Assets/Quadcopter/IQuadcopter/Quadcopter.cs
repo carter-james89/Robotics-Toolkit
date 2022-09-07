@@ -42,6 +42,8 @@ namespace QuadcopterUtilities
         [SerializeField]
         private float yawInput;
 
+        private bool m_initialized = false;
+
         [SerializeField]
         private float assumedHeightOffset = 0;
 
@@ -93,7 +95,7 @@ namespace QuadcopterUtilities
         {
             if (_selfInitialize)
             {
-              //  Initialize(GetComponent<IFlightController>(), GetComponent<IInputs>().GetInputValues);
+                Initialize(GetComponent<IFlightController>(), GetComponent<IInputs>().GetInputValues);
             }
         }
 
@@ -102,7 +104,7 @@ namespace QuadcopterUtilities
         /// </summary>
         public virtual void Takeoff()
         {
-           // Debug.Log("Takeoff");
+            Debug.Log("Takeoff");
             _flightController.Takeoff();
 
             //Update();
@@ -131,8 +133,6 @@ namespace QuadcopterUtilities
             return _flightController.IsSimulator();
         }
 
-
-
         /// <summary>
         /// Initialize the autopilot, and provide the depenencies it needs. 
         /// </summary>
@@ -157,6 +157,8 @@ namespace QuadcopterUtilities
             {
                 _trailVisualizer.Initialize(this);
             }
+
+            m_initialized = true;
         }
 
         private void OnFlightStatusChanged(IQuadcopter.FlightStatus newStatus)
@@ -255,7 +257,7 @@ namespace QuadcopterUtilities
 
         public void Update()
         {
-            if (!IsSimulator())
+            if (m_initialized && !IsSimulator())
             {
                 RunQuadcopterUpdate();
             }
@@ -263,7 +265,7 @@ namespace QuadcopterUtilities
 
         public void FixedUpdate()
         {
-            if (IsSimulator())
+            if (m_initialized && IsSimulator())
             {
                 RunQuadcopterUpdate();
             }
@@ -278,13 +280,11 @@ namespace QuadcopterUtilities
                     var quadData = _flightController.GetSensorData();
                     SetVirtualPosition(quadData);
                     ProcessInputs();
-                    //if (_flightStatus != IQuadcopter.FlightStatus.PreLaunch)
                      _flightController.Run(_flightStatus, currentInputs);
                     OnTransformUpdated();
                 }
                 else
                 {
-
                     // Debug.Log("not ready to fly");
                 }
             }
