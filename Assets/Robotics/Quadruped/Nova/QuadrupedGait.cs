@@ -1,7 +1,5 @@
 using RoboticsToolkit.Robotics;
 using RoboticToolkit.Robotics.Limbs;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Gaits
@@ -20,7 +18,13 @@ namespace RoboticToolkit.Robotics.Gaits
 
         private IRoboticLimb[] m_limbs;
 
-        public bool Walking { get; private set; } = false;
+        public enum StrideType
+        {
+            NONE,
+            STATIONARYSTEP,
+            WALKING
+        }
+        private StrideType m_currentStride = StrideType.NONE;
 
         public void Initialize(IRoboticController robot)
         {
@@ -84,7 +88,7 @@ namespace RoboticToolkit.Robotics.Gaits
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                Walking = true;
+                m_currentStride = StrideType.WALKING;
                 SetNextGaitCycle();
                 // m_gaitProvider.SetGaitTargets()
                 //  m_stridePosition = 1;
@@ -98,7 +102,7 @@ namespace RoboticToolkit.Robotics.Gaits
         }
         public void RunGait()
         {
-            if (Walking)
+            if (m_currentStride != StrideType.NONE)
             {
                 foreach (var limb in m_limbs)
                 {

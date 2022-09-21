@@ -151,7 +151,6 @@ public class PiCopterFlightController : MonoBehaviour, IFlightController
             _groundStatationData.roll = desiredInputs.roll;
             _groundStatationData.throttle = desiredInputs.throttle;
 
-
             var motorValues = _motorThrustCalculator.Run(new Vector3(_quadcopterData.posX, _quadcopterData.posY, _quadcopterData.posZ), new Vector3(_quadcopterData.gyroPitch, _quadcopterData.gyroYaw, _quadcopterData.gyroRoll), desiredInputs);
 
             _groundStatationData.motorBRSpeed = Math.Round(motorValues.motorBR);

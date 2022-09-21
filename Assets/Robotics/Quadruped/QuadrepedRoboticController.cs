@@ -117,9 +117,7 @@ namespace RoboticsToolkit.Robotics
                 //    (limb.ShoulderServoController as PIDServoController).ResetPid(m_pidD, m_pidI, m_pidD, m_pidMax, m_pidMin);
                 //    (limb.ElbowServoController as PIDServoController).ResetPid(m_pidD, m_pidI, m_pidD, m_pidMax, m_pidMin);
                 //    (limb.WristServoController as PIDServoController).ResetPid(m_pidD, m_pidI, m_pidD, m_pidMax, m_pidMin);
-                //}
-
-             
+                //}           
             }
 
             if (m_simulate)
@@ -137,10 +135,8 @@ namespace RoboticsToolkit.Robotics
                     var tempPos = limb.GetPositioner().transform.position;
                     tempPos.y = transform.position.y - m_walkHeight;
                     limb.GetPositioner().transform.position = tempPos;
-                }
-              
+                }         
             }
-
             m_gait.Initialize(this);
         }
 
@@ -154,10 +150,6 @@ namespace RoboticsToolkit.Robotics
            // GetComponent<ArduinoConnection>().WriteToArduino("1");
         }
 
-
-
-
-
         private void FixedUpdate()
         {
             PositionGimble();
@@ -165,22 +157,31 @@ namespace RoboticsToolkit.Robotics
             if(m_gait != null)
             {
                 m_gait.RunGait();
-            }
-         
+            }        
 
             if (m_arduinoConnection && m_arduinoConnection.enabled)
             {
                 var digitalTwinData = new NovaDigitalTwinData();
 
-                digitalTwinData.FL_CoaxMotorPosition = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-                digitalTwinData.FL_ShoulderMotorPosition = -(int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-                digitalTwinData.FL_ElbowMotorPosition = (int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+                digitalTwinData.FL_0 = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+                digitalTwinData.FL_1 = (int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+                digitalTwinData.FL_2 = (int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
 
-                digitalTwinData.FR_CoaxMotorPosition = (int)m_frLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-                digitalTwinData.FR_ShoulderMotorPosition = -(int)m_frLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-                digitalTwinData.FR_ElbowMotorPosition = (int)m_frLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+                digitalTwinData.FR_0 = (int)m_frLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+                digitalTwinData.FR_1 = (int)m_frLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+                digitalTwinData.FR_2 = (int)m_frLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+
+                digitalTwinData.BL_0 = (int)m_blLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+                digitalTwinData.BL_1 = (int)m_blLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+                digitalTwinData.BL_2 = (int)m_blLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+
+                digitalTwinData.BR_0 = (int)m_brLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+                digitalTwinData.BR_1 = (int)m_brLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+                digitalTwinData.BR_2 = (int)m_brLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
 
                 m_arduinoConnection.WriteToArduino(JsonUtility.ToJson(digitalTwinData));
+
+             // Debug.Log("bl2 : " +digitalTwinData.BL_2);
             }
         }
 

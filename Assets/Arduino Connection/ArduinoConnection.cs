@@ -19,7 +19,7 @@ namespace RoboticsToolkit.ArduinoUtilities
         {
             m_arduinoConnection = new SerialPortConnection(m_portName, m_baudeRate);
 
-            m_arduinoConnection.serialPortMessage += x => Debug.Log(x);
+           // m_arduinoConnection.serialPortMessage += x => Debug.Log(x);
         }
 
         private void Start()
@@ -47,7 +47,7 @@ namespace RoboticsToolkit.ArduinoUtilities
             // {
            // string responce = null;
             var responce = m_arduinoConnection.ReadLine();
-            Debug.Log("responce " + responce);
+          //  Debug.Log("responce " + responce);
             return responce;
 
             //  }

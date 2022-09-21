@@ -12,13 +12,21 @@ public class NovaDigitalTwinData
     //public int[] Motors;
     // public int[] MotorPositions;
 
-    public int FL_CoaxMotorPosition;
-    public int FL_ShoulderMotorPosition;
-    public int FL_ElbowMotorPosition;
+    public int FL_0;
+    public int FL_1;
+    public int FL_2;
 
-    public int FR_CoaxMotorPosition;
-    public int FR_ShoulderMotorPosition;
-    public int FR_ElbowMotorPosition;
+    public int FR_0;
+    public int FR_1;
+    public int FR_2;
+
+    public int BL_0;
+    public int BL_1;
+    public int BL_2;
+
+    public int BR_0;
+    public int BR_1;
+    public int BR_2;
 }
 
 
@@ -127,9 +135,9 @@ namespace RoboticsToolkit.Robotics
 
             var digitalTwinData = new NovaDigitalTwinData();
        
-            digitalTwinData.FL_CoaxMotorPosition = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-            digitalTwinData.FL_ShoulderMotorPosition = -(int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-            digitalTwinData.FL_ElbowMotorPosition = -(int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+            digitalTwinData.FL_0 = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            digitalTwinData.FL_1 = -(int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            digitalTwinData.FL_2 = -(int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
 
            GetComponent<ArduinoConnection>().WriteToArduino(JsonUtility.ToJson(digitalTwinData));
             //GetComponent<ArduinoConnection>().WriteToArduino("1");
