@@ -72,7 +72,7 @@ namespace RoboticToolkit.Robotics.Gaits
                 m_prevDist = Vector3.Distance(m_target.localPosition, transform.localPosition);
                 foreach (var limb in m_limbs)
                 {
-                    limb.GetPositioner().SetTargetPosition(Vector3.zero);
+                    limb.GetGameObject().GetComponentInChildren<LimbPositioner>().SetTargetPosition(Vector3.zero);
                 }
                 if (m_pauseAtReset)
                 {
@@ -119,10 +119,10 @@ namespace RoboticToolkit.Robotics.Gaits
         private Vector3 m_minBounds = -Vector3.one;
         public override void OnActionReceived(ActionBuffers actions)
         {
-            var flLimb = m_limbs[0].GetPositioner();
-            var frLimb = m_limbs[1].GetPositioner();
-            var brLimb = m_limbs[2].GetPositioner();
-            var blLimb = m_limbs[3].GetPositioner();
+            var flLimb = m_limbs[0].GetGameObject().GetComponentInChildren<LimbPositioner>();
+            var frLimb = m_limbs[1].GetGameObject().GetComponentInChildren<LimbPositioner>();
+            var brLimb = m_limbs[2].GetGameObject().GetComponentInChildren<LimbPositioner>();
+            var blLimb = m_limbs[3].GetGameObject().GetComponentInChildren<LimbPositioner>();
 
             SetPosition(flLimb, actions.ContinuousActions[0], actions.ContinuousActions[1], actions.ContinuousActions[2]);
             SetPosition(frLimb, actions.ContinuousActions[3], actions.ContinuousActions[4], actions.ContinuousActions[5]);

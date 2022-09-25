@@ -101,7 +101,7 @@ namespace RoboticsToolkit.Robotics
            // m_baseTargets.transform.localPosition = Vector3.zero;
             foreach (var limb in m_limbs)
             {
-                limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
+               // limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
                 //limb.GetGait().transform.SetParent(m_gaits);
                 //var tempPos = limb.GetGait().transform.localPosition;
                 //tempPos.y = 0;
@@ -132,12 +132,16 @@ namespace RoboticsToolkit.Robotics
                 m_articulationBody.immovable = true;
                 foreach (var limb in m_limbs)
                 {
-                    var tempPos = limb.GetPositioner().transform.position;
+                    var tempPos = limb.GetIKTargetPos();
                     tempPos.y = transform.position.y - m_walkHeight;
-                    limb.GetPositioner().transform.position = tempPos;
+                    limb.SetIKTargetPos(tempPos);
                 }         
             }
-            m_gait.Initialize(this);
+            if (m_gait !=null)
+            {
+                m_gait.Initialize(this);
+            }
+         
         }
 
         void Update()
@@ -157,7 +161,11 @@ namespace RoboticsToolkit.Robotics
             if(m_gait != null)
             {
                 m_gait.RunGait();
-            }        
+            }
+            foreach (var limb in m_limbs)
+            {
+                limb.RunLimb(true);
+            }
 
             if (m_arduinoConnection && m_arduinoConnection.enabled)
             {

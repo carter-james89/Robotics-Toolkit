@@ -101,7 +101,7 @@ namespace RoboticsToolkit.Robotics
             m_baseTargets.transform.SetParent(transform.parent);
             foreach (var limb in m_limbs)
             {
-                limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
+                //limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
                 //limb.GetGait().transform.SetParent(m_gaits);
                 //var tempPos = limb.GetGait().transform.localPosition;
                 //tempPos.y = 0;
