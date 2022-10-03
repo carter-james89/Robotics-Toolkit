@@ -19,6 +19,8 @@ namespace RoboticToolkit.Robotics.Limbs
         public void SetIKTargetPos(Vector3 globalPos);
         public Vector3 GetIKTargetPos();
 
+        public bool LimbAtTarget();
+
     }
     public class ThreeJointRoboticLimb : MonoBehaviour, IRoboticLimb
     {    
@@ -85,6 +87,7 @@ namespace RoboticToolkit.Robotics.Limbs
             m_elbowServoController = m_elbowServoObject.GetComponent<IServoController>();
             m_wristServoController = m_wristServoObject.GetComponent<IServoController>();
             m_positionerOffset = transform.InverseTransformPoint(m_heightAdjustment.position);
+            m_positionerOffset.y = -.1f;
 
             m_servoControllers = new IServoController[3];
             m_servoControllers[0] = m_shoulderServoController;
@@ -103,13 +106,24 @@ namespace RoboticToolkit.Robotics.Limbs
         {
             m_desiredLimbHeight = desiredHeight;
         }
-        public void SetIKTargetPos(Vector3 globalPos)
+        public void SetIKTargetPos(Vector3 localPos)
         {
-            m_ikTarget.position = globalPos;
+            m_ikTarget.localPosition = localPos;
         }
         public Vector3 GetIKTargetPos()
         {
-            return m_ikTarget.position;
+            return m_ikTarget.localPosition;
+        }
+        public bool LimbAtTarget()
+        {
+            if(Vector3.Distance(m_endPoint.position,m_ikTarget.position) < .015f)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         public void RunLimb(bool adjustHeight = false)
         {
@@ -133,7 +147,7 @@ namespace RoboticToolkit.Robotics.Limbs
             {
                 PositionGaitHeight(0);
             }
-
+            //return;
             //  m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 5);
 
             var tempPos = transform.InverseTransformPoint(m_ikTarget.position);
@@ -157,18 +171,13 @@ namespace RoboticToolkit.Robotics.Limbs
       
         public void PositionGaitHeight(float height)
         {
-
             var gaitPos = transform.TransformPoint(new Vector3(m_positionerOffset.x, 0, m_positionerOffset.z));
             gaitPos.y = -height;
-       
-            m_targetGaitPos = gaitPos;
+           // gaitPos.y = transform.position.y - .2f;
 
-            m_targetGaitPos = m_heightAdjustment.localPosition - new Vector3(0,height,0);
-            // m_positioner.transform.localPosition = Vector3.Lerp(m_positioner.transform.localPosition, m_targetGaitPos, Time.deltaTime * 2);
+           m_targetGaitPos = transform.InverseTransformPoint( gaitPos);
             m_heightAdjustment.localPosition = Vector3.Lerp(m_heightAdjustment.localPosition, m_targetGaitPos, Time.deltaTime * 2);
-            //m_targetGaitPos = m_baseTarget.position - new Vector3(0, .1f, 0);
 
-            // m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 4);
         }
 
         public void ResetLimb()

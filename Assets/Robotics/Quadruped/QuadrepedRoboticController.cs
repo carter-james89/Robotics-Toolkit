@@ -133,7 +133,7 @@ namespace RoboticsToolkit.Robotics
                 foreach (var limb in m_limbs)
                 {
                     var tempPos = limb.GetIKTargetPos();
-                    tempPos.y = transform.position.y - m_walkHeight;
+                    tempPos.y  -= m_walkHeight;
                     limb.SetIKTargetPos(tempPos);
                 }         
             }
