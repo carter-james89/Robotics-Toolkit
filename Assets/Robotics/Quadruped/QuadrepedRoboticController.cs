@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using ProcessCommunicationToolkit_Csharp;
 using RoboticsToolkit.ArduinoUtilities;
 using RoboticToolkit.Robotics.Gaits;
 using RoboticToolkit.Robotics.Limbs;
@@ -6,6 +8,7 @@ using UnityEngine;
 
 namespace RoboticsToolkit.Robotics
 {
+
     public interface IRoboticController
     {
         public struct RobotData
@@ -25,6 +28,7 @@ namespace RoboticsToolkit.Robotics
 
         public void ResetController();
     }
+
     public class QuadrepedRoboticController : MonoBehaviour, IRoboticController
     {
         [SerializeField]
@@ -36,10 +40,7 @@ namespace RoboticsToolkit.Robotics
         [SerializeField]
         private ThreeJointRoboticLimb m_blLimb;
 
-        [SerializeField]
-        private Transform m_ground;
-
-        private ArduinoConnection m_arduinoConnection;
+       
 
         public GameObject GetGameObject() => gameObject;
 
@@ -49,6 +50,8 @@ namespace RoboticsToolkit.Robotics
         private Transform m_baseTargets;
 
         private ArticulationBody m_articulationBody;
+
+        private IQuadrupedDataTransfer m_quadrupedDataTransfer;
 
         private bool m_ready = true;
 
@@ -76,7 +79,9 @@ namespace RoboticsToolkit.Robotics
             m_gait = GetComponent<IGait>();
             m_articulationBody = GetComponent<ArticulationBody>();
 
-            m_arduinoConnection = GetComponent<ArduinoConnection>();
+            m_quadrupedDataTransfer = GetComponent<IQuadrupedDataTransfer>();
+            m_quadrupedDataTransfer.Initialize(this);
+
 
             if (m_flLimb)
             {
@@ -98,10 +103,10 @@ namespace RoboticsToolkit.Robotics
             // m_gaits.transform.position = transform.position;
             m_gaits.transform.SetParent(transform.parent);
             m_baseTargets.transform.SetParent(transform.parent);
-           // m_baseTargets.transform.localPosition = Vector3.zero;
+            // m_baseTargets.transform.localPosition = Vector3.zero;
             foreach (var limb in m_limbs)
             {
-               // limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
+                // limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
                 //limb.GetGait().transform.SetParent(m_gaits);
                 //var tempPos = limb.GetGait().transform.localPosition;
                 //tempPos.y = 0;
@@ -123,74 +128,114 @@ namespace RoboticsToolkit.Robotics
             if (m_simulate)
             {
                 m_baseTargets.transform.position = transform.position + new Vector3(0, m_walkHeight, 0);
-                m_ground.gameObject.SetActive(true);
+             //   m_ground.gameObject.SetActive(true);
                 m_articulationBody.immovable = false;
             }
             else
             {
-                m_ground.gameObject.SetActive(false);
+               // m_ground.gameObject.SetActive(false);
                 m_articulationBody.immovable = true;
                 foreach (var limb in m_limbs)
                 {
                     var tempPos = limb.GetIKTargetPos();
-                    tempPos.y  -= m_walkHeight;
+                    tempPos.y -= m_walkHeight;
                     limb.SetIKTargetPos(tempPos);
-                }         
+                }
             }
-            if (m_gait !=null)
+            if (m_gait != null)
             {
                 m_gait.Initialize(this);
             }
-         
+            //if (m_arduinoConnection && m_arduinoConnection.enabled)
+            //{
+            //    var handShakeDataMessage = m_arduinoConnection.ReadFromArduino();
+            //    Debug.Log(handShakeDataMessage);    
+            //    var handShakeData = JsonUtility.FromJson<QuadrupedSensorData>(handShakeDataMessage);
+            //    Debug.Log(handShakeData.H);
+            //}
+        }
+
+        private bool UpdateSensorData()
+        {
+            QuadrupedSensorData sensorData = m_quadrupedDataTransfer.GetSensorData();
+            if(sensorData == null)
+            {
+                Debug.Log("Failed to get sensor data");
+                return false;
+            }
+            return true;
         }
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.DownArrow))
+            //if (!Input.GetKeyDown(KeyCode.DownArrow))
+            //{
+            //    return;
+            //}
+            bool success = UpdateSensorData();
+            if (!success)
             {
-                m_articulationBody.immovable = false;
+                return;
             }
-            PositionGimble();      
-           // GetComponent<ArduinoConnection>().WriteToArduino("1");
+            PositionGimble();
+           
+            if (m_gait != null)
+            {
+               // m_gait.RunGait();
+            }
+            foreach (var limb in m_limbs)
+            {
+               limb.RunLimb(true);
+            }
+
+            WriteArduinoData();
         }
 
         private void FixedUpdate()
         {
-            PositionGimble();
 
-            if(m_gait != null)
-            {
-                m_gait.RunGait();
-            }
-            foreach (var limb in m_limbs)
-            {
-                limb.RunLimb(true);
-            }
+            //PositionGimble();
 
-            if (m_arduinoConnection && m_arduinoConnection.enabled)
-            {
-                var digitalTwinData = new NovaDigitalTwinData();
+            //if (m_gait != null)
+            //{
+            //    m_gait.RunGait();
+            //}
+            //foreach (var limb in m_limbs)
+            //{
+            //    limb.RunLimb(true);
+            //}
 
-                digitalTwinData.FL_0 = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-                digitalTwinData.FL_1 = (int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-                digitalTwinData.FL_2 = (int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
 
-                digitalTwinData.FR_0 = (int)m_frLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-                digitalTwinData.FR_1 = (int)m_frLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-                digitalTwinData.FR_2 = (int)m_frLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+            //WriteArduinoData();
 
-                digitalTwinData.BL_0 = (int)m_blLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-                digitalTwinData.BL_1 = (int)m_blLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-                digitalTwinData.BL_2 = (int)m_blLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+        }
 
-                digitalTwinData.BR_0 = (int)m_brLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-                digitalTwinData.BR_1 = (int)m_brLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-                digitalTwinData.BR_2 = (int)m_brLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+        private void WriteArduinoData()
+        {
 
-                m_arduinoConnection.WriteToArduino(JsonUtility.ToJson(digitalTwinData));
+            var digitalTwinData = new QuadrupedGroundStationData();
 
-             // Debug.Log("bl2 : " +digitalTwinData.BL_2);
-            }
+            //digitalTwinData.FL_0 = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            //digitalTwinData.FL_1 = (int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            //digitalTwinData.FL_2 = (int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+
+            //digitalTwinData.FR_0 = (int)m_frLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            //digitalTwinData.FR_1 = (int)m_frLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            //digitalTwinData.FR_2 = (int)m_frLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+
+            //digitalTwinData.BL_0 = (int)m_blLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            //digitalTwinData.BL_1 = (int)m_blLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            //digitalTwinData.BL_2 = (int)m_blLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+
+            //digitalTwinData.BR_0 = (int)m_brLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            //digitalTwinData.BR_1 = (int)m_brLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            //digitalTwinData.BR_2 = (int)m_brLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+
+            //      m_arduinoConnection.WriteToArduino(JsonUtility.ToJson(digitalTwinData));
+            m_quadrupedDataTransfer.SendCommands(digitalTwinData);
+
+            // Debug.Log("bl2 : " +digitalTwinData.BL_2);
+
         }
 
         private void PositionGimble()
@@ -225,7 +270,7 @@ namespace RoboticsToolkit.Robotics
             {
                 limb.ResetLimb();
             }
-            m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
+           // m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
         }
     }
 }

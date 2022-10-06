@@ -762,6 +762,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8106819409149277115, guid: 761d054b8e64c9945a781ec21830677c, type: 3}
   m_PrefabInstance: {fileID: 1155808506}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1023166467 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4134918493617378539, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+  m_PrefabInstance: {fileID: 5994312885752826017}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1023166475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1023166467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38e7a734dcd75f4488ee7dfbaba1b2c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gaitCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: -2.0746567
+      outSlope: -2.0746567
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.04242891
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  gaitCurveY: 0
+  gaitCurveX: 0
+  StrideStart: {fileID: 173735751}
+  m_desiredStrideTime: 1
 --- !u!1001 &1155808506
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1319,10 +1364,6 @@ PrefabInstance:
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2137326285644847494, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_Mass
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 2137326285644847494, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_Immovable
       value: 0
       objectReference: {fileID: 0}
@@ -1381,18 +1422,6 @@ PrefabInstance:
     - target: {fileID: 4134918493617378539, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_Name
       value: Yertle
-      objectReference: {fileID: 0}
-    - target: {fileID: 4831544022759787059, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_strideHeight
-      value: 0.07
-      objectReference: {fileID: 0}
-    - target: {fileID: 4831544022759787059, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_strideLength
-      value: 0.05
-      objectReference: {fileID: 0}
-    - target: {fileID: 4831544022759787059, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_gaitTranslateSpeed
-      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4944195037014308994, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_ParentAnchorRotation.w
@@ -1497,10 +1526,6 @@ PrefabInstance:
     - target: {fileID: 6303649317406834157, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_ParentAnchorPosition.z
       value: -0.1635
-      objectReference: {fileID: 0}
-    - target: {fileID: 6417101710590175695, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_Center.y
-      value: 0.06
       objectReference: {fileID: 0}
     - target: {fileID: 6483354711715010126, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_ParentAnchorPosition.y
@@ -1722,6 +1747,17 @@ PrefabInstance:
       propertyPath: m_ParentAnchorRotation.z
       value: 0.5512889
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 5352976034079103046, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+    - target: {fileID: 0}
+      propertyPath: m_strideHeight
+      value: 0.07
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_strideLength
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_gaitTranslateSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}

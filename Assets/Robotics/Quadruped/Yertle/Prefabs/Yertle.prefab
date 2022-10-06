@@ -1545,12 +1545,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6672052242582568475}
   - component: {fileID: 2137326285644847494}
-  - component: {fileID: 2650549748821901585}
   - component: {fileID: 6417101710590175695}
-  - component: {fileID: 5352976034079103046}
   - component: {fileID: 1284158707}
   - component: {fileID: 3099181762458029914}
-  - component: {fileID: 4831544022759787059}
   m_Layer: 0
   m_Name: Yertle
   m_TagString: Untagged
@@ -1588,7 +1585,7 @@ ArticulationBody:
   m_GameObject: {fileID: 4134918493617378539}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 5
+  m_Mass: 10
   m_ParentAnchorPosition: {x: 0, y: 0, z: 0}
   m_ParentAnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
@@ -1631,22 +1628,6 @@ ArticulationBody:
   m_Immovable: 1
   m_UseGravity: 1
   m_CollisionDetectionMode: 1
---- !u!114 &2650549748821901585
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4134918493617378539}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cd96695e4c2933f4689718470d28eabd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  COM: {fileID: 0}
-  ab: {fileID: 2137326285644847494}
-  gait0: {fileID: 0}
-  gait1: {fileID: 0}
 --- !u!65 &6417101710590175695
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1659,23 +1640,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.11453602, y: 0.06997317, z: 0.4269229}
-  m_Center: {x: 0, y: -0.01, z: 0}
---- !u!114 &5352976034079103046
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4134918493617378539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b7c5aa502d6da943806bda0abd5697c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_strideLength: 0.03
-  m_strideHeight: 0.1
-  m_gaitTranslateSpeed: 2
-  m_mGaitRotationSpeed: 330
+  m_Center: {x: 0, y: 0.06, z: 0}
 --- !u!114 &1284158707
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1695,6 +1660,8 @@ MonoBehaviour:
   m_ground: {fileID: 0}
   m_gaits: {fileID: 4873529952135503595}
   m_baseTargets: {fileID: 9219462630832583033}
+  m_walkHeight: 0.2
+  m_simulate: 0
 --- !u!114 &3099181762458029914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1709,22 +1676,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_portName: COM3
   m_baudeRate: 115200
---- !u!114 &4831544022759787059
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4134918493617378539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b7c5aa502d6da943806bda0abd5697c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_strideLength: 0.03
-  m_strideHeight: 0.1
-  m_gaitTranslateSpeed: 2
-  m_mGaitRotationSpeed: 330
 --- !u!1 &4258457150663669959
 GameObject:
   m_ObjectHideFlags: 0

@@ -55,7 +55,6 @@ namespace RoboticToolKit.Robotics.Servos
             if (m_articulation == null)
             {
                 m_articulation = GetComponent<ArticulationBody>();
-
             }
             return m_articulation.jointPosition[0] * Mathf.Rad2Deg;
         }

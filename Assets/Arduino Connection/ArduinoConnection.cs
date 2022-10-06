@@ -2,6 +2,7 @@ using ProcessCommunicationToolkit.SerialPortTools;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO.Ports;
 
 namespace RoboticsToolkit.ArduinoUtilities
 {
@@ -17,22 +18,40 @@ namespace RoboticsToolkit.ArduinoUtilities
         // Start is called before the first frame update
         void Awake()
         {
+            //m_arduinoConnection.serialPortMessage += x => Debug.Log(x);
             m_arduinoConnection = new SerialPortConnection(m_portName, m_baudeRate);
 
-           // m_arduinoConnection.serialPortMessage += x => Debug.Log(x);
+
         }
 
         private void Start()
         {
-            
+
         }
 
         private void OnDestroy()
         {
             if (m_arduinoConnection != null)
             {
+                m_arduinoConnection.Write("shutdown");
+                Debug.Log(m_arduinoConnection.ReadLine());
+
                 m_arduinoConnection.ShutDown();
             }
+        }
+
+        public bool Connected => m_arduinoConnection.Connected;
+
+        public string ReadFromArduino()
+        {
+            if (!m_arduinoConnection.Connected)
+            {
+                Debug.LogWarning("Arduino Connection not Connected");
+                return null;
+            }
+
+
+            return m_arduinoConnection.ReadLine();
         }
 
         public string WriteToArduino(string message, bool waitForResponce = false)
@@ -42,13 +61,14 @@ namespace RoboticsToolkit.ArduinoUtilities
                 return null;
 
             m_arduinoConnection.Write(message);
+            // m_arduinoConnection.
 
             // if (waitForResponce)
             // {
-           // string responce = null;
-            var responce = m_arduinoConnection.ReadLine();
-          //  Debug.Log("responce " + responce);
-            return responce;
+            // string responce = null;
+            //var responce = m_arduinoConnection.ReadLine();
+            //Debug.Log("responce from down arrow" + responce);
+            return null;
 
             //  }
             //  else
