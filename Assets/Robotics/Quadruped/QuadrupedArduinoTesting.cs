@@ -19,6 +19,12 @@ public class QuadrupedArduinoTesting : MonoBehaviour
     [SerializeField]
     private Vector3 m_gyroData;
 
+    [SerializeField]
+    private Transform m_ground;
+
+    [SerializeField]
+    private Transform m_groundSensor;
+
     private void Awake()
     {
         m_arduinoConnection = GetComponent<ArduinoConnection>();
@@ -54,6 +60,17 @@ public class QuadrupedArduinoTesting : MonoBehaviour
 
                 var euler = new Vector3(-data.P, data.R, data.Y);
                 transform.rotation = Quaternion.Euler(euler);
+
+                var groundPosition = m_groundSensor.transform.position + (m_groundSensor.forward * (.01f * data.H));
+
+                var groundOffset = new Vector3(0, groundPosition.y, 0);
+
+                // robotTransform.position -= groundOffset;
+
+               var  m_desiredPosition = transform.position - groundOffset;
+
+                transform.position = Vector3.Lerp(transform.position, m_desiredPosition,Time.deltaTime);
+                //robotTransform.rotation = m_desiredRotation;
             }
             
 

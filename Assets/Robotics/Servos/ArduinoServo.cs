@@ -37,7 +37,7 @@ namespace RoboticToolKit.Robotics.Servos
            m_currentPosition = resetAngle;
         }
 
-        public void SetServoPosition(float position)
+        public void SetServoPosition(bool setServoImmediate, float position)
         {
             SetServoPosition(position, m_servoSpeed);
         }
@@ -48,6 +48,16 @@ namespace RoboticToolKit.Robotics.Servos
             float rotationGoal = GetCurrentAngle() + (dif * Time.deltaTime * speed);
             m_currentPosition = rotationGoal;
             m_arduinoConnection.WriteToArduino(m_servoNumber + ":" + rotationGoal.ToString());
+        }
+
+        public void SetServoPosition(float position)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void SetServoPositionImmediate(float position)
+        {
+            throw new System.NotImplementedException();
         }
 
         public void SetServoSpeed(float speed)

@@ -137,7 +137,7 @@ namespace Robotics.Nova.ML
             // Debug.Log("on action received");
             for (int i = 0; i < m_servoControllers.Count; i++)
             {
-                m_servoControllers[i].SetAndRunServo(actions.ContinuousActions[i]*15);
+                //m_servoControllers[i].SetAndRunServo(actions.ContinuousActions[i]*15);
             }
             CalculateRewards();
         }

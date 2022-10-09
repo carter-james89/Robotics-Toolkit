@@ -26,7 +26,7 @@ namespace RoboticToolkit.Robotics.Gaits
         }
         private StrideType m_currentStride = StrideType.NONE;
 
-        public void Initialize(IRoboticController robot)
+        public void Initialize(IRobot robot)
         {
             m_limbs = robot.GetLimbs();
 

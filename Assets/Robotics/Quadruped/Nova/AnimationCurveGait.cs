@@ -34,7 +34,7 @@ public class AnimationCurveGait : MonoBehaviour, IGait
 
     private float m_stideTimeFull;
 
-    public void Initialize(IRoboticController robot)
+    public void Initialize(IRobot robot)
     {
         m_limbs = robot.GetLimbs();
 
@@ -47,11 +47,16 @@ public class AnimationCurveGait : MonoBehaviour, IGait
 
         var middle = (begining + ending) / 2;
 
+        m_totalGaitDistance = ending;
+
         // transform.position = new Vector3(middle, 0, 0);
         StrideStart.localPosition = new Vector3(-middle, 0, 0);
         // StrideEnd.localPosition = new Vector3(middle, 0, 0);
     }
 
+    private int m_totalGaitTime = 1;
+    private float m_totalGaitDistance = 0;
+    private float m_gaitVelocity;
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -59,6 +64,8 @@ public class AnimationCurveGait : MonoBehaviour, IGait
             m_currentStride = StrideType.WALKING;
             m_positioningLimbs[0] = 0;
             m_positioningLimbs[1] = 2;
+
+            m_gaitVelocity = m_totalGaitDistance / m_totalGaitTime;
             // SetNextGaitCycle();
         }
     }
@@ -70,7 +77,7 @@ public class AnimationCurveGait : MonoBehaviour, IGait
         {
             return;
         }
-        var currentStrideTime = m_strideTime + Time.deltaTime* m_desiredStrideTime;
+        var currentStrideTime = m_strideTime + Time.deltaTime * m_gaitVelocity;
         if (currentStrideTime > gaitCurve.keys[gaitCurve.keys.Length - 1].time)
         {
             m_strideTime = gaitCurve.keys[gaitCurve.keys.Length - 1].time;
@@ -94,16 +101,16 @@ public class AnimationCurveGait : MonoBehaviour, IGait
         {
             m_strideTime = gaitCurve.keys[0].time;
 
-            if (m_positioningLimbs[0] == 0)
-            {
-                m_positioningLimbs[0] = 1;
-                m_positioningLimbs[1] = 3;
-            }
-            else
-            {
-                m_positioningLimbs[0] = 0;
-                m_positioningLimbs[1] = 2;
-            }
+            //if (m_positioningLimbs[0] == 0)
+            //{
+            //    m_positioningLimbs[0] = 1;
+            //    m_positioningLimbs[1] = 3;
+            //}
+            //else
+            //{
+            //    m_positioningLimbs[0] = 0;
+            //    m_positioningLimbs[1] = 2;
+            //}
         }
 
         //gaitCurveX = (avgStridePercent + .03f) * timeLength;

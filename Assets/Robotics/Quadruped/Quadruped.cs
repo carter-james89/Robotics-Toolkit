@@ -1,6 +1,3 @@
-using Newtonsoft.Json;
-using ProcessCommunicationToolkit_Csharp;
-using RoboticsToolkit.ArduinoUtilities;
 using RoboticToolkit.Robotics.Gaits;
 using RoboticToolkit.Robotics.Limbs;
 using System.Collections.Generic;
@@ -8,28 +5,7 @@ using UnityEngine;
 
 namespace RoboticsToolkit.Robotics
 {
-
-    public interface IRoboticController
-    {
-        public struct RobotData
-        {
-            public Vector3 Velocity;
-            public Vector3 AngularVelocity;
-
-            public RobotData(Vector3 velocity, Vector3 angularVelocity)
-            {
-                Velocity = velocity;
-                AngularVelocity = angularVelocity;
-            }
-        }
-        public GameObject GetGameObject();
-        public IRoboticLimb[] GetLimbs();
-        public RobotData GetRobotData();
-
-        public void ResetController();
-    }
-
-    public class QuadrepedRoboticController : MonoBehaviour, IRoboticController
+    public class Quadruped : MonoBehaviour, IRobot
     {
         [SerializeField]
         private ThreeJointRoboticLimb m_frLimb;
@@ -40,8 +16,6 @@ namespace RoboticsToolkit.Robotics
         [SerializeField]
         private ThreeJointRoboticLimb m_blLimb;
 
-       
-
         public GameObject GetGameObject() => gameObject;
 
         [SerializeField]
@@ -51,7 +25,7 @@ namespace RoboticsToolkit.Robotics
 
         private ArticulationBody m_articulationBody;
 
-        private IQuadrupedDataTransfer m_quadrupedDataTransfer;
+        private IRoboticController m_roboticController;
 
         private bool m_ready = true;
 
@@ -64,9 +38,9 @@ namespace RoboticsToolkit.Robotics
         [SerializeField]
         private bool m_simulate = false;
 
-        public IRoboticController.RobotData GetRobotData()
+        public IRobot.RobotData GetRobotData()
         {
-            return new IRoboticController.RobotData(m_articulationBody.velocity, m_articulationBody.angularVelocity);
+            return new IRobot.RobotData(m_articulationBody.velocity, m_articulationBody.angularVelocity);
         }
 
         private List<ThreeJointRoboticLimb> m_limbs = new List<ThreeJointRoboticLimb>();
@@ -79,9 +53,7 @@ namespace RoboticsToolkit.Robotics
             m_gait = GetComponent<IGait>();
             m_articulationBody = GetComponent<ArticulationBody>();
 
-            m_quadrupedDataTransfer = GetComponent<IQuadrupedDataTransfer>();
-            m_quadrupedDataTransfer.Initialize(this);
-
+         
 
             if (m_flLimb)
             {
@@ -125,23 +97,39 @@ namespace RoboticsToolkit.Robotics
                 //}           
             }
 
+            var controllers = GetComponents<IRoboticController>();
             if (m_simulate)
             {
-                m_baseTargets.transform.position = transform.position + new Vector3(0, m_walkHeight, 0);
-             //   m_ground.gameObject.SetActive(true);
+               // m_baseTargets.transform.position = transform.position + new Vector3(0, m_walkHeight, 0);
+                //   m_ground.gameObject.SetActive(true);
                 m_articulationBody.immovable = false;
+
+                foreach (var item in controllers)
+                {
+                    if (item.IsSimulator())
+                    {
+                        m_roboticController = item;
+                    }
+                }
             }
             else
             {
-               // m_ground.gameObject.SetActive(false);
-                m_articulationBody.immovable = true;
-                foreach (var limb in m_limbs)
+                foreach (var item in controllers)
                 {
-                    var tempPos = limb.GetIKTargetPos();
-                    tempPos.y -= m_walkHeight;
-                    limb.SetIKTargetPos(tempPos);
+                    if (!item.IsSimulator())
+                    {
+                        m_roboticController = item;
+                    }
                 }
+                m_articulationBody.immovable = true;
+                //foreach (var limb in m_limbs)
+                //{
+                //    var tempPos = limb.GetIKTargetPos();
+                //    tempPos.y -= m_walkHeight;
+                //    limb.SetIKTargetPos(tempPos);
+                //}
             }
+            m_roboticController.Initialize(this);
             if (m_gait != null)
             {
                 m_gait.Initialize(this);
@@ -155,10 +143,10 @@ namespace RoboticsToolkit.Robotics
             //}
         }
 
-        private bool UpdateSensorData()
+        private bool SetTransformValues()
         {
-            QuadrupedSensorData sensorData = m_quadrupedDataTransfer.GetSensorData();
-            if(sensorData == null)
+            bool success = m_roboticController.SetTransformValues();
+            if (!success)
             {
                 Debug.Log("Failed to get sensor data");
                 return false;
@@ -168,75 +156,60 @@ namespace RoboticsToolkit.Robotics
 
         void Update()
         {
-            //if (!Input.GetKeyDown(KeyCode.DownArrow))
-            //{
-            //    return;
-            //}
-            bool success = UpdateSensorData();
+            if (!m_roboticController.IsSimulator())
+            {
+                RunRoboticController();
+            }
+           
+        }
+
+        private void FixedUpdate()
+        {
+            if (m_roboticController.IsSimulator())
+            {
+                RunRoboticController();
+            }
+
+        }
+
+        public void RunRoboticController()
+        {
+            bool success = SetTransformValues();
             if (!success)
             {
                 return;
             }
             PositionGimble();
-           
+
             if (m_gait != null)
             {
-               // m_gait.RunGait();
+                m_gait.RunGait();
             }
+            
             foreach (var limb in m_limbs)
             {
-               limb.RunLimb(true);
+                limb.RunLimb(!m_roboticController.IsSimulator(), true);
             }
 
-            WriteArduinoData();
-        }
-
-        private void FixedUpdate()
-        {
-
-            //PositionGimble();
-
-            //if (m_gait != null)
-            //{
-            //    m_gait.RunGait();
-            //}
-            //foreach (var limb in m_limbs)
-            //{
-            //    limb.RunLimb(true);
-            //}
-
-
-            //WriteArduinoData();
-
-        }
-
-        private void WriteArduinoData()
-        {
-
             var digitalTwinData = new QuadrupedGroundStationData();
+            digitalTwinData.FL_0 = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            digitalTwinData.FL_1 = (int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            digitalTwinData.FL_2 = (int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
 
-            //digitalTwinData.FL_0 = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-            //digitalTwinData.FL_1 = (int)m_flLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-            //digitalTwinData.FL_2 = (int)m_flLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+            digitalTwinData.FR_0 = (int)m_frLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            digitalTwinData.FR_1 = (int)m_frLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            digitalTwinData.FR_2 = (int)m_frLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
 
-            //digitalTwinData.FR_0 = (int)m_frLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-            //digitalTwinData.FR_1 = (int)m_frLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-            //digitalTwinData.FR_2 = (int)m_frLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+            digitalTwinData.BL_0 = (int)m_blLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            digitalTwinData.BL_1 = (int)m_blLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            digitalTwinData.BL_2 = (int)m_blLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
 
-            //digitalTwinData.BL_0 = (int)m_blLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-            //digitalTwinData.BL_1 = (int)m_blLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-            //digitalTwinData.BL_2 = (int)m_blLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
-
-            //digitalTwinData.BR_0 = (int)m_brLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
-            //digitalTwinData.BR_1 = (int)m_brLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
-            //digitalTwinData.BR_2 = (int)m_brLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
-
-            //      m_arduinoConnection.WriteToArduino(JsonUtility.ToJson(digitalTwinData));
-            m_quadrupedDataTransfer.SendCommands(digitalTwinData);
-
-            // Debug.Log("bl2 : " +digitalTwinData.BL_2);
-
+            digitalTwinData.BR_0 = (int)m_brLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
+            digitalTwinData.BR_1 = (int)m_brLimb.GetServoControllers()[1].GetServo().GetCurrentAngle();
+            digitalTwinData.BR_2 = (int)m_brLimb.GetServoControllers()[2].GetServo().GetCurrentAngle();
+            m_roboticController.SendCommands(digitalTwinData);          
         }
+
 
         private void PositionGimble()
         {
@@ -270,7 +243,7 @@ namespace RoboticsToolkit.Robotics
             {
                 limb.ResetLimb();
             }
-           // m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
+            // m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
         }
     }
 }

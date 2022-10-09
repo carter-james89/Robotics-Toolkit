@@ -13,7 +13,7 @@ namespace RoboticToolkit.Robotics.Limbs
         public Transform GetEndPoint();
         public Transform GetTargetBasePosition();
         public IServoController[] GetServoControllers();
-        public void RunLimb(bool adjustHeight = false);
+        public void RunLimb(bool positionImmediate, bool adjustHeight = false);
         public void ResetLimb();
 
         public void SetIKTargetPos(Vector3 globalPos);
@@ -80,6 +80,8 @@ namespace RoboticToolkit.Robotics.Limbs
 
         public Transform GetTargetBasePosition() => m_baseTarget;
 
+        private Vector3 m_desiredLocalPosition;
+
 
         private void Awake()
         {
@@ -93,6 +95,8 @@ namespace RoboticToolkit.Robotics.Limbs
             m_servoControllers[0] = m_shoulderServoController;
             m_servoControllers[1] = m_elbowServoController;
             m_servoControllers[2] = m_wristServoController;
+
+            m_desiredLocalPosition = transform.localPosition;
 
             var hipOffset = transform.InverseTransformPoint(m_shoulderServoController.GetServo().GetGameObject().transform.position);
             var offset = transform.InverseTransformPoint(m_ikTarget.position);
@@ -125,7 +129,7 @@ namespace RoboticToolkit.Robotics.Limbs
                 return false;
             }
         }
-        public void RunLimb(bool adjustHeight = false)
+        public void RunLimb(bool positionServoImmediate, bool adjustHeight = false)
         {
             if (adjustHeight)
             {
@@ -155,7 +159,7 @@ namespace RoboticToolkit.Robotics.Limbs
             var baseTarget = transform.TransformPoint(tempPos);
             var limbBaseAngle = IKCalculator.CalculateSingleIK(m_shoulderServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
            baseTarget, true);
-            m_shoulderServoController.SetAndRunServo(limbBaseAngle);
+            m_shoulderServoController.SetAndRunServo(limbBaseAngle, positionServoImmediate);
 
             // var limbBaseAngle = IKCalculator.CalculateSingleIK(m_elbowServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
             //m_positioner.GetTarget().position, true);
@@ -165,8 +169,8 @@ namespace RoboticToolkit.Robotics.Limbs
                 m_wristServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
                 m_endPoint.position, m_ikTarget.position);
 
-            m_elbowServoController.SetAndRunServo(elbowWristAngles.Key);
-            m_wristServoController.SetAndRunServo(elbowWristAngles.Value);
+            m_elbowServoController.SetAndRunServo(elbowWristAngles.Key, positionServoImmediate);
+            m_wristServoController.SetAndRunServo(elbowWristAngles.Value, positionServoImmediate);
         }
       
         public void PositionGaitHeight(float height)
@@ -203,6 +207,24 @@ namespace RoboticToolkit.Robotics.Limbs
         //        return true;
         //    }
         //    return false;
+        //}
+
+        //void Update()
+        //{
+        //    PlaceLimb();
+        //}
+        //void FixedUpdate()
+        //{
+        //    PlaceLimb();
+        //}
+
+        //void PlaceLimb()
+        //{
+        //    var ab = GetComponent<ArticulationBody>();
+        //   ab.TeleportRoot(transform.parent.TransformPoint(m_desiredLocalPosition), transform.parent.rotation);
+        //    ab.velocity = Vector3.zero;
+        //    ab.angularVelocity = Vector3.zero;
+        //    ab.Sleep();
         //}
     }
 }

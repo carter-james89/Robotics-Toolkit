@@ -26,7 +26,7 @@ namespace RoboticToolkit.Robotics.Gaits
 
         private bool m_firstComplition = true;
 
-        private IRoboticController m_robot;
+        private IRobot m_robot;
 
         private bool m_firstEpisode = true;
 
@@ -37,10 +37,10 @@ namespace RoboticToolkit.Robotics.Gaits
         protected override void Awake()
         {
             base.Awake();
-            m_robot = GetComponent<IRoboticController>();
+            m_robot = GetComponent<IRobot>();
             m_meshRenderer.material.color = Color.white;
         }
-        public void Initialize(IRoboticController robot)
+        public void Initialize(IRobot robot)
         {
             m_limbs = robot.GetLimbs();
 

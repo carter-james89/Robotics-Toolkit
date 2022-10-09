@@ -30,14 +30,14 @@ namespace RoboticToolkit.Robotics.Gaits
         private Quaternion m_currentBodyRotation;
         private bool m_firstComplition = true;
 
-        private IRoboticController m_robot;
+        private IRobot m_robot;
 
         protected override void Awake()
         {
             base.Awake();
-            m_robot = GetComponent<IRoboticController>();
+            m_robot = GetComponent<IRobot>();
         }
-        public void Initialize(IRoboticController robot)
+        public void Initialize(IRobot robot)
         {
             throw new System.NotImplementedException();
         }

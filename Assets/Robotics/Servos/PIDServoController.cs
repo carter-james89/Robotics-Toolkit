@@ -8,7 +8,7 @@ namespace RoboticToolKit.Robotics.Servos
     public interface IServoController
     {
         public IServo GetServo();
-        public void SetAndRunServo(float desiredAngle);
+        public void SetAndRunServo(float desiredAngle, bool immediate);
 
         public void Reset();
 
@@ -102,7 +102,7 @@ namespace RoboticToolKit.Robotics.Servos
             }
            
         }
-        public void SetAndRunServo(float desiredAngle)
+        public void SetAndRunServo(float desiredAngle, bool immediate)
         {
             DesiredAngle = desiredAngle;
             CalculateServoSpeed(desiredAngle);

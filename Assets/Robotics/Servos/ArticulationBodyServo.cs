@@ -13,6 +13,7 @@ namespace RoboticToolKit.Robotics.Servos
         public void SetServoSpeed(float speed);
         public void SetServoPosition(float position);
         public void SetServoPosition(float position,float speed);
+        public void SetServoPositionImmediate(float position);
         public void ResetServo(float resetAngle);
     }
 
@@ -73,6 +74,11 @@ namespace RoboticToolKit.Robotics.Servos
         public void SetServoPosition(float position)
         {
             SetServoPosition(position, m_servoSpeed);
+            RotateTo(position);
+        }
+        public void SetServoPositionImmediate(float position)
+        {
+             RotateTo(position);
         }
 
         private void RotateTo(float angle)

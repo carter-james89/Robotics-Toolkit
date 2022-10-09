@@ -18,23 +18,32 @@ namespace RoboticToolKit.Robotics.Servos
             {
                 servo.ResetServo(0);
             }
-           
+
         }
         public IServo GetServo()
         {
-           if(m_servos == null)
+            if (m_servos == null)
             {
                 m_servos = GetComponents<IServo>();
             }
-           return m_servos[0];  
+            return m_servos[0];
         }
 
-        public void SetAndRunServo(float desiredAngle)
+        public void SetAndRunServo(float desiredAngle, bool immediate)
         {
-            
-            foreach (var servo in m_servos)
+            if (immediate)
             {
-                servo.SetServoPosition(desiredAngle);
+                foreach (var servo in m_servos)
+                {
+                    servo.SetServoPositionImmediate(desiredAngle);
+                }
+                return;
+            }
+            {
+                foreach (var servo in m_servos)
+                {
+                    servo.SetServoPosition(desiredAngle);
+                }
             }
         }
     }

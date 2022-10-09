@@ -12,7 +12,7 @@ namespace RoboticToolkit.Robotics.Gaits
     }
     public interface IGait
     {
-        public void Initialize(IRoboticController robot);
+        public void Initialize(IRobot robot);
         public void RunGait();
     }
     public class LimbPositioner : MonoBehaviour
