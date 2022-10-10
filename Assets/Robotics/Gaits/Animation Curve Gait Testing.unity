@@ -229,7 +229,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 491831610}
-  - component: {fileID: 491831609}
+  - component: {fileID: 491831611}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -237,56 +237,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &491831609
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 491831608}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 035e307f4df096547be116343501104d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gaitCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 4.0354023
-      outSlope: 4.0354023
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.105425104
-    - serializedVersion: 3
-      time: 0.0001
-      value: 0.6977234
-      inSlope: 0.06068212
-      outSlope: 0.06068212
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.10277808
-    - serializedVersion: 3
-      time: 0.0002
-      value: 0
-      inSlope: -4.88168
-      outSlope: -4.88168
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.08088542
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  gaitCurveY: 0
-  gaitCurveX: 0
-  StrideStart: {fileID: 1161470913}
-  StrideEnd: {fileID: 1208208396}
-  Target: {fileID: 888514514}
 --- !u!4 &491831610
 Transform:
   m_ObjectHideFlags: 0
@@ -306,6 +256,56 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &491831611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491831608}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 035e307f4df096547be116343501104d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_target: {fileID: 40430305}
+  gaitCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.25
+      value: 1
+      inSlope: -0.39961886
+      outSlope: -0.39961886
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.5
+      value: 0
+      inSlope: -6.85306
+      outSlope: -6.85306
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.045742035
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  gaitCurveY: 0
+  gaitCurveX: 0
+  StrideStart: {fileID: 1161470913}
+  m_desiredStrideTime: 10
 --- !u!1 &888514513
 GameObject:
   m_ObjectHideFlags: 0

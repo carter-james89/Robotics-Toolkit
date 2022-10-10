@@ -16,6 +16,8 @@ namespace RoboticsToolkit.Robotics
         [SerializeField]
         private ThreeJointRoboticLimb m_blLimb;
 
+        public IGimbal Gimbal { get; private set; }    
+
         public GameObject GetGameObject() => gameObject;
 
         [SerializeField]
@@ -45,6 +47,11 @@ namespace RoboticsToolkit.Robotics
 
         private List<ThreeJointRoboticLimb> m_limbs = new List<ThreeJointRoboticLimb>();
         public IRoboticLimb[] GetLimbs() => m_limbs.ToArray();
+
+        void Awake()
+        {
+            Gimbal = GetComponentInChildren<IGimbal>();
+        }
 
         // Start is called before the first frame update
         void Start()
@@ -89,6 +96,8 @@ namespace RoboticsToolkit.Robotics
                 tempPos.y = 0;
                 limb.GetBaseTarget().localPosition = tempPos;
 
+                limb.Initialize(Gimbal);
+
                 //if(limb.ShoulderServoController is PIDServoController)
                 //{
                 //    (limb.ShoulderServoController as PIDServoController).ResetPid(m_pidD, m_pidI, m_pidD, m_pidMax, m_pidMin);
@@ -100,7 +109,7 @@ namespace RoboticsToolkit.Robotics
             var controllers = GetComponents<IRoboticController>();
             if (m_simulate)
             {
-               // m_baseTargets.transform.position = transform.position + new Vector3(0, m_walkHeight, 0);
+                m_baseTargets.transform.position = transform.position + new Vector3(0, m_walkHeight, 0);
                 //   m_ground.gameObject.SetActive(true);
                 m_articulationBody.immovable = false;
 
@@ -213,6 +222,9 @@ namespace RoboticsToolkit.Robotics
 
         private void PositionGimble()
         {
+            this.Gimbal.GetGameObject().transform.position = transform.position;
+            this.Gimbal.GetGameObject().transform.rotation = Quaternion.identity;
+
             var tempPos = m_gaits.transform.position;
             tempPos.x = transform.position.x;
             tempPos.y = 0;
@@ -246,5 +258,8 @@ namespace RoboticsToolkit.Robotics
             // m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
         }
     }
+
+
+
 }
 
