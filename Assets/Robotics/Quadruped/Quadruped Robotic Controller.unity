@@ -356,7 +356,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 730692042}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: -0.006, z: 0.188}
+  m_LocalPosition: {x: 0, y: -0.061, z: 0.188}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -908,6 +908,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1284158707, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
@@ -1036,15 +1037,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2137326285644847494, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_Immovable
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2137326285644847494, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      propertyPath: m_AngularDamping
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 2701181494444797725, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_simulate
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2701181494444797725, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_walkHeight
       value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2701181494444797725, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      propertyPath: m_emergencyStopAngle
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 2701181494444797725, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      propertyPath: m_useGimbalLimbHeight
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2765711139405903169, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_Enabled
@@ -1117,6 +1130,10 @@ PrefabInstance:
     - target: {fileID: 3092324098829006745, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_ParentAnchorPosition.y
       value: 0.009235736
+      objectReference: {fileID: 0}
+    - target: {fileID: 3099181762458029914, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3099181762458029914, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_portName
@@ -1415,6 +1432,13 @@ PrefabInstance:
       value: 0.5512889
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6672052242582568475, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 730692043}
+    - targetCorrespondingSourceObject: {fileID: 6672052242582568475, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1045989892}
   m_SourcePrefab: {fileID: 100100000, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
 --- !u!1 &1243062121 stripped
 GameObject:
@@ -1500,7 +1524,7 @@ MonoBehaviour:
   gaitCurveY: 0
   gaitCurveX: 0
   StrideStart: {fileID: 1584083143}
-  m_desiredGaitTime: 1.5
+  m_desiredGaitTime: 0.5
 --- !u!1 &1584083142
 GameObject:
   m_ObjectHideFlags: 0
