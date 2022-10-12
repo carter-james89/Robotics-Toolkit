@@ -22,6 +22,8 @@ namespace RoboticsToolkit.Robotics
         public IRoboticLimb[] GetLimbs();
         public RobotData GetRobotData();
 
+        public void EmergencyStop();
+
         public void ResetController();
     } 
 }

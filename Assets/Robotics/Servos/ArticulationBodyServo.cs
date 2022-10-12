@@ -43,6 +43,8 @@ namespace RoboticToolKit.Robotics.Servos
           //  xDrive.forceLimit *= 2;
             m_articulation.xDrive = xDrive;
 
+            SetServoPositionImmediate(0);
+
             m_anchorTransform = new GameObject("Anchor").transform;
             m_anchorTransform.SetParent(transform);
 

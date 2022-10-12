@@ -15,11 +15,14 @@ namespace RoboticToolkit.Robotics.Limbs
         public IServoController[] GetServoControllers();
         public void RunLimb(bool positionImmediate, bool adjustHeight = false);
         public void ResetLimb();
+        public void ResetLimbTargetPosition();
 
         public void SetIKTargetPos(Vector3 globalPos);
         public Vector3 GetIKTargetPos();
 
         public bool LimbAtTarget();
+
+        
 
     }
     public class ThreeJointRoboticLimb : MonoBehaviour, IRoboticLimb
@@ -74,6 +77,8 @@ namespace RoboticToolkit.Robotics.Limbs
 
         public Transform GetBaseTarget() => m_baseTarget;
 
+        private Transform m_heightAdjustementOrigin;
+
         private float m_desiredLimbHeight = .15f;
 
         private Vector3 m_positionerOffset;
@@ -88,19 +93,23 @@ namespace RoboticToolkit.Robotics.Limbs
             m_shoulderServoController = m_shoulderServoObject.GetComponent<IServoController>();
             m_elbowServoController = m_elbowServoObject.GetComponent<IServoController>();
             m_wristServoController = m_wristServoObject.GetComponent<IServoController>();
-            m_positionerOffset = transform.InverseTransformPoint(m_heightAdjustment.position);
-            m_positionerOffset.y = -.1f;
+           // m_positionerOffset = transform.InverseTransformPoint(m_heightAdjustment.position);
+           // m_positionerOffset.y = -.1f;
 
             m_servoControllers = new IServoController[3];
             m_servoControllers[0] = m_shoulderServoController;
             m_servoControllers[1] = m_elbowServoController;
             m_servoControllers[2] = m_wristServoController;
         }
-        public void Initialize(IGimbal gimbal)
+        public void Initialize(IGimbal gimbal,bool useGimbalHeightAdjustment)
         {
             m_gimbal = gimbal;
-            var hipOffset = m_gimbal.GetGameObject().transform.InverseTransformPoint(m_shoulderServoController.GetServo().GetGameObject().transform.position);
-            var ikOffset = m_gimbal.GetGameObject().transform.InverseTransformPoint(m_ikTarget.position);
+            m_heightAdjustementOrigin = useGimbalHeightAdjustment ? gimbal.GetGameObject().transform : transform;
+            m_positionerOffset = m_heightAdjustementOrigin.InverseTransformPoint(m_heightAdjustment.position);
+           // m_positionerOffset.y = -.1f;
+
+            var hipOffset = m_heightAdjustementOrigin.InverseTransformPoint(m_shoulderServoController.GetServo().GetGameObject().transform.position);
+            var ikOffset = m_heightAdjustementOrigin.InverseTransformPoint(m_ikTarget.position);
 
             if(ikOffset.x > hipOffset.x)
             {
@@ -134,6 +143,7 @@ namespace RoboticToolkit.Robotics.Limbs
                 return false;
             }
         }
+
         public Transform DebugCube;
         public void RunLimb(bool positionServoImmediate, bool adjustHeight = false)
         {
@@ -155,6 +165,7 @@ namespace RoboticToolkit.Robotics.Limbs
             }
             else
             {
+                Debug.Log("set limb to 0 " + name);
                 PositionGaitHeight(0);
             }
             //return;
@@ -185,15 +196,34 @@ namespace RoboticToolkit.Robotics.Limbs
       
         public void PositionGaitHeight(float height)
         {
-            var gaitPos = m_gimbal.GetGameObject().transform.TransformPoint(new Vector3(m_positionerOffset.x, 0, m_positionerOffset.z));
-            gaitPos.y = -height;
-           // gaitPos.y = transform.position.y - .2f;
+            //var gaitPos = m_gimbal.GetGameObject().transform.TransformPoint(new Vector3(m_positionerOffset.x, 0, m_positionerOffset.z));
+            var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
+            
+            // gaitPos.y = transform.position.y - .2f;
 
-           m_targetGaitPos = m_gimbal.GetGameObject().transform.InverseTransformPoint( gaitPos);
-            m_heightAdjustment.localPosition = Vector3.Lerp(m_heightAdjustment.localPosition, m_targetGaitPos, Time.deltaTime * 2);
+            //   m_targetGaitPos = m_gimbal.GetGameObject().transform.InverseTransformPoint( gaitPos);
+            //   m_heightAdjustment.localPosition = Vector3.Lerp(m_heightAdjustment.localPosition, m_targetGaitPos, Time.deltaTime * 2);
+
+          //  m_heightAdjustment.position = gaitPos;
+          //if(height == 0)
+          //  {
+          //      gaitPos.y = 0;
+          //      m_heightAdjustment.position = gaitPos;
+          //  }
+          //  else
+          //  {
+                gaitPos.y = -height;
+                m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * 1.5f);
+         //   }
+         
 
         }
-
+        public void ResetLimbTargetPosition()
+        {
+            var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
+            m_heightAdjustment.position = gaitPos;
+            m_ikTarget.localPosition = Vector3.zero;
+        }
         public void ResetLimb()
         {
             m_shoulderServoController.Reset();

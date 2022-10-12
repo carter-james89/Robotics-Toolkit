@@ -16,6 +16,17 @@ namespace RoboticsToolkit.Robotics
         [SerializeField]
         private ThreeJointRoboticLimb m_blLimb;
 
+        [SerializeField]
+        private float m_physicsTime = 1;
+
+        [SerializeField]
+        private bool m_useGimbalLimbHeight = true;
+
+        [SerializeField]
+        private float m_emergencyStopAngle = 20;
+
+        public bool IsRunning { get; private set; } = true;
+
         public IGimbal Gimbal { get; private set; }    
 
         public GameObject GetGameObject() => gameObject;
@@ -83,6 +94,7 @@ namespace RoboticsToolkit.Robotics
             m_gaits.transform.SetParent(transform.parent);
             m_baseTargets.transform.SetParent(transform.parent);
             // m_baseTargets.transform.localPosition = Vector3.zero;
+            PositionGimble();
             foreach (var limb in m_limbs)
             {
                 // limb.GetPositioner().gameObject.name += "(" + limb.name + ")";
@@ -96,7 +108,7 @@ namespace RoboticsToolkit.Robotics
                 tempPos.y = 0;
                 limb.GetBaseTarget().localPosition = tempPos;
 
-                limb.Initialize(Gimbal);
+                limb.Initialize(Gimbal, m_useGimbalLimbHeight);
 
                 //if(limb.ShoulderServoController is PIDServoController)
                 //{
@@ -165,11 +177,22 @@ namespace RoboticsToolkit.Robotics
 
         void Update()
         {
+            Time.timeScale = m_physicsTime;
             if (!m_roboticController.IsSimulator())
             {
                 RunRoboticController();
             }
            
+        }
+
+        public void EmergencyStop()
+        {
+            Debug.Log("EMERGENCY STOP");
+            IsRunning = false;
+            foreach (var limb in m_limbs)
+            {
+           //     limb.ResetLimbTargetPosition();
+            }
         }
 
         private void FixedUpdate()
@@ -190,15 +213,25 @@ namespace RoboticsToolkit.Robotics
             }
             PositionGimble();
 
-            if (m_gait != null)
+            if (m_gait != null && IsRunning)
             {
                 m_gait.RunGait();
             }
-            
-            foreach (var limb in m_limbs)
+            if (!IsRunning)
             {
-                limb.RunLimb(!m_roboticController.IsSimulator(), true);
+                foreach (var limb in m_limbs)
+                {
+                    limb.RunLimb(!m_roboticController.IsSimulator(), true);
+                }
             }
+            else if(m_gait != null && !m_gait.IsRunning())
+            {
+                foreach (var limb in m_limbs)
+                {
+                    limb.RunLimb(!m_roboticController.IsSimulator(), true);
+                }
+            }
+           // m_roboticController.SendCommands();
 
             var digitalTwinData = new QuadrupedGroundStationData();
             digitalTwinData.FL_0 = (int)m_flLimb.GetServoControllers()[0].GetServo().GetCurrentAngle();
@@ -222,28 +255,41 @@ namespace RoboticsToolkit.Robotics
 
         private void PositionGimble()
         {
-            this.Gimbal.GetGameObject().transform.position = transform.position;
-            this.Gimbal.GetGameObject().transform.rotation = Quaternion.identity;
+              this.Gimbal.GetGameObject().transform.position = transform.position;
+            // this.Gimbal.GetGameObject().transform.rotation = Quaternion.identity;
+          //  Gimbal.GetGameObject().transform.position = Vector3.zero;
 
-            var tempPos = m_gaits.transform.position;
-            tempPos.x = transform.position.x;
-            tempPos.y = 0;
-            tempPos.z = transform.position.z;
-            m_gaits.transform.position = tempPos;
+            Gimbal.GetGameObject().transform.rotation = transform.rotation;
+            var tempEuler = Gimbal.GetGameObject().transform.eulerAngles;
+            tempEuler.x = 0;
+            tempEuler.z = 0;
+            Gimbal.GetGameObject().transform.rotation = Quaternion.Euler(tempEuler);
 
-            var tempEuler = m_gaits.transform.eulerAngles;
-            tempEuler.y = transform.eulerAngles.y;
-            m_gaits.eulerAngles = tempEuler;
+            //var tempPos = m_gaits.transform.position;
+            //tempPos.x = transform.position.x;
+            //tempPos.y = 0;
+            //tempPos.z = transform.position.z;
+            //m_gaits.transform.position = tempPos;
 
-            tempPos = m_baseTargets.transform.position;
+            //var tempEuler = m_gaits.transform.eulerAngles;
+            //tempEuler.y = transform.eulerAngles.y;
+            //m_gaits.eulerAngles = tempEuler;
+
+            var tempPos = m_baseTargets.transform.position;
             tempPos.x = transform.position.x;
             tempPos.z = transform.position.z;
             m_baseTargets.transform.position = tempPos;
             //  m_baseTargets.transform.rotation = m_gaits.rotation;
             // m_baseTargets.transform.rotation = Quaternion.LookRotation(transform.forward);
-            tempEuler = m_baseTargets.eulerAngles;
+             tempEuler = m_baseTargets.eulerAngles;
             //tempEuler.y = transform.eulerAngles.y;
             m_baseTargets.eulerAngles = tempEuler;
+
+            var angle = Vector3.Angle(transform.up, Gimbal.GetGameObject().transform.up);
+            if(angle > m_emergencyStopAngle && IsRunning)
+            {
+                EmergencyStop();
+            }
         }
 
 

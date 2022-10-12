@@ -34,9 +34,9 @@ namespace RoboticToolkit.Robotics.Gaits
         private MeshRenderer m_meshRenderer;
 
 
-        protected override void Awake()
+        protected  void Awake()
         {
-            base.Awake();
+           // base.Awake();
             m_robot = GetComponent<IRobot>();
             m_meshRenderer.material.color = Color.white;
         }
@@ -188,6 +188,11 @@ namespace RoboticToolkit.Robotics.Gaits
             {
                 m_meshRenderer.material.color = Color.blue;
             }
+        }
+
+        public bool IsRunning()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

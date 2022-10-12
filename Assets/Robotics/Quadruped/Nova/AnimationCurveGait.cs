@@ -24,6 +24,8 @@ public class AnimationCurveGait : MonoBehaviour, IGait
 
     private int[] m_positioningLimbs = new int[2];
 
+    public bool IsRunning() => m_currentStride != StrideType.NONE;
+
     public enum StrideType
     {
         NONE,
@@ -118,13 +120,18 @@ public class AnimationCurveGait : MonoBehaviour, IGait
         var gaitCurveY = gaitCurve.Evaluate(m_strideTime);
         var desiredPos = new Vector3(0, gaitCurveY, currentStrideTime - (.5f * m_stideTimeFull));
 
+        //var lerpPos = Vector3.Lerp(m_limbs[m_positioningLimbs[0]].GetIKTargetPos(), desiredPos, Time.deltaTime*2);
+
         //Target.position = pointBack.TransformPoint(new Vector3(0, gaitCurveY, gaitCurveX));
         // for (int i = 0; i < m_limbs.Length; i++)
         // {
         m_limbs[m_positioningLimbs[0]].SetIKTargetPos(desiredPos);
         m_limbs[m_positioningLimbs[1]].SetIKTargetPos(desiredPos);
         // }
-
+        foreach (var limb in m_limbs)
+        {
+            limb.RunLimb(false, true);
+        }
     }
 
     private void SetNextGaitCycle()

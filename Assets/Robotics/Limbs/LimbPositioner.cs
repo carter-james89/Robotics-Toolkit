@@ -14,6 +14,8 @@ namespace RoboticToolkit.Robotics.Gaits
     {
         public void Initialize(IRobot robot);
         public void RunGait();
+
+        public bool IsRunning();
     }
     public class LimbPositioner : MonoBehaviour
     {

@@ -32,9 +32,9 @@ namespace RoboticToolkit.Robotics.Gaits
 
         private IRobot m_robot;
 
-        protected override void Awake()
+        protected  void Awake()
         {
-            base.Awake();
+           // base.Awake();
             m_robot = GetComponent<IRobot>();
         }
         public void Initialize(IRobot robot)
@@ -130,7 +130,10 @@ namespace RoboticToolkit.Robotics.Gaits
             SetReward(-Vector3.Distance(m_target.localPosition, m_currentBodyPosition));
         }
 
-
+        public bool IsRunning()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 

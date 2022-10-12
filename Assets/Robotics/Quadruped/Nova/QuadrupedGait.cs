@@ -116,6 +116,11 @@ namespace RoboticToolkit.Robotics.Gaits
                 limb.RunLimb(true);
             }
         }
+
+        public bool IsRunning()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 
