@@ -134,7 +134,7 @@ namespace RoboticsToolkit.Robotics
         private void PositionTransform()
         {
             var ab = m_robot.GetGameObject().GetComponent<ArticulationBody>();
-            var lerpedPosition = Vector3.Lerp(m_robot.GetGameObject().transform.position,m_desiredPosition,Time.deltaTime*40);
+            var lerpedPosition = Vector3.Lerp(m_robot.GetGameObject().transform.position,m_desiredPosition,Time.deltaTime*20);
             ab.TeleportRoot(lerpedPosition, m_desiredRotation);
             ab.velocity = Vector3.zero;
             ab.angularVelocity = Vector3.zero;

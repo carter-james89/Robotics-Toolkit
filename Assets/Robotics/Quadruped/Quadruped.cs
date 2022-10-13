@@ -117,11 +117,11 @@ namespace RoboticsToolkit.Robotics
                 //    (limb.WristServoController as PIDServoController).ResetPid(m_pidD, m_pidI, m_pidD, m_pidMax, m_pidMin);
                 //}           
             }
-
+            m_baseTargets.transform.position = transform.position + new Vector3(0, m_walkHeight, 0);
             var controllers = GetComponents<IRoboticController>();
             if (m_simulate)
             {
-                m_baseTargets.transform.position = transform.position + new Vector3(0, m_walkHeight, 0);
+               
                 //   m_ground.gameObject.SetActive(true);
                 m_articulationBody.immovable = false;
 
@@ -180,7 +180,7 @@ namespace RoboticsToolkit.Robotics
             Time.timeScale = m_physicsTime;
             if (!m_roboticController.IsSimulator())
             {
-                RunRoboticController();
+               RunRoboticController();
             }
            
         }
