@@ -10,6 +10,8 @@ namespace RoboticToolKit.Robotics.Servos
         public IServo GetServo();
         public void SetAndRunServo(float desiredAngle, bool immediate);
 
+        public float GetSetAngle();
+
         public void Reset();
 
     }
@@ -141,6 +143,11 @@ namespace RoboticToolKit.Robotics.Servos
             }
             m_servoToControl.SetServoSpeed(m_setSpeed);
             //m_servoToControl.RunServo(desiredAngle);
+        }
+
+        public float GetSetAngle()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

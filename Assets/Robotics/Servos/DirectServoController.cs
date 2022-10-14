@@ -7,6 +7,8 @@ namespace RoboticToolKit.Robotics.Servos
     public class DirectServoController : MonoBehaviour, IServoController
     {
         private IServo[] m_servos;
+
+        private float m_setAngle;
         private void Awake()
         {
             GetServo();
@@ -31,6 +33,7 @@ namespace RoboticToolKit.Robotics.Servos
 
         public void SetAndRunServo(float desiredAngle, bool immediate)
         {
+            m_setAngle = desiredAngle;
             if (immediate)
             {
                 foreach (var servo in m_servos)
@@ -45,6 +48,11 @@ namespace RoboticToolKit.Robotics.Servos
                     servo.SetServoPosition(desiredAngle);
                 }
             }
+        }
+
+        public float GetSetAngle()
+        {
+            return m_setAngle;
         }
     }
 }

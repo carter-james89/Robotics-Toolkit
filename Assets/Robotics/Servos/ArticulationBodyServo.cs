@@ -80,11 +80,11 @@ namespace RoboticToolKit.Robotics.Servos
         }
         public void SetServoPositionImmediate(float position)
         {
-            var rotation = Quaternion.Euler(position, 0, 0);
-            m_articulation.TeleportRoot(m_articulation.transform.position, transform.rotation * rotation);
-            m_articulation.velocity = Vector3.zero;
-            m_articulation.angularVelocity = Vector3.zero;
-            // RotateTo(position);
+            //var rotation = Quaternion.Euler(position, 0, 0);
+            //m_articulation.TeleportRoot(m_articulation.transform.position, transform.rotation * rotation);
+            //m_articulation.velocity = Vector3.zero;
+            //m_articulation.angularVelocity = Vector3.zero;
+             RotateTo(position);
         }
 
         private void RotateTo(float angle)

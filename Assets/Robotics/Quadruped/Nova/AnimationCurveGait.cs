@@ -98,6 +98,8 @@ public class AnimationCurveGait : MonoBehaviour, IGait
             }
         }
 
+        strideComplete = m_limbs[m_positioningLimbs[0]].LimbAtTarget() && m_limbs[m_positioningLimbs[1]].LimbAtTarget();
+
         if (strideComplete && m_strideTime == gaitCurve.keys[gaitCurve.keys.Length - 1].time)
         {
             m_strideTime = gaitCurve.keys[0].time;
@@ -125,11 +127,21 @@ public class AnimationCurveGait : MonoBehaviour, IGait
         //Target.position = pointBack.TransformPoint(new Vector3(0, gaitCurveY, gaitCurveX));
         // for (int i = 0; i < m_limbs.Length; i++)
         // {
-        m_limbs[m_positioningLimbs[0]].SetIKTargetPos(desiredPos);
-        m_limbs[m_positioningLimbs[1]].SetIKTargetPos(desiredPos);
+     //   m_limbs[m_positioningLimbs[0]].SetIKTargetPos(desiredPos);
+      //  m_limbs[m_positioningLimbs[1]].SetIKTargetPos(desiredPos);
         // }
         foreach (var limb in m_limbs)
         {
+            if(limb == m_limbs[m_positioningLimbs[0]] || limb == m_limbs[m_positioningLimbs[1]])
+            {
+                limb.SetIKTargetPos(desiredPos);
+            }
+            else
+            {
+                var pos = limb.GetIKTargetPos();
+                var newPos = pos + (-transform.forward * m_gaitVelocity);
+               //limb.SetIKTargetPos(new Vector3(0, 0, (currentStrideTime - (.5f * m_stideTimeFull))));
+            }
             limb.RunLimb(false, true);
         }
     }

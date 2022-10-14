@@ -18,7 +18,7 @@ namespace RoboticsToolkit.Robotics
 
         private bool m_initialized = false;
 
-        
+
 
         public GameObject GetGameObject() => gameObject;
 
@@ -29,7 +29,7 @@ namespace RoboticsToolkit.Robotics
 
         void Awake()
         {
-            
+
         }
         public bool SetTransformValues()
         {
@@ -52,22 +52,22 @@ namespace RoboticsToolkit.Robotics
                 var euler = new Vector3(-sensorData.P, sensorData.R, sensorData.Y);
                 m_desiredRotation = Quaternion.Euler(euler);
 
-               // Debug.Log(sensorDataJSON);
+                // Debug.Log(sensorDataJSON);
 
                 var groundPosition = m_groundSensor.transform.position + (m_groundSensor.forward * (.01f * sensorData.H));
 
                 var groundOffset = new Vector3(0, groundPosition.y, 0);
 
-               // robotTransform.position -= groundOffset;
+                // robotTransform.position -= groundOffset;
 
-               m_desiredPosition = robotTransform.position - groundOffset;
+                m_desiredPosition = robotTransform.position - groundOffset;
 
-              //  robotTransform.position = m_desiredPosition;
-              //  robotTransform.rotation = m_desiredRotation;
+                //  robotTransform.position = m_desiredPosition;
+                //  robotTransform.rotation = m_desiredRotation;
 
                 //robotTransform.
 
-             //   PositionTransform();
+                //   PositionTransform();
 
                 return true;
             }
@@ -97,7 +97,7 @@ namespace RoboticsToolkit.Robotics
             try
             {
                 m_arduinoConnection.WriteToArduino(JsonUtility.ToJson(groundStationData));
-              //  Debug.Log("Echo : " + m_arduinoConnection.ReadFromArduino());
+                //  Debug.Log("Echo : " + m_arduinoConnection.ReadFromArduino());
                 return true;
             }
             catch (System.Exception e)
@@ -112,7 +112,7 @@ namespace RoboticsToolkit.Robotics
             m_arduinoConnection = GetComponent<ArduinoConnection>();
             m_arduinoConnection.ConnectToArduino();
             m_robot = robot;
-            m_desiredPosition = robot.GetGameObject().transform.position;   
+            m_desiredPosition = robot.GetGameObject().transform.position;
             m_desiredRotation = robot.GetGameObject().transform.rotation;
             foreach (var ab in robot.GetGameObject().GetComponentsInChildren<ArticulationBody>())
             {
@@ -127,23 +127,18 @@ namespace RoboticsToolkit.Robotics
 
         private void FixedUpdate()
         {
-            if(m_initialized)
-            PositionTransform();
+            if (m_initialized)
+                PositionTransform();
         }
 
         private void PositionTransform()
         {
             var ab = m_robot.GetGameObject().GetComponent<ArticulationBody>();
-            var lerpedPosition = Vector3.Lerp(m_robot.GetGameObject().transform.position,m_desiredPosition,Time.deltaTime*20);
+            var lerpedPosition = Vector3.Lerp(m_robot.GetGameObject().transform.position, m_desiredPosition, Time.deltaTime * 20);
             ab.TeleportRoot(lerpedPosition, m_desiredRotation);
             ab.velocity = Vector3.zero;
             ab.angularVelocity = Vector3.zero;
             //ab.ResetInertiaTensor();
-
-
-        
-
-
             //ab.Sleep();
         }
     }
