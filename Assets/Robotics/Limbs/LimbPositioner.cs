@@ -1,22 +1,10 @@
 using RoboticsToolkit.Robotics;
-using RoboticToolkit.Robotics.Limbs;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Gaits
 {
-    public interface IGaitEventListener
-    {
-        public void OnLimbAchievedTarget(Vector3 currentTarget);
-    }
-    public interface IGait
-    {
-        public void Initialize(IRobot robot);
-        public void RunGait();
-
-        public bool IsRunning();
-    }
+ 
     public class LimbPositioner : MonoBehaviour
     {
         [SerializeField]

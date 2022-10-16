@@ -4,6 +4,18 @@ using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Gaits
 {
+    public interface IGaitEventListener
+    {
+        public void OnLimbAchievedTarget(Vector3 currentTarget);
+    }
+    public interface IGait
+    {
+        public void Initialize(IRobot robot);
+        public void RunGait();
+
+        public bool IsRunning();
+    }
+
     public class QuadrupedGait : MonoBehaviour, IGait
     {
         private int m_stridePosition = 0;
