@@ -18,8 +18,6 @@ namespace RoboticsToolkit.Robotics
 
         private bool m_initialized = false;
 
-
-
         public GameObject GetGameObject() => gameObject;
 
         private Vector3 m_desiredPosition = Vector3.zero;

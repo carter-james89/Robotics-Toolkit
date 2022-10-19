@@ -30,6 +30,16 @@ namespace RoboticToolkit.Robotics.Gaits
 
         private IRoboticLimb[] m_limbs;
 
+        private IRoboticLimb[] m_rotatingLimbs = new IRoboticLimb[2];
+        private IRoboticLimb[] m_translatingLimbs = new IRoboticLimb[2];
+
+        private IRobot m_robot;
+
+        public enum Direction
+        {
+            Forward,
+            Rotating,
+        }
         public enum StrideType
         {
             NONE,
@@ -40,6 +50,7 @@ namespace RoboticToolkit.Robotics.Gaits
 
         public void Initialize(IRobot robot)
         {
+            m_robot = robot;
             m_limbs = robot.GetLimbs();
 
             foreach (var limb in m_limbs)
@@ -49,35 +60,59 @@ namespace RoboticToolkit.Robotics.Gaits
         }
         private void SetNextGaitCycle()
         {
-            var flLimb = m_limbs[0].GetGameObject().GetComponentInChildren<LimbPositioner>();
-            var frLimb = m_limbs[1].GetGameObject().GetComponentInChildren<LimbPositioner>();
-            var brLimb = m_limbs[2].GetGameObject().GetComponentInChildren<LimbPositioner>();
-            var blLimb = m_limbs[3].GetGameObject().GetComponentInChildren<LimbPositioner>();
-
             m_stridePosition++;
-            if (m_stridePosition == 3)
+            if (m_stridePosition == 2)
             {
-                m_stridePosition = 1;
+                m_stridePosition = 0;
             }
             switch (m_stridePosition)
             {
-                case 1:
-                    frLimb.RotateToPosition(new Vector3(0, 0, m_strideLength), m_mGaitRotationSpeed, m_strideHeight);
-                    blLimb.RotateToPosition(new Vector3(0, 0, m_strideLength), m_mGaitRotationSpeed, m_strideHeight);
+                case 0:
+                    m_rotatingLimbs[0] = m_limbs[0];
+                    m_rotatingLimbs[1] = m_limbs[2];
 
-                    flLimb.TranslateToPosition(new Vector3(0, 0, -m_strideLength), m_gaitTranslateSpeed);
-                    brLimb.TranslateToPosition(new Vector3(0, 0, -m_strideLength), m_gaitTranslateSpeed);
+                    m_translatingLimbs[0] = m_limbs[1];
+                    m_translatingLimbs[1] = m_limbs[3];
                     break;
-                case 2:
-                    flLimb.RotateToPosition(new Vector3(0, 0, m_strideLength), m_mGaitRotationSpeed, m_strideHeight);
-                    brLimb.RotateToPosition(new Vector3(0, 0, m_strideLength), m_mGaitRotationSpeed, m_strideHeight);
+                case 1:
+                    m_rotatingLimbs[0] = m_limbs[1];
+                    m_rotatingLimbs[1] = m_limbs[3];
 
-                    frLimb.TranslateToPosition(new Vector3(0, 0, -m_strideLength), m_gaitTranslateSpeed);
-                    blLimb.TranslateToPosition(new Vector3(0, 0, -m_strideLength), m_gaitTranslateSpeed);
+                    m_translatingLimbs[0] = m_limbs[0];
+                    m_translatingLimbs[1] = m_limbs[2];
                     break;
                 default:
                     break;
             }
+             // var direction = Direction.Rotating;
+            var direction = Direction.Forward;
+            switch (direction)
+            {
+                case Direction.Forward:
+                    foreach (var limb in m_rotatingLimbs)
+                    {
+                        //limb.GetPositioner().RotateToPosition(new Vector3(0, 0, .05f), Quaternion.identity, .5f, true);
+                        limb.GetPositioner().RotateToPosition(m_robot.GetGimbal().GetGameObject().transform.forward, transform.up, .05f, .3f);
+                    }
+                    foreach (var limb in m_translatingLimbs)
+                    {
+                        //limb.GetPositioner().TranslateToPosition(new Vector3(0, 0, -.05f), .5f, true);
+                        limb.GetPositioner().TranslateToPosition(-m_robot.GetGimbal().GetGameObject().transform.forward, .05f, .3f);
+                    }
+                    break;
+                case Direction.Rotating:
+                    float distance = .02f;
+                    float time = .6f;
+                    m_rotatingLimbs[0].GetPositioner().RotateToPosition(-m_robot.GetGimbal().GetGameObject().transform.right, transform.up, distance, time);
+                    m_rotatingLimbs[1].GetPositioner().RotateToPosition(m_robot.GetGimbal().GetGameObject().transform.right, transform.up, distance, time);
+
+                    m_translatingLimbs[0].GetPositioner().TranslateToPosition(m_robot.GetGimbal().GetGameObject().transform.right, distance, time);
+                    m_translatingLimbs[1].GetPositioner().TranslateToPosition(-m_robot.GetGimbal().GetGameObject().transform.right, distance, time);
+                    break;
+                default:
+                    break;
+            }
+
         }
 
         void Update()
@@ -92,46 +127,39 @@ namespace RoboticToolkit.Robotics.Gaits
         {
             if (m_currentStride != StrideType.NONE)
             {
-                foreach (var limb in m_limbs)
-                {
-                    limb.GetGameObject().GetComponentInChildren<LimbPositioner>().Run();
-                }
                 bool strideComplete = true;
                 foreach (var limb in m_limbs)
                 {
-                    if (limb.GetGameObject().GetComponentInChildren<LimbPositioner>().CheckLimbAtTarget() == false)
+                    limb.GetPositioner().Run();
+                    if(m_rotatingLimbs[0] == limb || m_rotatingLimbs[1] == limb)
+                    {
+                        limb.RunLimb(false, false);
+                    }
+                    else
+                    {
+                        limb.RunLimb(false, true);
+                    }
+                    if (limb.GetPositioner().StrideComplete() == false)
                     {
                         strideComplete = false;
                     }
                 }
+
                 if (strideComplete)
                 {
                     SetNextGaitCycle();
                 }
             }
 
-            foreach (var limb in m_limbs)
-            {
-                //if (limb.GetPositioner().GetMovementStyle() != LimbPositioner.MovementStyle.Rotate)
-                //{
-                //    // heightOffset = m_baseTarget.position.y - m_shoulderServoController.GetServo().GetGameObject().transform.position.y;
-                //    // heightOffset = transform.InverseTransformPoint(m_baseTarget.position).y;
-
-                //    var heightOffset = limb.GetGameObject().transform.position.y - limb.GetTargetBasePosition().position.y;
-
-                //    limb.GetPositioner().transform.localPosition PositionGaitHeight(-heightOffset);
-                //}
-                //else
-                //{
-                //    limb.PositionGaitHeight(0);
-                //}
-                limb.RunLimb(true);
-            }
+            //foreach (var limb in m_limbs)
+            //{
+            //    limb.RunLimb(false,true);
+            //}
         }
 
         public bool IsRunning()
         {
-            throw new System.NotImplementedException();
+            return m_currentStride != StrideType.NONE;
         }
     }
 }

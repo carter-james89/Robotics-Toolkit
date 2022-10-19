@@ -17,7 +17,7 @@ namespace RoboticsToolkit.Robotics
 
     public interface IRoboticControllerEventListener
     {
-
+      
     }
 
     public class QuadrupedSensorData

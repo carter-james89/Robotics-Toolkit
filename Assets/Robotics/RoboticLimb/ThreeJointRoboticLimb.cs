@@ -1,3 +1,4 @@
+using RoboticsToolkit.Robotics;
 using RoboticToolkit.Robotics.Gaits;
 using RoboticToolKit.Robotics.Servos;
 using System.Collections;
@@ -9,7 +10,7 @@ namespace RoboticToolkit.Robotics.Limbs
     public interface IRoboticLimb
     {
         public GameObject GetGameObject();
-        // public LimbPositioner GetPositioner();
+        public ILimbPositioner GetPositioner();
         public Transform GetEndPoint();
         public Transform GetTargetBasePosition();
         public IServoController[] GetServoControllers();
@@ -100,11 +101,13 @@ namespace RoboticToolkit.Robotics.Limbs
             m_servoControllers[0] = m_shoulderServoController;
             m_servoControllers[1] = m_elbowServoController;
             m_servoControllers[2] = m_wristServoController;
+
+            m_positioner = GetComponentInChildren<ILimbPositioner>();
         }
-        public void Initialize(IGimbal gimbal, bool useGimbalHeightAdjustment)
+        public void Initialize(IRobot robot, bool useGimbalHeightAdjustment)
         {
-            m_gimbal = gimbal;
-            m_heightAdjustementOrigin = useGimbalHeightAdjustment ? gimbal.GetGameObject().transform : transform;
+            m_gimbal = robot.GetGimbal();
+            m_heightAdjustementOrigin = useGimbalHeightAdjustment ? robot.GetGameObject().transform : transform;
             m_positionerOffset = m_heightAdjustementOrigin.InverseTransformPoint(m_heightAdjustment.position);
             // m_positionerOffset.y = -.1f;
 
@@ -126,11 +129,11 @@ namespace RoboticToolkit.Robotics.Limbs
         }
         public void SetIKTargetPos(Vector3 localPos)
         {
-            m_ikTarget.localPosition = localPos;
+            m_ikTarget.position = localPos;
         }
         public Vector3 GetIKTargetPos()
         {
-            return m_ikTarget.localPosition;
+            return  m_ikTarget.position;
         }
         public bool LimbAtTarget()
         {
@@ -145,6 +148,8 @@ namespace RoboticToolkit.Robotics.Limbs
         }
 
         public Transform DebugCube;
+        private ILimbPositioner m_positioner;
+
         public void RunLimb(bool positionServoImmediate, bool adjustHeight = false)
         {
             if (adjustHeight)
@@ -201,10 +206,12 @@ namespace RoboticToolkit.Robotics.Limbs
             //var gaitPos = m_heightAdjustementOrigin.transform.TransformPoint(tempPos);
             //m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * .1f);
 
+           // m_positionerOffset.y = -.15f;
+
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
 
             gaitPos.y = -height;
-            m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * 2);// 1.5f);
+            m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * 3);// 1.5f);
 
         }
         public void ResetLimbTargetPosition()
@@ -220,10 +227,10 @@ namespace RoboticToolkit.Robotics.Limbs
             m_wristServoController.Reset();
         }
 
-        //public LimbPositioner GetPositioner()
-        //{
-        //    return m_positioner;
-        //}
+        public ILimbPositioner GetPositioner()
+        {
+            return m_positioner;
+        }
 
         //public bool LimbAtTarget()
         //{

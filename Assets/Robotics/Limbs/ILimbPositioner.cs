@@ -5,13 +5,22 @@ using UnityEngine;
 
 public interface ILimbPositioner 
 {
-    public void RotateToPosition(Vector3 globalPosition, Quaternion rotationAxis, float time);
+    public GameObject GetGameObject();
+    public void RotateToPosition(Vector3 globalPosition, Quaternion rotationAxis, float time, bool localSpace);
 
-    public void TranslateToPosition(Vector3 globalPosition, float time);
+    public void RotateToPosition(Vector3 direction, Vector3 upDirection, float distance, float time);
 
-    public void SetLimbPosition(Vector3 globalPosition);
+    public void TranslateToPosition(Vector3 globalPosition, float time, bool localSpace);
 
-    public Vector3 GetLimbPosition();
+    public void TranslateToPosition(Vector3 direction, float distance, float time);
+
+    public bool StrideComplete();
+
+    public void SetLimbPosition(Vector3 globalPosition, bool localSpace);
+
+    public Vector3 GetLimbPosition(bool localSpace);
+
+    public bool Run();
 
     public void SubscribeToEvents(ILimbPositionerEventListener listener);
     public void UnsubscribeFromEvents(ILimbPositionerEventListener listener);
