@@ -141,6 +141,7 @@ namespace RoboticToolkit.Robotics.Gaits
                     }
                     if (limb.GetPositioner().StrideComplete() == false)
                     {
+                        Debug.Log("waiting on " + limb.GetGameObject().name);
                         strideComplete = false;
                     }
                 }

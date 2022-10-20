@@ -170,7 +170,7 @@ namespace RoboticToolkit.Robotics.Limbs
             }
             else
             {
-                Debug.Log("set limb to 0 " + name);
+               // Debug.Log("set limb to 0 " + name);
                 PositionGaitHeight(0);
             }
             //return;
