@@ -52,7 +52,7 @@ namespace RoboticsToolkit.Robotics
 
         private bool m_ready = true;
 
-        private IGait m_gait;
+        private IGaitController m_gaitController;
         private float m_startHeight;
 
         [SerializeField]
@@ -60,6 +60,15 @@ namespace RoboticsToolkit.Robotics
 
         [SerializeField]
         private bool m_simulate = false;
+
+        [SerializeField]
+        private bool m_static = false;
+
+        [SerializeField]
+        private GameObject m_ground;
+
+        [SerializeField]
+        private Transform m_com;
 
         public IRobot.RobotData GetRobotData()
         {
@@ -78,7 +87,7 @@ namespace RoboticsToolkit.Robotics
         void Start()
         {
             m_startHeight = transform.localPosition.y;
-            m_gait = GetComponent<IGait>();
+            m_gaitController = GetComponent<IGaitController>();
             m_articulationBody = GetComponent<ArticulationBody>();
 
             if (m_flLimb)
@@ -139,9 +148,9 @@ namespace RoboticsToolkit.Robotics
                 m_articulationBody.immovable = true;
             }
             m_roboticController.Initialize(this);
-            if (m_gait != null)
+            if (m_gaitController != null)
             {
-                m_gait.Initialize(this);
+                m_gaitController.Initialize(this);
             }
             //if (m_arduinoConnection && m_arduinoConnection.enabled)
             //{
@@ -172,6 +181,8 @@ namespace RoboticsToolkit.Robotics
             {
                 RunRoboticController();
             }
+            m_com.localPosition = m_articulationBody.centerOfMass;
+           // m_com.localPosition = m_articulationBody.c
         }
 
         public void EmergencyStop()
@@ -182,6 +193,7 @@ namespace RoboticsToolkit.Robotics
             {
                 //     limb.ResetLimbTargetPosition();
             }
+
             NotifyEventListeners(IRobotEventListener.EventType.OnEmergencyStop);
         }
 
@@ -191,6 +203,7 @@ namespace RoboticsToolkit.Robotics
             {
                 RunRoboticController();
             }
+
         }
 
         public void RunRoboticController()
@@ -209,7 +222,7 @@ namespace RoboticsToolkit.Robotics
                 {
                     limb.RunLimb(!m_roboticController.IsSimulator(), true);
 
-                    if (!limb.LimbAtTarget())
+                    if (!limb.LimbAtTarget() || !limb.BaseAtTarget())
                     {
                         atTarget = false;
                     }
@@ -217,6 +230,16 @@ namespace RoboticsToolkit.Robotics
                 if (atTarget)
                 {
                     m_status = Status.Ready;
+
+                    if (m_static)
+                    {
+                        m_articulationBody.immovable = true;
+                        m_ground.SetActive(false);
+                        var tempPos = m_baseTargets.position;
+                        tempPos.y = m_blLimb.GetGameObject().transform.position.y;
+                        m_baseTargets.transform.position = tempPos; 
+                    }
+
                     NotifyEventListeners(IRobotEventListener.EventType.OnRobotInPosition);
                 }
                 else
@@ -225,24 +248,39 @@ namespace RoboticsToolkit.Robotics
                 }
             }
 
-            if (m_gait != null && IsRunning)
-            {
-                m_gait.RunGait();
-            }
             if (!IsRunning)
             {
-                foreach (var limb in m_limbs)
-                {
-                    limb.RunLimb(!m_roboticController.IsSimulator(), true);
-                }
+                return;
             }
-            else if (m_gait != null && !m_gait.IsRunning())
+            foreach (var limb in m_limbs)
+            {
+                limb.GetPositioner().GetGameObject().transform.rotation = Quaternion.LookRotation(GetGimbal().GetGameObject().transform.forward, GetGimbal().GetGameObject().transform.up);
+            }
+            if (m_gaitController != null && m_gaitController.IsRunning())
+            {
+                m_gaitController.Run();
+            }
+            else
             {
                 foreach (var limb in m_limbs)
                 {
                     limb.RunLimb(!m_roboticController.IsSimulator(), true);
                 }
             }
+            //if (!IsRunning)
+            //{
+            //    foreach (var limb in m_limbs)
+            //    {
+            //        limb.RunLimb(!m_roboticController.IsSimulator(), true);
+            //    }
+            //}
+            //else if (m_gait != null && !m_gait.IsRunning())
+            //{
+            //    foreach (var limb in m_limbs)
+            //    {
+            //        limb.RunLimb(!m_roboticController.IsSimulator(), true);
+            //    }
+            //}
             // m_roboticController.SendCommands();
 
             var digitalTwinData = new QuadrupedGroundStationData();

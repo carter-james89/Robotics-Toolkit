@@ -23,7 +23,7 @@ namespace RoboticToolkit.Robotics.Limbs
 
         public bool LimbAtTarget();
 
-
+        public bool BaseAtTarget();
 
     }
     public class ThreeJointRoboticLimb : MonoBehaviour, IRoboticLimb
@@ -146,7 +146,17 @@ namespace RoboticToolkit.Robotics.Limbs
                 return false;
             }
         }
-
+        public bool BaseAtTarget()
+        {
+            if (Vector3.Distance(transform.position, m_baseTarget.transform.position) < .015f)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public Transform DebugCube;
         private ILimbPositioner m_positioner;
 
@@ -206,12 +216,21 @@ namespace RoboticToolkit.Robotics.Limbs
             //var gaitPos = m_heightAdjustementOrigin.transform.TransformPoint(tempPos);
             //m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * .1f);
 
-           // m_positionerOffset.y = -.15f;
+         //   m_positionerOffset.y = -.16f;
 
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
 
+            //m_heightAdjustment.position = gaitPos;
+            //return;
+
+            if (height == 0)
+            {
+                gaitPos.y = 0;
+                m_heightAdjustment.position = gaitPos;
+
+            }
             gaitPos.y = -height;
-            m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * 3);// 1.5f);
+            m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * 1f);
 
         }
         public void ResetLimbTargetPosition()

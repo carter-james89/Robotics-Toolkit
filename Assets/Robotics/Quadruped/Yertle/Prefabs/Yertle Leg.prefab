@@ -785,7 +785,7 @@ ArticulationBody:
   m_GameObject: {fileID: 2326164859709567417}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 0.01
+  m_Mass: 1
   m_ParentAnchorPosition: {x: 0, y: 0, z: 0}
   m_ParentAnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
@@ -1079,7 +1079,7 @@ SphereCollider:
   m_GameObject: {fileID: 3833935170518536798}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.012
   m_Center: {x: 0, y: 0.004, z: -0.009}
@@ -1947,42 +1947,46 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0.26752666
-      outSlope: 0.26752666
+      inSlope: 0.30015224
+      outSlope: 0.30015224
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.076466605
+      outWeight: 0.03122752
     - serializedVersion: 3
-      time: 0.02687341
-      value: 0.019396663
-      inSlope: -0.00066556723
-      outSlope: -0.00066556723
+      time: 0.008843141
+      value: 0.0111593045
+      inSlope: 0.25843957
+      outSlope: 0.25843957
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.08638896
+      outWeight: 0.33333334
     - serializedVersion: 3
-      time: 0.98140544
-      value: 0.01837901
-      inSlope: -0.012107107
-      outSlope: -0.012107107
+      time: 0.9972141
+      value: 0.013016414
+      inSlope: -0.026063465
+      outSlope: -0.026063465
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.05200699
+      inWeight: 0.049512338
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: -1.2018435
-      outSlope: -1.2018435
+      inSlope: -0.063199006
+      outSlope: -0.063199006
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.1331371
+      inWeight: 0.04437524
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  m_log: 0
+  m_useAcceleration: 0
+  m_acceleration: 0
+  m_initialVelocity: 0
 --- !u!120 &570344103233370561
 LineRenderer:
   serializedVersion: 2
@@ -2266,7 +2270,7 @@ GameObject:
   - component: {fileID: 2244703776719461689}
   - component: {fileID: 4063126453019108574}
   - component: {fileID: 5780390248985079434}
-  - component: {fileID: 2211478990442846855}
+  - component: {fileID: 4576326134993840860}
   m_Layer: 0
   m_Name: Arm Elevation Servo
   m_TagString: Untagged
@@ -2421,8 +2425,8 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7017852121102698579}
   m_Mesh: {fileID: 5537898041940747634, guid: 76c98bfba69227744aa5b451ee21668d, type: 3}
---- !u!64 &2211478990442846855
-MeshCollider:
+--- !u!65 &4576326134993840860
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2431,10 +2435,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 5537898041940747634, guid: 76c98bfba69227744aa5b451ee21668d, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.057311013, y: 0.034198068, z: 0.052953556}
+  m_Center: {x: 0.032057993, y: 0, z: 0.009637736}
 --- !u!1 &7534096709214346190
 GameObject:
   m_ObjectHideFlags: 0

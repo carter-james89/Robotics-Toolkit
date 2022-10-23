@@ -24,10 +24,15 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
 
     private List<ILimbPositionerEventListener> m_eventListeners = new List<ILimbPositionerEventListener>();
 
-
+    [SerializeField]
+    private bool m_log = false;
     private float m_strideTime = 0;
 
     private float m_gaitVelocity = 0;
+
+    public bool m_useAcceleration = false;
+    public float m_acceleration = 0;
+    public float m_initialVelocity = 0;
 
 
     private float m_totalCurveDistance;
@@ -67,11 +72,9 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
 
     public void TranslateToPosition(Vector3 position, float time, bool localSpace)
     {
-        Debug.Log("Translated End Point to " + position + " " + transform.parent.name);
         if (localSpace)
         {
             position = transform.TransformPoint(position);
-            Debug.Log("Convert to golbal positon " + position + " " + transform.parent.name);
         }
 
         // m_totalCurveDistance = m_gaitCurve.keys[m_gaitCurve.keys.Length - 1].time - m_gaitCurve.keys[0].time;
@@ -102,7 +105,6 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
 
     private void CalculateAnimationCurve(Vector3 globalEndPoint, float desiredGaitTime)
     {
-        
         m_totalCurveDistance = m_gaitCurve.keys[m_gaitCurve.keys.Length - 1].time - m_gaitCurve.keys[0].time;
 
         m_stride.position = m_limb.GetIKTargetPos();
@@ -122,14 +124,38 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
     {
         if (CurrentStatus == Status.None)
         {
-            return m_limb.LimbAtTarget();
+            return StrideComplete();
         }
 
-        var currentStrideTime = m_strideTime + Time.deltaTime * m_gaitVelocity;
+        float velocity = m_gaitVelocity;
+        if (m_useAcceleration)
+        {
+            //velocity = m_initialVelocity + (m_acceleration * m_strideTime);
+
+            velocity = Mathf.Lerp(m_gaitVelocity * 2.01f,0.01f, m_strideTime / m_totalCurveDistance);
+           // velocity += .001f;
+
+            if (m_log)
+            {
+              //  Debug.Log("Current velocity : " + velocity);
+            }
+        }
+
+        var currentStrideTime = m_strideTime + Time.deltaTime * velocity;
         if (currentStrideTime > m_currentCurve.keys[m_currentCurve.keys.Length - 1].time)
         {
             m_strideTime = m_currentCurve.keys[m_currentCurve.keys.Length - 1].time;
+
+            var endPos = new Vector3(0, m_currentCurve.keys[m_currentCurve.keys.Length - 1].value, m_totalTravelDistance);
+            m_limb.SetIKTargetPos(m_stride.TransformPoint(endPos));
+
             CurrentStatus = Status.None;
+           
+            if (m_log)
+            {
+                Debug.Log("Limb at Target : " + name + " : " + transform.InverseTransformPoint(m_limb.GetIKTargetPos()).z);
+            }
+            return StrideComplete();
         }
         else
         {
@@ -148,7 +174,8 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
     }
     public bool StrideComplete()
     {
-        if (CurrentStatus == Status.None && m_limb.LimbAtTarget())
+        //  Debug.Log(transform.parent.name + " " + CurrentStatus);
+        if (CurrentStatus == Status.None) // && m_limb.LimbAtTarget() && m_limb.BaseAtTarget())
         {
             return true;
         }
@@ -187,39 +214,31 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
 
     public void RotateToPosition(Vector3 direction, Vector3 upDirection, float distance, float time)
     {
+        SetStridePosition(Quaternion.LookRotation(direction, upDirection), distance);
         m_totalCurveDistance = m_gaitCurve.keys[m_gaitCurve.keys.Length - 1].time - m_gaitCurve.keys[0].time;
 
-        m_stride.position = m_limb.GetIKTargetPos();
-        m_stride.rotation = Quaternion.LookRotation(direction, upDirection);
+          m_gaitVelocity = m_totalCurveDistance / time;
 
-       // var localEndPoint = m_stride.InverseTransformPoint(globalEndPoint);
-        m_strideLine.SetPosition(0, Vector3.zero);
-        m_strideLine.SetPosition(1, new Vector3(0,0,distance));
+        m_useAcceleration = true;
+        //m_acceleration = -1;
+        //m_initialVelocity = (distance / time) - (.5f*(m_acceleration * time));
 
-        m_totalTravelDistance = distance;
-        m_gaitVelocity = m_totalCurveDistance / time;
+        if (m_log)
+        {
+            Debug.Log("initial velocity : " + m_initialVelocity);
+        }
 
         m_currentCurve = m_gaitCurve;
 
         m_strideTime = 0;
-        CurrentStatus = Status.Rotating;
+       CurrentStatus = Status.Rotating;
     }
 
-    public void TranslateToPosition(Vector3 direction, float distance, float time)
+    public void TranslateToPosition(Vector3 direction, Vector3 upDir, float distance, float time)
     {
-        // m_totalCurveDistance = m_gaitCurve.keys[m_gaitCurve.keys.Length - 1].time - m_gaitCurve.keys[0].time;
-
-        m_stride.position = m_limb.GetIKTargetPos();
-        m_stride.rotation = Quaternion.LookRotation(direction);
-
-       // m_stride.rotation = Quaternion.LookRotation(direction,Vector3.up,)
-
-      //  var localEndPoint = m_stride.InverseTransformPoint(new Vector3(0,0,distance));
-        m_strideLine.SetPosition(0, Vector3.zero);
-        m_strideLine.SetPosition(1, new Vector3(0, 0, distance));
+        SetStridePosition(Quaternion.LookRotation(direction,upDir), distance);
 
         m_totalCurveDistance = distance;
-        m_totalTravelDistance = m_totalCurveDistance;
 
         Keyframe[] newFrames = new Keyframe[2];
         newFrames[0] = new Keyframe(0, 0);
@@ -229,8 +248,27 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
         m_currentCurve = m_translationCurve;
 
         m_gaitVelocity = m_totalCurveDistance / time;
+     //   Debug.Log("Gait Translate Velocity : " + m_gaitVelocity);
 
-        CurrentStatus = Status.Translating;
+       CurrentStatus = Status.Translating;
         m_strideTime = 0;
+    }
+
+    private void SetStridePosition(Quaternion direction, float distance)
+    {
+        m_stride.position = m_limb.GetIKTargetPos();
+        m_stride.rotation = direction;
+
+        m_totalTravelDistance = distance;
+
+       // m_limb.SetIKTargetPos(m_stride.TransformPoint(new Vector3(0,0,m_totalTravelDistance)));
+
+        if (m_log)
+        {
+           // Debug.Log("set travel distance to " + m_totalTravelDistance);
+        }
+
+        m_strideLine.SetPosition(0, Vector3.zero);
+        m_strideLine.SetPosition(1, new Vector3(0, 0, distance));
     }
 }

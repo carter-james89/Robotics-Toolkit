@@ -12,7 +12,7 @@ public interface ILimbPositioner
 
     public void TranslateToPosition(Vector3 globalPosition, float time, bool localSpace);
 
-    public void TranslateToPosition(Vector3 direction, float distance, float time);
+    public void TranslateToPosition(Vector3 direction, Vector3 upDir, float distance, float time);
 
     public bool StrideComplete();
 

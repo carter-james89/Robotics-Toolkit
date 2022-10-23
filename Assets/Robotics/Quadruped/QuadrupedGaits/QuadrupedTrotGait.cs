@@ -1,5 +1,6 @@
 using RoboticsToolkit.Robotics;
 using RoboticToolkit.Robotics.Limbs;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Gaits
@@ -11,14 +12,16 @@ namespace RoboticToolkit.Robotics.Gaits
     public interface IGait
     {
         public void Initialize(IRobot robot);
+
+        public void Begin();
         public void RunGait();
 
         public bool IsRunning();
     }
 
-    public class QuadrupedGait : MonoBehaviour, IGait
+    public class QuadrupedTrotGait : MonoBehaviour, IGait
     {
-        private int m_stridePosition = 0;
+        private int m_stridePosition = 1;
         [SerializeField]
         private float m_strideLength = .05f;
         [SerializeField]
@@ -27,6 +30,8 @@ namespace RoboticToolkit.Robotics.Gaits
         private float m_gaitTranslateSpeed = .1f;
         [SerializeField]
         private float m_mGaitRotationSpeed = 25;
+
+        private bool m_firstStride = true;
 
         private IRoboticLimb[] m_limbs;
 
@@ -43,7 +48,6 @@ namespace RoboticToolkit.Robotics.Gaits
         public enum StrideType
         {
             NONE,
-            STATIONARYSTEP,
             WALKING
         }
         private StrideType m_currentStride = StrideType.NONE;
@@ -60,11 +64,6 @@ namespace RoboticToolkit.Robotics.Gaits
         }
         private void SetNextGaitCycle()
         {
-            m_stridePosition++;
-            if (m_stridePosition == 2)
-            {
-                m_stridePosition = 0;
-            }
             switch (m_stridePosition)
             {
                 case 0:
@@ -84,71 +83,103 @@ namespace RoboticToolkit.Robotics.Gaits
                 default:
                     break;
             }
-             // var direction = Direction.Rotating;
             var direction = Direction.Forward;
             switch (direction)
             {
                 case Direction.Forward:
+                    float distance = .04f;
+                    float time = .2f;
+                    if (m_firstStride)
+                    {
+                        distance /= 2;
+                        time /= 2;
+                        m_firstStride = false;
+                    }
                     foreach (var limb in m_rotatingLimbs)
                     {
                         //limb.GetPositioner().RotateToPosition(new Vector3(0, 0, .05f), Quaternion.identity, .5f, true);
-                        limb.GetPositioner().RotateToPosition(m_robot.GetGimbal().GetGameObject().transform.forward, transform.up, .05f, .3f);
+                        limb.GetPositioner().RotateToPosition(m_robot.GetGimbal().GetGameObject().transform.forward, m_robot.GetGimbal().GetGameObject().transform.up, distance, time - (time * .25f));
                     }
                     foreach (var limb in m_translatingLimbs)
                     {
                         //limb.GetPositioner().TranslateToPosition(new Vector3(0, 0, -.05f), .5f, true);
-                        limb.GetPositioner().TranslateToPosition(-m_robot.GetGimbal().GetGameObject().transform.forward, .05f, .3f);
+                        limb.GetPositioner().TranslateToPosition(-m_robot.GetGimbal().GetGameObject().transform.forward, m_robot.GetGimbal().GetGameObject().transform.up, distance, time);
                     }
                     break;
                 case Direction.Rotating:
-                    float distance = .02f;
-                    float time = .6f;
-                    m_rotatingLimbs[0].GetPositioner().RotateToPosition(-m_robot.GetGimbal().GetGameObject().transform.right, transform.up, distance, time);
-                    m_rotatingLimbs[1].GetPositioner().RotateToPosition(m_robot.GetGimbal().GetGameObject().transform.right, transform.up, distance, time);
+                    distance = .02f;
+                    time = .4f;
+                    m_rotatingLimbs[0].GetPositioner().RotateToPosition(-m_robot.GetGimbal().GetGameObject().transform.right, Vector3.up, distance, time);
+                    m_rotatingLimbs[1].GetPositioner().RotateToPosition(m_robot.GetGimbal().GetGameObject().transform.right, Vector3.up, distance, time);
 
-                    m_translatingLimbs[0].GetPositioner().TranslateToPosition(m_robot.GetGimbal().GetGameObject().transform.right, distance, time);
-                    m_translatingLimbs[1].GetPositioner().TranslateToPosition(-m_robot.GetGimbal().GetGameObject().transform.right, distance, time);
+                    m_translatingLimbs[0].GetPositioner().TranslateToPosition(m_robot.GetGimbal().GetGameObject().transform.right, m_robot.GetGimbal().GetGameObject().transform.up, distance, time);
+                    m_translatingLimbs[1].GetPositioner().TranslateToPosition(-m_robot.GetGimbal().GetGameObject().transform.right, m_robot.GetGimbal().GetGameObject().transform.up, distance, time);
                     break;
                 default:
                     break;
             }
-
-        }
-
-        void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
+            m_stridePosition++;
+            if (m_stridePosition == 2)
             {
-                m_currentStride = StrideType.WALKING;
-                SetNextGaitCycle();
+
+                m_stridePosition = 0;
             }
         }
+
+        private bool m_postStrideCooldown = false;
+        private float m_postStrideCooldownTime = 0;
+        private float m_postStrideCooldownTargetTime = 1f;
         public void RunGait()
         {
-            if (m_currentStride != StrideType.NONE)
+            if (m_postStrideCooldown)
             {
-                bool strideComplete = true;
+                m_postStrideCooldownTime += Time.deltaTime;
+                if (m_postStrideCooldownTime >= m_postStrideCooldownTargetTime)
+                {
+                    SetNextGaitCycle();
+                    m_postStrideCooldown = false;
+                    m_postStrideCooldownTime = 0;
+                }
+            }
+            if (m_postStrideCooldown)
+            {
+               // Debug.Log("cooldown");
                 foreach (var limb in m_limbs)
                 {
+                    limb.RunLimb(true, true);
+                }
+                return;
+            }
+            if (m_currentStride != StrideType.NONE)
+            {
+                List<ILimbPositioner> m_limbsAtTarget = new List<ILimbPositioner>();
+                foreach (var limb in m_limbs)
+                {
+
                     limb.GetPositioner().Run();
-                    if(m_rotatingLimbs[0] == limb || m_rotatingLimbs[1] == limb)
+                    if (m_rotatingLimbs[0] == limb || m_rotatingLimbs[1] == limb)
                     {
-                        limb.RunLimb(false, false);
+                        limb.RunLimb(true, true);
                     }
                     else
                     {
-                        limb.RunLimb(false, true);
+                        limb.RunLimb(true, true);
                     }
-                    if (limb.GetPositioner().StrideComplete() == false)
+                    if (limb.GetPositioner().StrideComplete() == true)
                     {
-                        Debug.Log("waiting on " + limb.GetGameObject().name);
-                        strideComplete = false;
+                      //   Debug.Log(limb.GetPositioner().cu);
+                        m_limbsAtTarget.Add(limb.GetPositioner());  
+                    }
+                    else
+                    {
+                        Debug.Log("Waiting for : " + limb.GetGameObject().name);
                     }
                 }
-
-                if (strideComplete)
+                //Debug.Log(m_limbsAtTarget.Count);
+                if (m_limbsAtTarget.Count >=3)
                 {
-                    SetNextGaitCycle();
+                    m_postStrideCooldown = true;
+                    // SetNextGaitCycle();
                 }
             }
 
@@ -162,6 +193,13 @@ namespace RoboticToolkit.Robotics.Gaits
         {
             return m_currentStride != StrideType.NONE;
         }
+
+        public void Begin()
+        {
+            m_currentStride = StrideType.WALKING;
+            SetNextGaitCycle();
+        }
     }
 }
+
 

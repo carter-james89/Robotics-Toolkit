@@ -431,7 +431,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7163596423080726649
 Transform:
   m_ObjectHideFlags: 0
@@ -569,7 +569,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5127840615009942789
 Transform:
   m_ObjectHideFlags: 0
@@ -1605,6 +1605,9 @@ MonoBehaviour:
   m_baseTargets: {fileID: 9219462630832583033}
   m_walkHeight: 0.2
   m_simulate: 0
+  m_static: 0
+  m_ground: {fileID: 0}
+  m_com: {fileID: 0}
 --- !u!114 &3099181762458029914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1682,8 +1685,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.11453602, y: 0.06997317, z: 0.4269229}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.11453602, y: 0.06997317, z: 0.1935153}
+  m_Center: {x: 0, y: 0, z: 0.00652276}
 --- !u!33 &6353467401179831182
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -2990,12 +2993,20 @@ PrefabInstance:
       value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[1].time
       value: 0.37819177
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].time
       value: 0.92983073
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[3].time
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[1].value
@@ -3006,8 +3017,28 @@ PrefabInstance:
       value: 0.034827985
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[0].inSlope
+      value: 0.26752666
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[1].inSlope
+      value: -0.00066556723
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].inSlope
       value: -0.0968425
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[3].inSlope
+      value: -1.2018435
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[0].outSlope
+      value: 0.26752666
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[1].outSlope
+      value: -0.00066556723
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].inWeight
@@ -3016,6 +3047,26 @@ PrefabInstance:
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].outSlope
       value: -0.0968425
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[3].inWeight
+      value: 0.1331371
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[3].outSlope
+      value: -1.2018435
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[0].outWeight
+      value: 0.076466605
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[1].outWeight
+      value: 0.08638896
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[2].outWeight
+      value: 0.33333334
       objectReference: {fileID: 0}
     - target: {fileID: 7890036655476095796, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_ParentAnchorPosition.x
@@ -3364,32 +3415,64 @@ PrefabInstance:
       value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[1].time
-      value: 0.37819177
+      value: 0.49983484
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].time
-      value: 0.92983073
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[1].value
-      value: 0.050524592
+      value: 0.050127864
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].value
-      value: 0.034827985
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[0].inSlope
+      value: 0.26752666
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[1].inSlope
+      value: -0.00066556723
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].inSlope
-      value: -0.0968425
+      value: -0.32044762
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[0].outSlope
+      value: 0.26752666
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[1].outSlope
+      value: -0.00066556723
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].inWeight
-      value: 0.33333334
+      value: 0.26750663
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].outSlope
-      value: -0.0968425
+      value: -0.32044762
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[0].outWeight
+      value: 0.076466605
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[1].outWeight
+      value: 0.08638896
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[2].outWeight
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7890036655476095796, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_ParentAnchorPosition.x
@@ -3755,6 +3838,10 @@ PrefabInstance:
       value: Yertle FR Leg
       objectReference: {fileID: 0}
     - target: {fileID: 3810489498786727389, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_Mass
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3810489498786727389, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_ParentAnchorPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -3807,12 +3894,20 @@ PrefabInstance:
       value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[1].time
       value: 0.37819177
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].time
       value: 0.92983073
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[3].time
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[1].value
@@ -3823,8 +3918,28 @@ PrefabInstance:
       value: 0.034827985
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[0].inSlope
+      value: 0.26752666
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[1].inSlope
+      value: -0.00066556723
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].inSlope
       value: -0.0968425
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[3].inSlope
+      value: -1.2018435
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[0].outSlope
+      value: 0.26752666
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[1].outSlope
+      value: -0.00066556723
       objectReference: {fileID: 0}
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].inWeight
@@ -3833,6 +3948,30 @@ PrefabInstance:
     - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_gaitCurve.m_Curve.Array.data[2].outSlope
       value: -0.0968425
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[3].inWeight
+      value: 0.1331371
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[3].outSlope
+      value: -1.2018435
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[0].outWeight
+      value: 0.076466605
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[1].outWeight
+      value: 0.08638896
+      objectReference: {fileID: 0}
+    - target: {fileID: 6188948294326597896, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_gaitCurve.m_Curve.Array.data[2].outWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 7890036655476095796, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_Mass
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 7890036655476095796, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_ParentAnchorPosition.x
@@ -3857,6 +3996,10 @@ PrefabInstance:
     - target: {fileID: 7890036655476095796, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_ParentAnchorRotation.z
       value: 0.5512889
+      objectReference: {fileID: 0}
+    - target: {fileID: 8941183602108320999, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
+      propertyPath: m_Mass
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 8941183602108320999, guid: 7f83cd9d876531348bffbf13022a5de9, type: 3}
       propertyPath: m_ParentAnchorPosition.x

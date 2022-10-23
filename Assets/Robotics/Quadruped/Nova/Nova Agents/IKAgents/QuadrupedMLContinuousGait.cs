@@ -194,6 +194,11 @@ namespace RoboticToolkit.Robotics.Gaits
         {
             throw new System.NotImplementedException();
         }
+
+        public void Begin()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 
