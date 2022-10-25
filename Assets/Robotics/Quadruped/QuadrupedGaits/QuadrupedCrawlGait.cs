@@ -30,9 +30,34 @@ namespace RoboticToolkit.Robotics.Gaits
             return m_limbPositioner != null;
         }
 
+        public void ReturnHome()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void RunGait()
         {
            
+        }
+
+        public void SetNextCycle()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Stop()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void SubscribeToEvents(IGaitEventListener listener)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void UnubscribeFromEvents(IGaitEventListener listener)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

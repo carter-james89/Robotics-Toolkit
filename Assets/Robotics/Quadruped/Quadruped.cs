@@ -244,7 +244,7 @@ namespace RoboticsToolkit.Robotics
                 }
                 else
                 {
-                    return;
+                  //  return;
                 }
             }
 
@@ -267,39 +267,24 @@ namespace RoboticsToolkit.Robotics
                     limb.RunLimb(!m_roboticController.IsSimulator(), true);
                 }
             }
-            //if (!IsRunning)
-            //{
-            //    foreach (var limb in m_limbs)
-            //    {
-            //        limb.RunLimb(!m_roboticController.IsSimulator(), true);
-            //    }
-            //}
-            //else if (m_gait != null && !m_gait.IsRunning())
-            //{
-            //    foreach (var limb in m_limbs)
-            //    {
-            //        limb.RunLimb(!m_roboticController.IsSimulator(), true);
-            //    }
-            //}
-            // m_roboticController.SendCommands();
 
             var digitalTwinData = new QuadrupedGroundStationData();
 
-            digitalTwinData.FL_0 = (int)m_flLimb.GetServoControllers()[0].GetSetAngle();
-            digitalTwinData.FL_1 = (int)m_flLimb.GetServoControllers()[1].GetSetAngle();
-            digitalTwinData.FL_2 = (int)m_flLimb.GetServoControllers()[2].GetSetAngle();
+            digitalTwinData.FL0 = (int)m_flLimb.GetServoControllers()[0].GetSetAngle();
+            digitalTwinData.FL1 = (int)m_flLimb.GetServoControllers()[1].GetSetAngle();
+            digitalTwinData.FL2 = (int)m_flLimb.GetServoControllers()[2].GetSetAngle();
 
-            digitalTwinData.FR_0 = (int)m_frLimb.GetServoControllers()[0].GetSetAngle();
-            digitalTwinData.FR_1 = (int)m_frLimb.GetServoControllers()[1].GetSetAngle();
-            digitalTwinData.FR_2 = (int)m_frLimb.GetServoControllers()[2].GetSetAngle();
+            digitalTwinData.FR0 = (int)m_frLimb.GetServoControllers()[0].GetSetAngle();
+            digitalTwinData.FR1 = (int)m_frLimb.GetServoControllers()[1].GetSetAngle();
+            digitalTwinData.FR2 = (int)m_frLimb.GetServoControllers()[2].GetSetAngle();
 
-            digitalTwinData.BL_0 = (int)m_blLimb.GetServoControllers()[0].GetSetAngle();
-            digitalTwinData.BL_1 = (int)m_blLimb.GetServoControllers()[1].GetSetAngle();
-            digitalTwinData.BL_2 = (int)m_blLimb.GetServoControllers()[2].GetSetAngle();
+            digitalTwinData.BL0 = (int)m_blLimb.GetServoControllers()[0].GetSetAngle();
+            digitalTwinData.BL1 = (int)m_blLimb.GetServoControllers()[1].GetSetAngle();
+            digitalTwinData.BL2 = (int)m_blLimb.GetServoControllers()[2].GetSetAngle();
 
-            digitalTwinData.BR_0 = (int)m_brLimb.GetServoControllers()[0].GetSetAngle();
-            digitalTwinData.BR_1 = (int)m_brLimb.GetServoControllers()[1].GetSetAngle();
-            digitalTwinData.BR_2 = (int)m_brLimb.GetServoControllers()[2].GetSetAngle();
+            digitalTwinData.BR0 = (int)m_brLimb.GetServoControllers()[0].GetSetAngle();
+            digitalTwinData.BR1 = (int)m_brLimb.GetServoControllers()[1].GetSetAngle();
+            digitalTwinData.BR2 = (int)m_brLimb.GetServoControllers()[2].GetSetAngle();
 
             m_roboticController.SendCommands(digitalTwinData);
         }

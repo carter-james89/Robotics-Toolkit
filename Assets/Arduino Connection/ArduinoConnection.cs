@@ -33,7 +33,7 @@ namespace RoboticsToolkit.ArduinoUtilities
         {
             if (m_arduinoConnection != null)
             {
-                m_arduinoConnection.Write("shutdown");
+                WriteToArduino("shutdown");
                 Debug.Log(m_arduinoConnection.ReadLine());
 
                 m_arduinoConnection.ShutDown();
@@ -60,7 +60,8 @@ namespace RoboticsToolkit.ArduinoUtilities
             if (!m_arduinoConnection.Connected)
                 return null;
 
-            m_arduinoConnection.Write(message);
+            m_arduinoConnection.Write("<"+message+">");
+           // m_arduinoConnection.
             // m_arduinoConnection.
 
             // if (waitForResponce)

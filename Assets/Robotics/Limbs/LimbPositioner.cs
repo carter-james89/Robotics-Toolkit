@@ -137,7 +137,7 @@ namespace RoboticToolkit.Robotics.Gaits
                 m_target.localPosition = m_currentDesiredPosition;
                 foreach (var listener in m_listeners)
                 {
-                    listener.OnLimbAchievedTarget(m_currentDesiredPosition);
+                   // listener.OnLimbAchievedTarget(m_currentDesiredPosition);
                 }
                 return;
             }

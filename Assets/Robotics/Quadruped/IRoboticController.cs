@@ -55,20 +55,20 @@ namespace RoboticsToolkit.Robotics
         // public int[] MotorPositions;
 
 
-        public int FL_0;
-        public int FL_1;
-        public int FL_2;
+        public int FL0;
+        public int FL1;
+        public int FL2;
 
-        public int FR_0;
-        public int FR_1;
-        public int FR_2;
+        public int FR0;
+        public int FR1;
+        public int FR2;
 
-        public int BL_0;
-        public int BL_1;
-        public int BL_2;
+        public int BL0;
+        public int BL1;
+        public int BL2;
 
-        public int BR_0;
-        public int BR_1;
-        public int BR_2;
+        public int BR0;
+        public int BR1;
+        public int BR2;
     }
 }

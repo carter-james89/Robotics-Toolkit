@@ -1,3 +1,4 @@
+
 using RoboticToolkit.Robotics.Limbs;
 using System;
 using System.Collections;
@@ -69,7 +70,6 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
         CurrentStatus = Status.Rotating;
     }
 
-
     public void TranslateToPosition(Vector3 position, float time, bool localSpace)
     {
         if (localSpace)
@@ -130,11 +130,7 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
         float velocity = m_gaitVelocity;
         if (m_useAcceleration)
         {
-            //velocity = m_initialVelocity + (m_acceleration * m_strideTime);
-
-            velocity = Mathf.Lerp(m_gaitVelocity * 2.01f,0.01f, m_strideTime / m_totalCurveDistance);
-           // velocity += .001f;
-
+            velocity = Mathf.Lerp(m_gaitVelocity * 2.001f,0.001f, m_strideTime / m_totalCurveDistance);
             if (m_log)
             {
               //  Debug.Log("Current velocity : " + velocity);
@@ -149,6 +145,8 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
             var endPos = new Vector3(0, m_currentCurve.keys[m_currentCurve.keys.Length - 1].value, m_totalTravelDistance);
             m_limb.SetIKTargetPos(m_stride.TransformPoint(endPos));
 
+            m_strideLine.SetPosition(0, Vector3.zero);
+            m_strideLine.SetPosition(1, Vector3.zero);
             CurrentStatus = Status.None;
            
             if (m_log)

@@ -13,6 +13,7 @@ namespace RoboticToolkit.Robotics.Gaits
     {
         public enum Direction
         {
+            NONE,
             FORWARD,
             BACKWARD,
             LEFT,
@@ -21,6 +22,7 @@ namespace RoboticToolkit.Robotics.Gaits
         public enum GaitPattern
         {
             NONE,
+            RETURNING_HOME,
             STATIONARYSTEP,
             CRAWL,
             TROT

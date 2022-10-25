@@ -37,12 +37,13 @@ namespace RoboticsToolkit.Robotics
                 return false;
             }
             // var arduinoMessage = m_arduinoConnection.ReadFromArduino();
-            //Debug.Log("Received Arduino Message : " + arduinoMessage);
+          //  Debug.Log("Ping Arduino");
             m_arduinoConnection.WriteToArduino("P");
 
             try
             {
                 var sensorDataJSON = m_arduinoConnection.ReadFromArduino();
+              //  Debug.Log("Sensor data : " + sensorDataJSON);
                 var sensorData = (QuadrupedSensorData)JsonConvert.DeserializeObject(sensorDataJSON, typeof(QuadrupedSensorData));
 
                 var robotTransform = m_robot.GetGameObject().transform;
@@ -92,10 +93,13 @@ namespace RoboticsToolkit.Robotics
 
         public bool SendCommands(QuadrupedGroundStationData groundStationData)
         {
+           // Debug.Log("Send motor values : " + groundStationData);
             try
             {
+                
                 m_arduinoConnection.WriteToArduino(JsonUtility.ToJson(groundStationData));
-                //  Debug.Log("Echo : " + m_arduinoConnection.ReadFromArduino());
+               // m_arduinoConnection.ReadFromArduino();
+                 //Debug.Log("Echo : " + m_arduinoConnection.ReadFromArduino());
                 return true;
             }
             catch (System.Exception e)

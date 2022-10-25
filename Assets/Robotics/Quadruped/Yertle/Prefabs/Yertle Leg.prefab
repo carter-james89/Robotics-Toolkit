@@ -1954,22 +1954,22 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0.03122752
     - serializedVersion: 3
-      time: 0.008843141
-      value: 0.0111593045
-      inSlope: 0.25843957
-      outSlope: 0.25843957
+      time: 0.088639274
+      value: 0.05616915
+      inSlope: 0.13193306
+      outSlope: 0.13193306
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.33333334
+      outWeight: 0.042004813
     - serializedVersion: 3
       time: 0.9972141
       value: 0.013016414
-      inSlope: -0.026063465
-      outSlope: -0.026063465
+      inSlope: -0.11593179
+      outSlope: -0.11593179
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.049512338
+      inWeight: 0.05648487
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
