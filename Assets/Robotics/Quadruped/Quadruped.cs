@@ -18,8 +18,6 @@ namespace RoboticsToolkit.Robotics
         [SerializeField]
         private float m_walkHeight = .2f;
         [SerializeField]
-        private bool m_simulate = false;
-        [SerializeField]
         private bool m_static = false;
         [SerializeField]
         private float m_physicsTime = 1;
@@ -95,6 +93,8 @@ namespace RoboticsToolkit.Robotics
 
             m_gaits.transform.SetParent(transform.parent);
             m_baseTargets.transform.SetParent(transform.parent);
+          ///  Gimbal.GetGameObject().transform.SetParent(null);
+            
 
             PositionGimble();
             foreach (var limb in m_limbs)
@@ -120,7 +120,7 @@ namespace RoboticsToolkit.Robotics
            
             var controllers = GetComponents<IRoboticController>();
 
-            if (m_simulate)
+            if (m_controlType == ControlType.Simulation)
             {
                 m_articulationBody.immovable = false;
 
@@ -132,7 +132,7 @@ namespace RoboticsToolkit.Robotics
                     }
                 }
             }
-            else
+            else if(m_controlType == ControlType.Arduino)
             {
                 foreach (var item in controllers)
                 {
@@ -165,6 +165,7 @@ namespace RoboticsToolkit.Robotics
 
         void Update()
         {
+            PositionGimble();
             Time.timeScale = m_physicsTime;
             if (!m_roboticController.IsSimulator())
             {

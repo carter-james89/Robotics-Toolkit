@@ -16,8 +16,6 @@ namespace RoboticToolkit.Robotics.Gaits
 
         private bool m_beginReturnHome = false;
 
-     
-
         private IGait m_activeGait;
 
         private IGaitController.GaitPattern m_currentPattern = IGaitController.GaitPattern.NONE;
@@ -35,28 +33,28 @@ namespace RoboticToolkit.Robotics.Gaits
         {
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                if(m_currentPattern != IGaitController.GaitPattern.TROT)
+                if(m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
                     BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.Forward);
                 }            
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
-                if (m_currentPattern != IGaitController.GaitPattern.TROT)
+                if (m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
                     BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.Backward);
                 }
             }
             else if (Input.GetKey(KeyCode.RightArrow))
             {
-                if (m_currentPattern != IGaitController.GaitPattern.TROT)
+                if (m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
                     BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.RotatingClockwise);
                 }
             }
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
-                if (m_currentPattern != IGaitController.GaitPattern.TROT)
+                if (m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
                     BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.RotatingCounterClockwise);
                 }

@@ -18,6 +18,8 @@ namespace RoboticToolkit.Robotics.Limbs
         public void ResetLimb();
         public void ResetLimbTargetPosition();
 
+
+
         public void SetIKTargetPos(Vector3 globalPos);
         public Vector3 GetIKTargetPos();
 
@@ -36,6 +38,9 @@ namespace RoboticToolkit.Robotics.Limbs
         private Transform m_shoulderTarget;
         [SerializeField]
         private Transform m_baseTarget;
+
+        [SerializeField]
+        private bool m_leftLeg = false;
 
         public float heightOffset;
         private Vector3 m_targetGaitPos;
@@ -87,6 +92,9 @@ namespace RoboticToolkit.Robotics.Limbs
         public Transform GetTargetBasePosition() => m_baseTarget;
 
         private IGimbal m_gimbal;
+        private IRobot m_robot;
+
+        private bool m_useGimbalHeightAdjustment = false;
 
 
         private void Awake()
@@ -106,8 +114,10 @@ namespace RoboticToolkit.Robotics.Limbs
         }
         public void Initialize(IRobot robot, bool useGimbalHeightAdjustment)
         {
+            m_robot = robot;
             m_gimbal = robot.GetGimbal();
-            m_heightAdjustementOrigin = useGimbalHeightAdjustment ? robot.GetGameObject().transform : transform;
+            m_useGimbalHeightAdjustment = useGimbalHeightAdjustment;
+            m_heightAdjustementOrigin = useGimbalHeightAdjustment ? m_gimbal.GetGameObject().transform : robot.GetGameObject().transform;// transform;
             m_positionerOffset = m_heightAdjustementOrigin.InverseTransformPoint(m_heightAdjustment.position);
             // m_positionerOffset.y = -.1f;
 
@@ -195,6 +205,20 @@ namespace RoboticToolkit.Robotics.Limbs
             }
             var limbBaseAngle = IKCalculator.CalculateSingleIK(m_shoulderServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
            baseTarget, true);
+
+            if (m_useGimbalHeightAdjustment)
+            {
+                var offset = m_robot.GetGameObject().transform.eulerAngles.z;
+                offset = Mathf.Clamp(offset, -5, 5);
+                if (!m_leftLeg)
+                {
+                   // limbBaseAngle += offset;
+                }
+                else
+                {
+                   // limbBaseAngle -= offset;
+                }
+            }
             m_shoulderServoController.SetAndRunServo(limbBaseAngle, positionServoImmediate);
 
             // var limbBaseAngle = IKCalculator.CalculateSingleIK(m_elbowServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
@@ -216,11 +240,11 @@ namespace RoboticToolkit.Robotics.Limbs
             //var gaitPos = m_heightAdjustementOrigin.transform.TransformPoint(tempPos);
             //m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * .1f);
 
-            m_positionerOffset.y = -m_desiredLimbHeight;// -.16f;
+            m_positionerOffset.y = -m_desiredLimbHeight - height;
 
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
 
-           // Debug.Log(-m_desiredLimbHeight);
+            // Debug.Log(-m_desiredLimbHeight);
             //m_heightAdjustment.position = gaitPos;
             //return;
 
@@ -231,7 +255,9 @@ namespace RoboticToolkit.Robotics.Limbs
 
             //}
             //gaitPos.y = -height;
-            m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * 1f);
+           // var pos  = new Vector3(gaitPos.x,m_heightAdjustment.position.y,gaitPos.z);
+           // m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, pos, Time.deltaTime * .5f);
+            m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * .8f);
 
         }
         public void ResetLimbTargetPosition()

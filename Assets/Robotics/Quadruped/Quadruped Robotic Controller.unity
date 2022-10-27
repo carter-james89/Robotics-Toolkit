@@ -1317,12 +1317,16 @@ PrefabInstance:
       value: 0.17
       objectReference: {fileID: 0}
     - target: {fileID: 2701181494444797725, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      propertyPath: m_controlType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2701181494444797725, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_physicsTime
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2701181494444797725, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_emergencyStopAngle
-      value: 30
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 2701181494444797725, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_useGimbalLimbHeight
@@ -1576,6 +1580,10 @@ PrefabInstance:
       propertyPath: m_servoSpeed
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 5839658699863173540, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      propertyPath: m_leftLeg
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5966197021802898180, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_Size.x
       value: -0.001
@@ -1827,6 +1835,10 @@ PrefabInstance:
     - target: {fileID: 7241496030583849738, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_Size.x
       value: -0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 7473834034742233514, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      propertyPath: m_leftLeg
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7552503907824598392, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_RootOrder
