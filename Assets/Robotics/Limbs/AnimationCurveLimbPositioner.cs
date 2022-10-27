@@ -53,6 +53,7 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
         m_stride.SetParent(transform);
 
         m_strideLine = m_stride.gameObject.AddComponent<LineRenderer>();
+        m_strideLine.SetPosition(1, Vector3.zero);
         m_strideLine.startWidth = .01f;
         m_strideLine.endWidth = .01f;
         m_strideLine.useWorldSpace = false;
@@ -151,7 +152,7 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
            
             if (m_log)
             {
-                Debug.Log("Limb at Target : " + name + " : " + transform.InverseTransformPoint(m_limb.GetIKTargetPos()).z);
+                //Debug.Log("Limb at Target : " + name + " : " + transform.InverseTransformPoint(m_limb.GetIKTargetPos()).z);
             }
             return StrideComplete();
         }
@@ -217,13 +218,13 @@ public class AnimationCurveLimbPositioner : MonoBehaviour, ILimbPositioner
 
           m_gaitVelocity = m_totalCurveDistance / time;
 
-        m_useAcceleration = true;
+      //  m_useAcceleration = true;
         //m_acceleration = -1;
         //m_initialVelocity = (distance / time) - (.5f*(m_acceleration * time));
 
         if (m_log)
         {
-            Debug.Log("initial velocity : " + m_initialVelocity);
+           // Debug.Log("initial velocity : " + m_initialVelocity);
         }
 
         m_currentCurve = m_gaitCurve;

@@ -24,7 +24,7 @@ namespace  QuadcopterUtilities
                 for (int i = 0; i < devices.Length; i++)
                     Debug.Log(devices[i].name);
 
-                var camTexture = new WebCamTexture("Integrated Camera");// HD Pro Webcam C920");//, 1920, 1080, 90);
+                var camTexture = new WebCamTexture("CyberTrack H6",3840,2160);// Integrated Camera");// HD Pro Webcam C920");//, 1920, 1080, 90);
                // var camTexture = new WebCamTexture()
                 GetComponent<MeshRenderer>().material.SetTexture("_MainTex", camTexture);
                 camTexture.Play();

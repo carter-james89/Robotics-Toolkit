@@ -140,8 +140,7 @@ namespace RoboticsToolkit.Robotics
             ab.TeleportRoot(lerpedPosition, m_desiredRotation);
             ab.velocity = Vector3.zero;
             ab.angularVelocity = Vector3.zero;
-            //ab.ResetInertiaTensor();
-            //ab.Sleep();
+
         }
     }
 }

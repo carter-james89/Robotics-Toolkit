@@ -216,20 +216,21 @@ namespace RoboticToolkit.Robotics.Limbs
             //var gaitPos = m_heightAdjustementOrigin.transform.TransformPoint(tempPos);
             //m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * .1f);
 
-         //   m_positionerOffset.y = -.16f;
+            m_positionerOffset.y = -m_desiredLimbHeight;// -.16f;
 
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
 
+           // Debug.Log(-m_desiredLimbHeight);
             //m_heightAdjustment.position = gaitPos;
             //return;
 
-            if (height == 0)
-            {
-                gaitPos.y = 0;
-                m_heightAdjustment.position = gaitPos;
+            //if (height == 0)
+            //{
+            //    gaitPos.y = 0;
+            //    m_heightAdjustment.position = gaitPos;
 
-            }
-            gaitPos.y = -height;
+            //}
+            //gaitPos.y = -height;
             m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * 1f);
 
         }

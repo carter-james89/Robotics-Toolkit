@@ -46,7 +46,7 @@ namespace RoboticToolkit.Robotics.Gaits
 
         private bool m_postStrideCooldown = false;
         private float m_postStrideCooldownTime = 0;
-        private float m_postStrideCooldownTargetTime = .8f;
+        private float m_postStrideCooldownTargetTime = .2f;
 
         private bool m_halfStride = false;
         private bool m_running = false;
@@ -104,7 +104,7 @@ namespace RoboticToolkit.Robotics.Gaits
             if(m_direction == Direction.Forward || m_direction == Direction.Backward)
             {
                 float distance = .04f;
-                float time = .35f;
+                float time = .22f;
                 if (m_halfStride)
                 {
                     distance /= 2;
@@ -136,8 +136,8 @@ namespace RoboticToolkit.Robotics.Gaits
             }
             else if(m_direction == Direction.RotatingClockwise || m_direction == Direction.RotatingCounterClockwise)
             {
-                var distance = .02f;
-                var time = .3f;
+                var distance = .04f;
+                var time = .2f;
                 if (m_halfStride)
                 {
                     distance /= 2;

@@ -7,6 +7,30 @@ namespace RoboticsToolkit.Robotics
 {
     public class Quadruped : MonoBehaviour, IRobot
     {
+        private enum ControlType
+        {
+            Simulation,
+            Arduino,
+            ArduinoSimulatedSensors
+        }
+        [SerializeField]
+        private ControlType m_controlType;
+        [SerializeField]
+        private float m_walkHeight = .2f;
+        [SerializeField]
+        private bool m_simulate = false;
+        [SerializeField]
+        private bool m_static = false;
+        [SerializeField]
+        private float m_physicsTime = 1;
+        [SerializeField]
+        private bool m_useGimbalLimbHeight = true;
+        [SerializeField]
+        private float m_emergencyStopAngle = 20;
+        [SerializeField]
+        private Transform m_gaits;
+        [SerializeField]
+        private Transform m_baseTargets;
         [SerializeField]
         private ThreeJointRoboticLimb m_frLimb;
         [SerializeField]
@@ -15,7 +39,12 @@ namespace RoboticsToolkit.Robotics
         private ThreeJointRoboticLimb m_brLimb;
         [SerializeField]
         private ThreeJointRoboticLimb m_blLimb;
+        [SerializeField]
+        private GameObject m_ground;
+        [SerializeField]
+        private Transform m_com;
 
+        private List<IRobotEventListener> m_listeners = new List<IRobotEventListener>();
         private enum Status
         {
             NotRunning,
@@ -23,59 +52,17 @@ namespace RoboticsToolkit.Robotics
             Ready,
         }
         private Status m_status = Status.NotRunning;
-
-        [SerializeField]
-        private float m_physicsTime = 1;
-
-        [SerializeField]
-        private bool m_useGimbalLimbHeight = true;
-
-        [SerializeField]
-        private float m_emergencyStopAngle = 20;
-
-        public bool IsRunning { get; private set; } = true;
-
-        private List<IRobotEventListener> m_listeners = new List<IRobotEventListener>();
-
-        public IGimbal Gimbal { get; private set; }
-
-        public GameObject GetGameObject() => gameObject;
-
-        [SerializeField]
-        private Transform m_gaits;
-        [SerializeField]
-        private Transform m_baseTargets;
-
         private ArticulationBody m_articulationBody;
-
         private IRoboticController m_roboticController;
-
         private bool m_ready = true;
-
         private IGaitController m_gaitController;
         private float m_startHeight;
-
-        [SerializeField]
-        private float m_walkHeight = .2f;
-
-        [SerializeField]
-        private bool m_simulate = false;
-
-        [SerializeField]
-        private bool m_static = false;
-
-        [SerializeField]
-        private GameObject m_ground;
-
-        [SerializeField]
-        private Transform m_com;
-
-        public IRobot.RobotData GetRobotData()
-        {
-            return new IRobot.RobotData(m_articulationBody.velocity, m_articulationBody.angularVelocity);
-        }
-
         private List<ThreeJointRoboticLimb> m_limbs = new List<ThreeJointRoboticLimb>();
+
+        public bool IsRunning { get; private set; } = true;
+        public IGimbal Gimbal { get; private set; }
+        public GameObject GetGameObject() => gameObject;
+        public IRobot.RobotData GetRobotData(){return new IRobot.RobotData(m_articulationBody.velocity, m_articulationBody.angularVelocity);}     
         public IRoboticLimb[] GetLimbs() => m_limbs.ToArray();
 
         void Awake()
@@ -83,7 +70,6 @@ namespace RoboticsToolkit.Robotics
             Gimbal = GetComponentInChildren<IGimbal>();
         }
 
-        // Start is called before the first frame update
         void Start()
         {
             m_startHeight = transform.localPosition.y;
@@ -114,14 +100,24 @@ namespace RoboticsToolkit.Robotics
             foreach (var limb in m_limbs)
             {
                 limb.GetBaseTarget().SetParent(m_baseTargets);
+                limb.GetBaseTarget().GetComponent<LimbHeightPositioner>().enabled = !m_static;
                 var tempPos = limb.GetBaseTarget().localPosition;
                 tempPos.y = 0;
                 limb.GetBaseTarget().localPosition = tempPos;
                 limb.Initialize(this, m_useGimbalLimbHeight);
-
-              //  limb.GetPositioner().GetGameObject().transform.SetParent(Gimbal.GetGameObject().transform);
             }
-            m_baseTargets.transform.position = transform.position + new Vector3(0, m_walkHeight, 0);
+            if (m_static)
+            {
+                foreach (var limb in m_limbs)
+                {
+                    (limb as ThreeJointRoboticLimb).SetLimbHeight(m_walkHeight);
+                }
+            }
+            else
+            {
+                m_baseTargets.transform.position = new Vector3(transform.position.x, m_walkHeight, transform.position.z);
+            }
+           
             var controllers = GetComponents<IRoboticController>();
 
             if (m_simulate)
@@ -152,13 +148,6 @@ namespace RoboticsToolkit.Robotics
             {
                 m_gaitController.Initialize(this);
             }
-            //if (m_arduinoConnection && m_arduinoConnection.enabled)
-            //{
-            //    var handShakeDataMessage = m_arduinoConnection.ReadFromArduino();
-            //    Debug.Log(handShakeDataMessage);    
-            //    var handShakeData = JsonUtility.FromJson<QuadrupedSensorData>(handShakeDataMessage);
-            //    Debug.Log(handShakeData.H);
-            //}
             m_status = Status.MovingToStartPosition;
             NotifyEventListeners(IRobotEventListener.EventType.OnRobotInitialized);
         }
@@ -191,9 +180,8 @@ namespace RoboticsToolkit.Robotics
             IsRunning = false;
             foreach (var limb in m_limbs)
             {
-                //     limb.ResetLimbTargetPosition();
+                //limb.ResetLimbTargetPosition();
             }
-
             NotifyEventListeners(IRobotEventListener.EventType.OnEmergencyStop);
         }
 
@@ -248,15 +236,12 @@ namespace RoboticsToolkit.Robotics
                 }
             }
 
-            if (!IsRunning)
-            {
-                return;
-            }
+
             foreach (var limb in m_limbs)
             {
                 limb.GetPositioner().GetGameObject().transform.rotation = Quaternion.LookRotation(GetGimbal().GetGameObject().transform.forward, GetGimbal().GetGameObject().transform.up);
             }
-            if (m_gaitController != null && m_gaitController.IsRunning())
+            if (m_gaitController != null && m_gaitController.IsRunning() && IsRunning)
             {
                 m_gaitController.Run();
             }
@@ -305,6 +290,7 @@ namespace RoboticsToolkit.Robotics
             tempPos.z = transform.position.z;
             m_baseTargets.transform.position = tempPos;
             tempEuler = m_baseTargets.eulerAngles;
+            tempEuler.y = Gimbal.GetGameObject().transform.eulerAngles.y;
             m_baseTargets.eulerAngles = tempEuler;
 
             var angle = Vector3.Angle(transform.up, Gimbal.GetGameObject().transform.up);
