@@ -42,6 +42,9 @@ namespace RoboticToolkit.Robotics.Limbs
         [SerializeField]
         private bool m_leftLeg = false;
 
+        public Transform DebugCube;
+        private ILimbPositioner m_positioner;
+
         public float heightOffset;
         private Vector3 m_targetGaitPos;
 
@@ -53,11 +56,6 @@ namespace RoboticToolkit.Robotics.Limbs
         public IServoController[] GetServoControllers() => m_servoControllers;
 
         private float m_hipFootOffset = 0;
-
-        // [SerializeField]
-        // private LimbPositioner m_positioner;
-
-        // private float m_hipOffset = 0;
 
         [SerializeField]
         private Transform m_heightAdjustment;
@@ -96,14 +94,14 @@ namespace RoboticToolkit.Robotics.Limbs
 
         private bool m_useGimbalHeightAdjustment = false;
 
+        private float m_startHeight;
+
 
         private void Awake()
         {
             m_shoulderServoController = m_shoulderServoObject.GetComponent<IServoController>();
             m_elbowServoController = m_elbowServoObject.GetComponent<IServoController>();
             m_wristServoController = m_wristServoObject.GetComponent<IServoController>();
-            // m_positionerOffset = transform.InverseTransformPoint(m_heightAdjustment.position);
-            // m_positionerOffset.y = -.1f;
 
             m_servoControllers = new IServoController[3];
             m_servoControllers[0] = m_shoulderServoController;
@@ -111,6 +109,8 @@ namespace RoboticToolkit.Robotics.Limbs
             m_servoControllers[2] = m_wristServoController;
 
             m_positioner = GetComponentInChildren<ILimbPositioner>();
+
+            m_startHeight = transform.position.y;   
         }
         public void Initialize(IRobot robot, bool useGimbalHeightAdjustment)
         {
@@ -119,7 +119,6 @@ namespace RoboticToolkit.Robotics.Limbs
             m_useGimbalHeightAdjustment = useGimbalHeightAdjustment;
             m_heightAdjustementOrigin = useGimbalHeightAdjustment ? m_gimbal.GetGameObject().transform : robot.GetGameObject().transform;// transform;
             m_positionerOffset = m_heightAdjustementOrigin.InverseTransformPoint(m_heightAdjustment.position);
-            // m_positionerOffset.y = -.1f;
 
             var hipOffset = m_heightAdjustementOrigin.InverseTransformPoint(m_shoulderServoController.GetServo().GetGameObject().transform.position);
             var ikOffset = m_heightAdjustementOrigin.InverseTransformPoint(m_ikTarget.position);
@@ -132,6 +131,13 @@ namespace RoboticToolkit.Robotics.Limbs
             {
                 m_hipFootOffset = hipOffset.x - ikOffset.x;
             }
+        }
+        public void ReturnToStartHeight()
+        {
+            var tempPos = m_baseTarget.transform.position;
+            tempPos.y = m_startHeight;
+            m_baseTarget.transform.position = tempPos;
+            SetLimbHeight(m_startHeight);
         }
         public void SetLimbHeight(float desiredHeight)
         {
@@ -167,35 +173,18 @@ namespace RoboticToolkit.Robotics.Limbs
                 return false;
             }
         }
-        public Transform DebugCube;
-        private ILimbPositioner m_positioner;
 
         public void RunLimb(bool positionServoImmediate, bool adjustHeight = false)
         {
             if (adjustHeight)
             {
-                // if (m_positioner.GetMovementStyle() != LimbPositioner.MovementStyle.Rotate)
-                // {
-                // heightOffset = m_baseTarget.position.y - m_shoulderServoController.GetServo().GetGameObject().transform.position.y;
-                // heightOffset = transform.InverseTransformPoint(m_baseTarget.position).y;
-
                 heightOffset = transform.position.y - m_baseTarget.position.y;
-
                 PositionGaitHeight(-heightOffset);
-                // }
-                // else
-                // {
-                //  PositionGaitHeight(0);
-                //  }
             }
             else
             {
-               // Debug.Log("set limb to 0 " + name);
                 PositionGaitHeight(0);
             }
-            //return;
-            //  m_positioner.transform.position = Vector3.Lerp(m_positioner.transform.position, m_targetGaitPos, Time.deltaTime * 5);
-
             var tempPos = transform.InverseTransformPoint(m_ikTarget.position);
             tempPos.x -= m_hipFootOffset;
             var baseTarget = transform.TransformPoint(tempPos);
@@ -206,25 +195,7 @@ namespace RoboticToolkit.Robotics.Limbs
             var limbBaseAngle = IKCalculator.CalculateSingleIK(m_shoulderServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
            baseTarget, true);
 
-            if (m_useGimbalHeightAdjustment)
-            {
-                var offset = m_robot.GetGameObject().transform.eulerAngles.z;
-                offset = Mathf.Clamp(offset, -5, 5);
-                if (!m_leftLeg)
-                {
-                   // limbBaseAngle += offset;
-                }
-                else
-                {
-                   // limbBaseAngle -= offset;
-                }
-            }
             m_shoulderServoController.SetAndRunServo(limbBaseAngle, positionServoImmediate);
-
-            // var limbBaseAngle = IKCalculator.CalculateSingleIK(m_elbowServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
-            //m_positioner.GetTarget().position, true);
-            // m_shoulderServoController.SetAndRunServo(limbBaseAngle);
-
             var elbowWristAngles = IKCalculator.CalculateDuelIK(m_elbowServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
                 m_wristServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
                 m_endPoint.position, m_ikTarget.position);
@@ -235,30 +206,10 @@ namespace RoboticToolkit.Robotics.Limbs
 
         public void PositionGaitHeight(float height)
         {
-            //var tempPos = m_positionerOffset;
-            //tempPos.y -= height;
-            //var gaitPos = m_heightAdjustementOrigin.transform.TransformPoint(tempPos);
-            //m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * .1f);
-
-            m_positionerOffset.y = -m_desiredLimbHeight - height;
+            m_positionerOffset.y = -m_desiredLimbHeight;// - height;
 
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
-
-            // Debug.Log(-m_desiredLimbHeight);
-            //m_heightAdjustment.position = gaitPos;
-            //return;
-
-            //if (height == 0)
-            //{
-            //    gaitPos.y = 0;
-            //    m_heightAdjustment.position = gaitPos;
-
-            //}
-            //gaitPos.y = -height;
-           // var pos  = new Vector3(gaitPos.x,m_heightAdjustment.position.y,gaitPos.z);
-           // m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, pos, Time.deltaTime * .5f);
             m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * .8f);
-
         }
         public void ResetLimbTargetPosition()
         {
@@ -277,36 +228,5 @@ namespace RoboticToolkit.Robotics.Limbs
         {
             return m_positioner;
         }
-
-        //public bool LimbAtTarget()
-        //{
-        //    if (!m_positioner.LimbAtTarget)
-        //    {
-        //        return false;
-        //    }
-        //    if (Vector3.Distance(m_endPoint.position, GetPositioner().GetTargetOffset().position) < .007f)
-        //    {
-        //        return true;
-        //    }
-        //    return false;
-        //}
-
-        //void Update()
-        //{
-        //    PlaceLimb();
-        //}
-        //void FixedUpdate()
-        //{
-        //    PlaceLimb();
-        //}
-
-        //void PlaceLimb()
-        //{
-        //    var ab = GetComponent<ArticulationBody>();
-        //   ab.TeleportRoot(transform.parent.TransformPoint(m_desiredLocalPosition), transform.parent.rotation);
-        //    ab.velocity = Vector3.zero;
-        //    ab.angularVelocity = Vector3.zero;
-        //    ab.Sleep();
-        //}
     }
 }

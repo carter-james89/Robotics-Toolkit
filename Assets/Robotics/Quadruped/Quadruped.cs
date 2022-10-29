@@ -172,6 +172,14 @@ namespace RoboticsToolkit.Robotics
                 RunRoboticController();
             }
             m_com.localPosition = m_articulationBody.centerOfMass;
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                foreach (var limb in m_limbs)
+                {
+                    limb.ReturnToStartHeight();
+                }
+            }
            // m_com.localPosition = m_articulationBody.c
         }
 

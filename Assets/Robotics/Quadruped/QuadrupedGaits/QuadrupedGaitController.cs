@@ -28,13 +28,38 @@ namespace RoboticToolkit.Robotics.Gaits
             m_trotGait.Initialize(m_robot);
             m_crawlGait.Initialize(m_robot);
         }
-      
+        [SerializeField]
+        private float m_forwardTrotStrideDistance = .04f;
+        [SerializeField]
+        private float m_forwardTrotStrideTime  = .22f;
+        [SerializeField]
+        private float m_forwardTrotStrideCoolDownTime = .2f;
+        [SerializeField]
+        private float m_idleTrotStrideDistance = .0001f;
+        [SerializeField]
+        private float m_idleTrotStrideTime = .1f;
+        [SerializeField]
+        private float m_idleTrotStrideCoolDownTime = .01f;
+        [SerializeField]
+        private float m_rotatingTrotStrideDistance = .04f;
+        [SerializeField]
+        private float m_rotatingTrotStrideTime = .22f;
+        [SerializeField]
+        private float m_rotatingTrotStrideCoolDownTime = .2f;
         void Update()
         {
             if (Input.GetKey(KeyCode.UpArrow))
             {
                 if(m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
+                    if (Input.GetKey(KeyCode.LeftShift))
+                    {
+                        m_trotGait.SetStrideValues(m_idleTrotStrideDistance, m_idleTrotStrideTime, m_idleTrotStrideCoolDownTime);                      
+                    }
+                    else
+                    {
+                        m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
+                    }
                     BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.Forward);
                 }            
             }
@@ -42,6 +67,7 @@ namespace RoboticToolkit.Robotics.Gaits
             {
                 if (m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
+                    m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
                     BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.Backward);
                 }
             }
@@ -49,14 +75,32 @@ namespace RoboticToolkit.Robotics.Gaits
             {
                 if (m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
-                    BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.RotatingClockwise);
+                    if (Input.GetKey(KeyCode.LeftShift))
+                    {
+                        m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
+                        BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.StrafeRight);
+                    }
+                    else
+                    {
+                        m_trotGait.SetStrideValues(m_rotatingTrotStrideDistance, m_rotatingTrotStrideTime, m_rotatingTrotStrideCoolDownTime);
+                        BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.RotatingClockwise);
+                    }                  
                 }
             }
             else if (Input.GetKey(KeyCode.LeftArrow))
             {
                 if (m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
-                    BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.RotatingCounterClockwise);
+                    if (Input.GetKey(KeyCode.LeftShift))
+                    {
+                        m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
+                        BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.StrafeLeft);
+                    }
+                    else
+                    {
+                        m_trotGait.SetStrideValues(m_rotatingTrotStrideDistance, m_rotatingTrotStrideTime, m_rotatingTrotStrideCoolDownTime);
+                        BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.RotatingCounterClockwise);
+                    }
                 }
             }
             else if (m_activeGait != null && (m_currentPattern != IGaitController.GaitPattern.NONE && m_currentPattern != IGaitController.GaitPattern.RETURNING_HOME))

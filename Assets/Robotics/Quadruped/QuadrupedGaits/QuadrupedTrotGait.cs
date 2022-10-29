@@ -46,7 +46,7 @@ namespace RoboticToolkit.Robotics.Gaits
 
         private bool m_postStrideCooldown = false;
         private float m_postStrideCooldownTime = 0;
-        private float m_postStrideCooldownTargetTime = .2f;
+    
 
         private bool m_halfStride = false;
         private bool m_running = false;
@@ -56,6 +56,17 @@ namespace RoboticToolkit.Robotics.Gaits
         private IRoboticLimb[] m_rotatingLimbs = new IRoboticLimb[2];
         private IRoboticLimb[] m_translatingLimbs = new IRoboticLimb[2];
 
+        private float m_strideDistance = 0;
+        private float m_strideTime = 0;
+        private float m_postStrideCooldownTargetTime = .2f;
+
+        public void SetStrideValues(float strideDistance, float strideTime, float strideCoolDownTime)
+        {
+            m_strideDistance = strideDistance;
+            m_strideTime = strideTime;
+            m_postStrideCooldownTargetTime = strideCoolDownTime;
+        }
+
         private IRobot m_robot;
 
         public enum Direction
@@ -64,22 +75,17 @@ namespace RoboticToolkit.Robotics.Gaits
             Forward,
             Backward,
             RotatingClockwise,
-            RotatingCounterClockwise
+            RotatingCounterClockwise,
+            StrafeLeft,
+            StrafeRight,
         }
         private Direction m_direction = Direction.NONE;
-
 
         public void Initialize(IRobot robot)
         {
             m_robot = robot;
             m_limbs = robot.GetLimbs();
-
-            foreach (var limb in m_limbs)
-            {
-                //limb.GetPositioner().transform.localPosition -= new Vector3(0, .1f, 0);
-            }
         }
-
 
         public void SetNextCycle()
         {
@@ -101,10 +107,10 @@ namespace RoboticToolkit.Robotics.Gaits
                     break;
             }
 
-            if(m_direction == Direction.Forward || m_direction == Direction.Backward)
+            if(m_direction == Direction.Forward || m_direction == Direction.Backward || m_direction == Direction.StrafeLeft || m_direction == Direction.StrafeRight)
             {
-                float distance = .04f;
-                float time = .22f;
+                float distance = m_strideDistance;
+                float time = m_strideTime;
                 if (m_halfStride)
                 {
                     distance /= 2;
@@ -113,25 +119,51 @@ namespace RoboticToolkit.Robotics.Gaits
                 }
                 foreach (var limb in m_rotatingLimbs)
                 {
-                    if (m_direction == Direction.Forward)
+                    Vector3 direction = Vector3.zero;
+                    switch (m_direction)
                     {
-                        limb.GetPositioner().RotateToPosition(m_robot.GetGimbal().GetGameObject().transform.forward, m_robot.GetGimbal().GetGameObject().transform.up, distance, time - (time * .25f));
+                        case Direction.NONE:
+                            break;
+                        case Direction.Forward:
+                            direction = m_robot.GetGimbal().GetGameObject().transform.forward;
+                            break;
+                        case Direction.Backward:
+                            direction = -m_robot.GetGimbal().GetGameObject().transform.forward;
+                            break;
+                        case Direction.StrafeLeft:
+                            direction = -m_robot.GetGimbal().GetGameObject().transform.right;
+                            break;
+                        case Direction.StrafeRight:
+                            direction = m_robot.GetGimbal().GetGameObject().transform.right;
+                            break;
+                        default:
+                            break;
                     }
-                    else
-                    {
-                        limb.GetPositioner().RotateToPosition(-m_robot.GetGimbal().GetGameObject().transform.forward, m_robot.GetGimbal().GetGameObject().transform.up, distance, time - (time * .25f));
-                    }
+                    limb.GetPositioner().RotateToPosition(direction, m_robot.GetGimbal().GetGameObject().transform.up, distance, time - (time * .25f));
                 }
                 foreach (var limb in m_translatingLimbs)
                 {
-                    if (m_direction == Direction.Forward)
+                    Vector3 direction = Vector3.zero;
+                    switch (m_direction)
                     {
-                        limb.GetPositioner().TranslateToPosition(-m_robot.GetGimbal().GetGameObject().transform.forward, m_robot.GetGimbal().GetGameObject().transform.up, distance, time);
+                        case Direction.NONE:
+                            break;
+                        case Direction.Forward:
+                            direction = -m_robot.GetGimbal().GetGameObject().transform.forward;
+                            break;
+                        case Direction.Backward:
+                            direction = m_robot.GetGimbal().GetGameObject().transform.forward;
+                            break;
+                        case Direction.StrafeLeft:
+                            direction = m_robot.GetGimbal().GetGameObject().transform.right;
+                            break;
+                        case Direction.StrafeRight:
+                            direction = -m_robot.GetGimbal().GetGameObject().transform.right;
+                            break;
+                        default:
+                            break;
                     }
-                    else
-                    {
-                        limb.GetPositioner().TranslateToPosition(m_robot.GetGimbal().GetGameObject().transform.forward, m_robot.GetGimbal().GetGameObject().transform.up, distance, time);
-                    }
+                    limb.GetPositioner().TranslateToPosition(direction, m_robot.GetGimbal().GetGameObject().transform.up, distance, time);
                 }
             }
             else if(m_direction == Direction.RotatingClockwise || m_direction == Direction.RotatingCounterClockwise)
