@@ -33,7 +33,7 @@ namespace RoboticsToolkit.ArduinoUtilities
         {
             if (m_arduinoConnection != null)
             {
-                WriteToArduino("shutdown");
+                WriteToArduino(0);
                 Debug.Log(m_arduinoConnection.ReadLine());
 
                 m_arduinoConnection.ShutDown();
@@ -54,6 +54,15 @@ namespace RoboticsToolkit.ArduinoUtilities
             return m_arduinoConnection.ReadLine();
         }
 
+        public void WriteToArduino(int cmd)
+        {
+            WriteToArduino(cmd.ToString());
+        }
+        public void WriteToArduino(int cmd, string message)
+        {
+            WriteToArduino(cmd.ToString() + "&"+message);
+        }
+
         public string WriteToArduino(string message, bool waitForResponce = false)
         {
             //  Debug.Log("Send message to arduino " + message);
@@ -61,6 +70,7 @@ namespace RoboticsToolkit.ArduinoUtilities
                 return null;
 
             m_arduinoConnection.Write("<"+message+">");
+           // Debug.Log("<" + message + ">");
            // m_arduinoConnection.
             // m_arduinoConnection.
 

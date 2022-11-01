@@ -29,6 +29,11 @@ namespace RoboticsToolkit.Robotics
         {
 
         }
+        //0 shutdown with confirmaton
+        //1 return sensor data
+        //2 set motor values
+        //3 set motor values with responce
+
         public bool SetTransformValues()
         {
             if (!m_arduinoConnection.Connected)
@@ -36,38 +41,21 @@ namespace RoboticsToolkit.Robotics
                 Debug.LogWarning("Not connected to arduino, cant get sensor data");
                 return false;
             }
-            // var arduinoMessage = m_arduinoConnection.ReadFromArduino();
-          //  Debug.Log("Ping Arduino");
-            m_arduinoConnection.WriteToArduino("P");
+            m_arduinoConnection.WriteToArduino(1);
 
             try
             {
                 var sensorDataJSON = m_arduinoConnection.ReadFromArduino();
-              //  Debug.Log("Sensor data : " + sensorDataJSON);
+               // Debug.Log(sensorDataJSON);
                 var sensorData = (QuadrupedSensorData)JsonConvert.DeserializeObject(sensorDataJSON, typeof(QuadrupedSensorData));
-
                 var robotTransform = m_robot.GetGameObject().transform;
 
                 var euler = new Vector3(-sensorData.P, sensorData.R, sensorData.Y);
                 m_desiredRotation = Quaternion.Euler(euler);
 
-                // Debug.Log(sensorDataJSON);
-
                 var groundPosition = m_groundSensor.transform.position + (m_groundSensor.forward * (.01f * sensorData.H));
-
                 var groundOffset = new Vector3(0, groundPosition.y, 0);
-
-                // robotTransform.position -= groundOffset;
-
                 m_desiredPosition = robotTransform.position - groundOffset;
-
-                //  robotTransform.position = m_desiredPosition;
-                //  robotTransform.rotation = m_desiredRotation;
-
-                //robotTransform.
-
-                //   PositionTransform();
-
                 return true;
             }
             catch (System.Exception e)
@@ -75,31 +63,21 @@ namespace RoboticsToolkit.Robotics
                 Debug.LogWarning(e);
                 return false;
             }
-
-            //m_gyroData = new Vector3(-data.P, data.R, data.Y);
-            //var sensorInfo = 
-            if (true)//m_calibrationStatus > 0)
-            {
-                //var eulers = new Quaternion(data.X, data.Y, data.Z, data.W).eulerAngles;
-                ////var newEulers = new Vector3(eulers.y, 0, 0);
-                //var newEulers = new Vector3(-eulers.y, -eulers.z, -eulers.x);
-                //var newRot = Quaternion.Euler(newEulers);
-                //transform.rotation = newRot;
-
-                // var euler = new Vector3(-data.P, data.R, data.Y);
-                //transform.rotation = Quaternion.Euler(euler);
-            }
         }
-
+        private bool m_logCMDResponce = false;
         public bool SendCommands(QuadrupedGroundStationData groundStationData)
         {
-           // Debug.Log("Send motor values : " + groundStationData);
             try
-            {
-                
-                m_arduinoConnection.WriteToArduino(JsonUtility.ToJson(groundStationData));
-               // m_arduinoConnection.ReadFromArduino();
-                 //Debug.Log("Echo : " + m_arduinoConnection.ReadFromArduino());
+            {                            
+                if (m_logCMDResponce)
+                {
+                    m_arduinoConnection.WriteToArduino(1, JsonUtility.ToJson(groundStationData));
+                    Debug.Log(m_arduinoConnection.ReadFromArduino());
+                }
+                else
+                {
+                    m_arduinoConnection.WriteToArduino(2, JsonUtility.ToJson(groundStationData));
+                }
                 return true;
             }
             catch (System.Exception e)
@@ -140,7 +118,6 @@ namespace RoboticsToolkit.Robotics
             ab.TeleportRoot(lerpedPosition, m_desiredRotation);
             ab.velocity = Vector3.zero;
             ab.angularVelocity = Vector3.zero;
-
         }
     }
 }

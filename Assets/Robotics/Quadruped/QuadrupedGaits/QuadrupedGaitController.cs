@@ -61,7 +61,14 @@ namespace RoboticToolkit.Robotics.Gaits
                         m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
                     }
                     BeginMovement(IGaitController.GaitPattern.TROT, QuadrupedTrotGait.Direction.Forward);
-                }            
+                }   
+                else if (Input.GetKey(KeyCode.RightArrow))
+                {
+                    foreach (var limb in m_limbs)
+                    {
+                       // if(limb.is)
+                    }
+                }
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
