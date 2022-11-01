@@ -33,7 +33,6 @@ namespace RoboticsToolkit.Robotics
         //1 return sensor data
         //2 set motor values
         //3 set motor values with responce
-
         public bool SetTransformValues()
         {
             if (!m_arduinoConnection.Connected)

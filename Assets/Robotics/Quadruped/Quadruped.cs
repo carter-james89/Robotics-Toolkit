@@ -18,8 +18,6 @@ namespace RoboticsToolkit.Robotics
         [SerializeField]
         private float m_walkHeight = .2f;
         [SerializeField]
-        private bool m_static = false;
-        [SerializeField]
         private float m_physicsTime = 1;
         [SerializeField]
         private bool m_useGimbalLimbHeight = true;
@@ -100,23 +98,13 @@ namespace RoboticsToolkit.Robotics
             foreach (var limb in m_limbs)
             {
                 limb.GetBaseTarget().SetParent(m_baseTargets);
-                limb.GetBaseTarget().GetComponent<LimbHeightPositioner>().enabled = !m_static;
                 var tempPos = limb.GetBaseTarget().localPosition;
                 tempPos.y = 0;
                 limb.GetBaseTarget().localPosition = tempPos;
                 limb.Initialize(this, m_useGimbalLimbHeight);
             }
-            if (m_static)
-            {
-                foreach (var limb in m_limbs)
-                {
-                    (limb as ThreeJointRoboticLimb).SetLimbHeight(m_walkHeight);
-                }
-            }
-            else
-            {
                 m_baseTargets.transform.position = new Vector3(transform.position.x, m_walkHeight, transform.position.z);
-            }
+            
            
             var controllers = GetComponents<IRoboticController>();
 
@@ -205,12 +193,16 @@ namespace RoboticsToolkit.Robotics
 
         public void RunRoboticController()
         {
-            bool success = SetTransformValues();
-            if (!success)
+            if(m_controlType != ControlType.ArduinoSimulatedSensors)
             {
-                return;
+                bool success = SetTransformValues();
+                if (!success)
+                {
+                    return;
+                }
+                PositionGimble();
             }
-            PositionGimble();
+           
 
             if(m_status == Status.MovingToStartPosition)
             {
@@ -227,16 +219,6 @@ namespace RoboticsToolkit.Robotics
                 if (atTarget)
                 {
                     m_status = Status.Ready;
-
-                    if (m_static)
-                    {
-                        m_articulationBody.immovable = true;
-                        m_ground.SetActive(false);
-                        var tempPos = m_baseTargets.position;
-                        tempPos.y = m_blLimb.GetGameObject().transform.position.y;
-                        m_baseTargets.transform.position = tempPos; 
-                    }
-
                     NotifyEventListeners(IRobotEventListener.EventType.OnRobotInPosition);
                 }
                 else
