@@ -206,6 +206,7 @@ namespace RoboticToolkit.Robotics.Limbs
 
         public void PositionGaitHeight(float height)
         {
+          //  Debug.Log("set limb height");
             m_positionerOffset.y = -m_desiredLimbHeight;// - height;
 
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
@@ -213,15 +214,35 @@ namespace RoboticToolkit.Robotics.Limbs
         }
         public void ResetLimbTargetPosition()
         {
+         //   Debug.Log("set heiht pos 2");
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
             m_heightAdjustment.position = gaitPos;
             m_ikTarget.localPosition = Vector3.zero;
         }
         public void ResetLimb()
         {
-            m_shoulderServoController.Reset();
-            m_elbowServoController.Reset();
-            m_wristServoController.Reset();
+             m_shoulderServoController.Reset();
+             m_elbowServoController.Reset();
+             m_wristServoController.Reset();
+
+            SetLimbHeight(m_startHeight);
+            m_positionerOffset.y = -m_desiredLimbHeight;// - height;
+
+            //var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
+            //m_heightAdjustment.position = gaitPos;
+
+         
+        }
+
+        public void SetHeightAdjustmentToFoot()
+        {
+            Debug.Log("set height adjustment to 0");
+            var tempPos = m_heightAdjustementOrigin.transform.position;
+            tempPos.y = 0;
+            m_heightAdjustementOrigin.transform.position = tempPos;
+
+
+            SetIKTargetPos(m_heightAdjustment.position);
         }
 
         public ILimbPositioner GetPositioner()

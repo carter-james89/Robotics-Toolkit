@@ -1,6 +1,6 @@
 default_settings: null
 behaviors:
-  YertleGait:
+  Yertle B Gait:
     trainer_type: ppo
     hyperparameters:
       batch_size: 1024

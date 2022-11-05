@@ -782,6 +782,8 @@ MonoBehaviour:
   m_currentGaitLocalOffset: {x: 0, y: 0, z: 0}
   m_shoulderTarget: {fileID: 6341994640522781626}
   m_baseTarget: {fileID: 4764333809625285617}
+  m_leftLeg: 0
+  DebugCube: {fileID: 0}
   heightOffset: 0
   m_shoulderServoObject: {fileID: 7017852121102698579}
   m_heightAdjustment: {fileID: 89923859767411000}
@@ -789,7 +791,6 @@ MonoBehaviour:
   m_elbowServoObject: {fileID: 5094296156725450225}
   m_wristServoObject: {fileID: 7751966334099608286}
   m_endPoint: {fileID: 6775419115243840382}
-  DebugCube: {fileID: 0}
 --- !u!171741748 &5116823880097563152
 ArticulationBody:
   m_ObjectHideFlags: 0
@@ -1482,7 +1483,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732bec42d223af54c88828f7cd122c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_servoSpeed: 15
+  m_servoSpeed: 100
   rotationState: 0
 --- !u!114 &1696291730238299238
 MonoBehaviour:
@@ -2374,7 +2375,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732bec42d223af54c88828f7cd122c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_servoSpeed: 1
+  m_servoSpeed: 100
   rotationState: 0
 --- !u!114 &2244703776719461689
 MonoBehaviour:
@@ -2721,7 +2722,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732bec42d223af54c88828f7cd122c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_servoSpeed: 15
+  m_servoSpeed: 100
   rotationState: 0
 --- !u!114 &533933208602816659
 MonoBehaviour:
