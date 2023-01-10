@@ -873,22 +873,6 @@ PrefabInstance:
       propertyPath: m_ParentAnchorRotation.z
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 2137326285644847494, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_Mass
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2137326285644847494, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2137326285644847494, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_Immovable
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2137326285644847494, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_AngularDamping
-      value: 1000
-      objectReference: {fileID: 0}
     - target: {fileID: 2264265836957543727, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -1073,18 +1057,6 @@ PrefabInstance:
       propertyPath: m_ParentAnchorPosition.y
       value: 0.009235736
       objectReference: {fileID: 0}
-    - target: {fileID: 3099181762458029914, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3099181762458029914, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_portName
-      value: COM3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3099181762458029914, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_baudeRate
-      value: 2000000
-      objectReference: {fileID: 0}
     - target: {fileID: 3444725838787205595, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -1173,6 +1145,10 @@ PrefabInstance:
       propertyPath: m_RootOrder
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 5798022236723026516, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+      propertyPath: m_ground
+      value: 
+      objectReference: {fileID: 1067565447}
     - target: {fileID: 5839658699863173540, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_leftLeg
       value: 1
@@ -1405,14 +1381,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6984936466094066542, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_ground
-      value: 
-      objectReference: {fileID: 1067565451}
-    - target: {fileID: 6984936466094066542, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-      propertyPath: m_groundSensor
-      value: 
-      objectReference: {fileID: 730692043}
     - target: {fileID: 7113211345290474146, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
       propertyPath: m_Mass
       value: 0.2
@@ -1637,9 +1605,7 @@ PrefabInstance:
       propertyPath: m_ParentAnchorRotation.z
       value: 0.5512889
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 6177842148979072844, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
-    - {fileID: 6984936466094066542, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
+    m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 96625873e8b26ec46b65f9411bf67607, type: 3}
 --- !u!114 &1243062137 stripped

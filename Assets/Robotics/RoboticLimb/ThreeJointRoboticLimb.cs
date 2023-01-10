@@ -202,15 +202,17 @@ namespace RoboticToolkit.Robotics.Limbs
 
             m_elbowServoController.SetAndRunServo(elbowWristAngles.Key, positionServoImmediate);
             m_wristServoController.SetAndRunServo(elbowWristAngles.Value, positionServoImmediate);
+            //m_elbowServoController.SetAndRunServo(ServoAngle, positionServoImmediate);
+            //m_wristServoController.SetAndRunServo(ServoAngle, positionServoImmediate);
         }
-
+        public int ServoAngle = 0;
         public void PositionGaitHeight(float height)
         {
           //  Debug.Log("set limb height");
             m_positionerOffset.y = -m_desiredLimbHeight;// - height;
 
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
-            m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * .8f);
+            m_heightAdjustment.position =  Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * 1.5f);// .8f);
         }
         public void ResetLimbTargetPosition()
         {

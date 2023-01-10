@@ -19,6 +19,7 @@ public class QuadrupedMLGaitController : Agent, IGaitController, IRobotEventList
     private IRoboticLimb[] m_limbs;
     public override void OnEpisodeBegin()
     {
+        Debug.Log("Episode Begin");
         m_robot.ResetController();
         Destroy(gameObject.GetComponent<DecisionRequester>());
         m_running = false;
@@ -33,7 +34,7 @@ public class QuadrupedMLGaitController : Agent, IGaitController, IRobotEventList
     }
     public override void OnActionReceived(ActionBuffers actions)
     {
-        //Debug.Log("on action recieved");
+      //  Debug.Log("on action recieved");
         base.OnActionReceived(actions);
         var flLimb = m_limbs[0].GetPositioner();
         //var frLimb = m_limbs[1].GetGameObject().GetComponentInChildren<LimbPositioner>();
@@ -74,6 +75,7 @@ public class QuadrupedMLGaitController : Agent, IGaitController, IRobotEventList
     {
         if (Vector3.Angle(Vector3.up, transform.up) > 40)
         {
+            Debug.Log("end episode angle");
             AddReward(-1);
             EndEpisode();
             return;
@@ -81,6 +83,8 @@ public class QuadrupedMLGaitController : Agent, IGaitController, IRobotEventList
         //var velocityReward = (m_target.transform.forward - m_robot.GetRobotData().Velocity).magnitude;
         var dir = m_target.transform.localPosition - transform.localPosition;
         AddReward(-dir.magnitude);
+
+        Debug.Log(StepCount);
     }
     public IGaitController.Direction GetDirection()
     {
@@ -102,12 +106,13 @@ public class QuadrupedMLGaitController : Agent, IGaitController, IRobotEventList
     public bool IsRunning()
     {
         return m_running;
+       // return m_robot.
     }
 
     public void Run()
     {
-      //  Debug.Log("run ml gait");
-       // RequestDecision();
+      // Debug.Log("run ml gait");
+        RequestDecision();
       //  RequestD
     }
 
@@ -123,6 +128,7 @@ public class QuadrupedMLGaitController : Agent, IGaitController, IRobotEventList
 
     public void OnRobotEventOccured(IRobotEventListener.EventData eventData)
     {
+       // Debug.Log("got robot event");
         switch (eventData.EventType)
         {
             case IRobotEventListener.EventType.OnRobotInitialized:

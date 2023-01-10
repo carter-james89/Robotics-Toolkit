@@ -76,10 +76,10 @@ public class ArduinoQuadrupedPositoner : MonoBehaviour, IQuadrupedPositioner
             var groundOffset = new Vector3(0, groundPosition.y, 0);
             m_desiredPosition = robotTransform.position - groundOffset;
 
-            var lerpedPosition = Vector3.Lerp(m_robot.GetGameObject().transform.position, m_desiredPosition, Time.deltaTime * 20);
-            m_body.TeleportRoot(lerpedPosition, m_desiredRotation);
-            m_body.velocity = Vector3.zero;
-            m_body.angularVelocity = Vector3.zero;
+            //var lerpedPosition = Vector3.Lerp(m_robot.GetGameObject().transform.position, m_desiredPosition, Time.deltaTime * 20);
+            //m_body.TeleportRoot(lerpedPosition, m_desiredRotation);
+            //m_body.velocity = Vector3.zero;
+            //m_body.angularVelocity = Vector3.zero;
 
             return true;
         }
@@ -89,16 +89,24 @@ public class ArduinoQuadrupedPositoner : MonoBehaviour, IQuadrupedPositioner
             return false;
         }
     }
-    //private void FixedUpdate()
-    //{
-    //    var lerpedPosition = Vector3.Lerp(m_robot.GetGameObject().transform.position, m_desiredPosition, Time.deltaTime * 20);
-    //    m_body.TeleportRoot(lerpedPosition, m_desiredRotation);
-    //    m_body.velocity = Vector3.zero;
-    //    m_body.angularVelocity = Vector3.zero;
-    //}
-
-    public void ResetPositioner()
+    private void FixedUpdate()
     {
-        throw new System.NotImplementedException();
+        if (!m_initialized)
+        {
+            return;
+        }
+        var lerpedPosition = Vector3.Lerp(m_robot.GetGameObject().transform.position, m_desiredPosition, Time.deltaTime * 20);
+        m_body.TeleportRoot(lerpedPosition, m_desiredRotation);
+        m_body.velocity = Vector3.zero;
+        m_body.angularVelocity = Vector3.zero;
+    }
+
+    public void BeginResetPositioner()
+    {
+      //  throw new System.NotImplementedException();
+    }
+    public void CompletePositionerReset()
+    {
+
     }
 }

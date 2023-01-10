@@ -40,6 +40,11 @@ namespace RoboticsToolkit.Robotics
         [SerializeField]
         private Transform m_com;
 
+        private bool m_resetPosition = false;
+        private QuadrupedGroundStationData m_servoValues;
+        private bool m_firstReset = true;
+        private float m_resetCount = 0;
+
         private List<IRobotEventListener> m_listeners = new List<IRobotEventListener>();
         private enum Status
         {
@@ -49,7 +54,6 @@ namespace RoboticsToolkit.Robotics
         }
         private Status m_status = Status.NotRunning;
         private ArticulationBody m_articulationBody;
-        //   private IRoboticController m_roboticController;
         private IServoCMDRelay m_servoCMDRelay;
         private IQuadrupedPositioner m_transformPositioner;
         private bool m_ready = true;
@@ -93,8 +97,6 @@ namespace RoboticsToolkit.Robotics
 
             m_gaits.transform.SetParent(transform.parent);
             m_baseTargets.transform.SetParent(transform.parent);
-            ///  Gimbal.GetGameObject().transform.SetParent(null);
-
 
             PositionGimble();
             foreach (var limb in m_limbs)
@@ -107,19 +109,19 @@ namespace RoboticsToolkit.Robotics
             }
             m_baseTargets.transform.position = new Vector3(transform.position.x, m_walkHeight, transform.position.z);
 
-
             var controllers = GetComponents<IRoboticController>();
 
             switch (m_controlType)
             {
                 case ControlType.Simulation:
+                    m_transformPositioner = GetComponent<QuadrupedSimulationPositioner>();
                     break;
                 case ControlType.Arduino:
-                    m_transformPositioner = GetComponent<IQuadrupedPositioner>();
+                    m_transformPositioner = GetComponent<ArduinoQuadrupedPositoner>();
                     m_servoCMDRelay = GetComponent<IServoCMDRelay>();
-
                     break;
                 case ControlType.ArduinoSimulatedSensors:
+                    m_servoCMDRelay = GetComponent<IServoCMDRelay>();
                     break;
                 default:
                     break;
@@ -133,7 +135,6 @@ namespace RoboticsToolkit.Robotics
                 m_servoCMDRelay.Initialize(this);
             }
 
-
             if (m_gaitController != null)
             {
                 m_gaitController.Initialize(this);
@@ -141,12 +142,6 @@ namespace RoboticsToolkit.Robotics
             m_status = Status.MovingToStartPosition;
             NotifyEventListeners(IRobotEventListener.EventType.OnRobotInitialized);
         }
-
-        private bool m_firstReset = true;
-        private float m_resetCount = 0;
-
-
-
 
         void Update()
         {
@@ -156,12 +151,19 @@ namespace RoboticsToolkit.Robotics
             if (m_controlType == ControlType.Arduino)
             {
                 SetTransformValues();
-            }
-         //   RunRoboticController();
-            if (m_controlType != ControlType.Simulation)
-            {
+                RunRoboticController();
                 m_servoCMDRelay.RelayServoCommands(m_servoValues);
             }
+            //   
+            //if (m_controlType != ControlType.Simulation)
+            //{
+            //    m_servoCMDRelay.RelayServoCommands(m_servoValues);
+            //}
+          
+            //if (m_controlType != ControlType.Simulation)
+            //{
+            //    m_servoCMDRelay.RelayServoCommands(m_servoValues);
+            //}
 
             m_com.localPosition = m_articulationBody.centerOfMass;
 
@@ -173,18 +175,37 @@ namespace RoboticsToolkit.Robotics
                 }
             }
         }
+        public void ResetController()
+        {
+            //if (m_firstReset)
+            //{
+            //    m_firstReset = false;
+            //    return;
+            //}
+            //  m_articulationBody.immovable = true;
+            foreach (var limb in m_limbs)
+            {
+                limb.ResetLimb();
+                // limb.SetLimbHeight(m_startHeight);
+
+                //limb.SetIKTargetPos()
+            }
+
+            m_resetPosition = true;
+            m_ground.GetComponent<Collider>().enabled = false;
+            m_transformPositioner.BeginResetPositioner();
+        }
         private void FixedUpdate()
         {
             if (m_resetPosition)
             {
                 if (m_resetCount == 0)
                 {
-
-
                     //m_articulationBody.velocity = Vector3.zero;
                     //m_articulationBody.angularVelocity = Vector3.zero;
                     //m_ground.GetComponent<Collider>().enabled = false;
                     //  m_roboticController.ResetController();
+                  //  m_transformPositioner.ResetPositioner();
                     //foreach (var limb in m_limbs)
                     //{
                     //    limb.ResetLimb();
@@ -195,29 +216,46 @@ namespace RoboticsToolkit.Robotics
                     // m_roboticController.ResetController();
                     // m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
                     // m_articulationBody.immovable = false;
-                    m_status = Status.MovingToStartPosition;
+                   // m_status = Status.MovingToStartPosition;
 
                     //m_ground.GetComponent<Collider>().enabled = true;
                     // m_resetPosition = false;
                 }
-                foreach (var limb in m_limbs)
-                {
-                    limb.ResetLimb();
-                    // limb.SetLimbHeight(m_startHeight);
+                //foreach (var limb in m_limbs)
+                //{
+                //    limb.ResetLimb();
+                //    // limb.SetLimbHeight(m_startHeight);
 
-                    //limb.SetIKTargetPos()
-                }
+                //    //limb.SetIKTargetPos()
+                //}
                 m_resetCount++;
                 if (m_resetCount > 50)
                 {
+                    m_transformPositioner.CompletePositionerReset();
+                    m_ground.GetComponent<Collider>().enabled = true;
                     NotifyEventListeners(IRobotEventListener.EventType.OnReset);
+                    m_status = Status.MovingToStartPosition;
                     m_resetCount = 0;
                     m_resetPosition = false;
                 }
                 return;
             }
 
-            RunRoboticController();
+            if (m_controlType != ControlType.Arduino)
+            {
+                SetTransformValues();
+                RunRoboticController();
+                if(m_servoCMDRelay != null)
+                m_servoCMDRelay.RelayServoCommands(m_servoValues);
+            }
+
+            //if(m_controlType != ControlType.Arduino)
+            //{
+            //    RunRoboticController();
+            //}
+
+            //RunRoboticController();
+
         }
         private bool SetTransformValues()
         {
@@ -289,7 +327,6 @@ namespace RoboticsToolkit.Robotics
             m_servoValues.BR2 = (int)m_brLimb.GetServoControllers()[2].GetSetAngle();
         }
 
-
         private void PositionGimble()
         {
             this.Gimbal.GetGameObject().transform.position = transform.position;
@@ -315,8 +352,6 @@ namespace RoboticsToolkit.Robotics
             }
         }
 
-        private bool m_resetPosition = false;
-        private QuadrupedGroundStationData m_servoValues;
         public void EmergencyStop()
         {
             Debug.Log("EMERGENCY STOP");
@@ -327,16 +362,7 @@ namespace RoboticsToolkit.Robotics
             }
             NotifyEventListeners(IRobotEventListener.EventType.OnEmergencyStop);
         }
-        public void ResetController()
-        {
-            //if (m_firstReset)
-            //{
-            //    m_firstReset = false;
-            //    return;
-            //}
-            //  m_articulationBody.immovable = true;
-            m_resetPosition = true;
-        }
+ 
 
         private void NotifyEventListeners(IRobotEventListener.EventType eventType)
         {
@@ -344,7 +370,7 @@ namespace RoboticsToolkit.Robotics
             {
                 if (listener != null)
                 {
-                    // listener.OnRobotEventOccured(new IRobotEventListener.EventData(eventType, this, m_roboticController));
+                    listener.OnRobotEventOccured(new IRobotEventListener.EventData(eventType, this, null));
                 }
             }
         }

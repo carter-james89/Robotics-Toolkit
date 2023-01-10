@@ -11,7 +11,8 @@ namespace RoboticsToolkit.Robotics
         public bool Initialize(IRobot robot);
         public bool PositionTransform();
 
-        public void ResetPositioner();
+        public void BeginResetPositioner();
+        public void CompletePositionerReset();
 
         public bool IsSimulator();
     }

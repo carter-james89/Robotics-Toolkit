@@ -358,11 +358,12 @@ GameObject:
   - component: {fileID: 6417101710590175695}
   - component: {fileID: 6353467401179831182}
   - component: {fileID: 3008256020788250660}
-  - component: {fileID: 6984936466094066542}
   - component: {fileID: 1476213744948802005}
-  - component: {fileID: 6177842148979072844}
   - component: {fileID: 8368787274389783152}
   - component: {fileID: 8631135281258301953}
+  - component: {fileID: 8983684002200509046}
+  - component: {fileID: 5798022236723026516}
+  - component: {fileID: 5758168019516584242}
   m_Layer: 0
   m_Name: Yertle
   m_TagString: Untagged
@@ -443,7 +444,7 @@ ArticulationBody:
   m_GameObject: {fileID: 4134918493617378539}
   m_Enabled: 1
   serializedVersion: 3
-  m_Mass: 10
+  m_Mass: 1
   m_ParentAnchorPosition: {x: 0, y: 0, z: 0}
   m_ParentAnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
@@ -481,9 +482,9 @@ ArticulationBody:
     target: 0
     targetVelocity: 0
   m_LinearDamping: 0.05
-  m_AngularDamping: 0.05
+  m_AngularDamping: 1000
   m_JointFriction: 0.05
-  m_Immovable: 1
+  m_Immovable: 0
   m_UseGravity: 1
   m_CollisionDetectionMode: 1
 --- !u!65 &6417101710590175695
@@ -550,20 +551,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &6984936466094066542
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4134918493617378539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 87b8a362580689e4799f528c66b0eb68, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ground: {fileID: 0}
-  m_groundSensor: {fileID: 0}
 --- !u!114 &1476213744948802005
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -587,18 +574,6 @@ MonoBehaviour:
   m_rotatingTrotStrideDistance: 0.04
   m_rotatingTrotStrideTime: 0.22
   m_rotatingTrotStrideCoolDownTime: 0.2
---- !u!114 &6177842148979072844
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4134918493617378539}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6a2e8aecdee10cb4ab94ef74a124126c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &8368787274389783152
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -621,6 +596,44 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9b387d136eb66374881ac6e5b853fb25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8983684002200509046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134918493617378539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 83ace6256de2d8d42bf309e56cf777eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5798022236723026516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134918493617378539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1565c284571b63d4aa441a6819214d26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ground: {fileID: 0}
+  m_groundSensor: {fileID: 5944587151848948574}
+--- !u!114 &5758168019516584242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4134918493617378539}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe9416c4f1188544e958eb5b30691595, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &4264516971705889505
