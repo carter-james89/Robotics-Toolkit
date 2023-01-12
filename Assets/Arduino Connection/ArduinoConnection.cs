@@ -18,6 +18,8 @@ namespace RoboticsToolkit.ArduinoUtilities
         // Start is called before the first frame update
         public void ConnectToArduino()
         {
+            if (m_arduinoConnection != null)
+                return;
             //m_arduinoConnection.serialPortMessage += x => Debug.Log(x);
             m_arduinoConnection = new SerialPortConnection(m_portName, m_baudeRate);
 

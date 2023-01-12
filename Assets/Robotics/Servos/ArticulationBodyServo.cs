@@ -92,6 +92,8 @@ namespace RoboticToolKit.Robotics.Servos
             var drive = m_articulation.xDrive;
             drive.target = angle;
             m_articulation.xDrive = drive;
+
+           // m_articulation.
         }
 
         public void ResetServo(float resetAngle)

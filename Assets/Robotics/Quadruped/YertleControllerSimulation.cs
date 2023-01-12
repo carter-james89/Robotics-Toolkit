@@ -8,7 +8,12 @@ namespace RoboticsToolkit.Robotics
     {
         public GameObject GetGameObject() => gameObject;
 
+        private Vector3 m_defaultPosition;
+        private Quaternion m_defaultRotation;
+
         public bool IsSimulator() => true;
+
+        private IRobot m_robot;
 
         public bool SetTransformValues()
         {
@@ -18,6 +23,9 @@ namespace RoboticsToolkit.Robotics
 
         public bool Initialize(IRobot robot)
         {
+            m_robot = robot;
+            m_defaultPosition = transform.localPosition;
+            m_defaultRotation = transform.localRotation;
             return true;
         }
 
@@ -25,6 +33,17 @@ namespace RoboticsToolkit.Robotics
         {
             return true;
         }
+
+      
+        public void ResetController()
+        {
+        //    Debug.Log("Teleport root to " + m_defaultPosition);
+            var ab = m_robot.GetGameObject().GetComponent<ArticulationBody>();
+            ab.TeleportRoot(m_defaultPosition, m_defaultRotation);
+            ab.velocity = Vector3.zero;
+            ab.angularVelocity = Vector3.zero;
+        }
+
     }
 
 }

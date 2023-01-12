@@ -10,6 +10,8 @@ namespace RoboticsToolkit.Robotics
         public bool Initialize(IRobot robot);
         public bool SetTransformValues();
 
+        public void ResetController();
+
         public bool IsSimulator();
 
         public bool SendCommands(QuadrupedGroundStationData groundStationData);

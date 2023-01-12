@@ -176,6 +176,10 @@ namespace RoboticToolkit.Robotics.Limbs
 
         public void RunLimb(bool positionServoImmediate, bool adjustHeight = false)
         {
+            if (m_positioner != null)
+            {
+                m_positioner.Run();
+            }
             if (adjustHeight)
             {
                 heightOffset = transform.position.y - m_baseTarget.position.y;
@@ -202,26 +206,54 @@ namespace RoboticToolkit.Robotics.Limbs
 
             m_elbowServoController.SetAndRunServo(elbowWristAngles.Key, positionServoImmediate);
             m_wristServoController.SetAndRunServo(elbowWristAngles.Value, positionServoImmediate);
+            //m_elbowServoController.SetAndRunServo(ServoAngle, positionServoImmediate);
+            //m_wristServoController.SetAndRunServo(ServoAngle, positionServoImmediate);
         }
-
+        public int ServoAngle = 0;
         public void PositionGaitHeight(float height)
         {
+          //  Debug.Log("set limb height");
             m_positionerOffset.y = -m_desiredLimbHeight;// - height;
 
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
-            m_heightAdjustment.position = Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * .8f);
+            m_heightAdjustment.position =  Vector3.Lerp(m_heightAdjustment.position, gaitPos, Time.deltaTime * 1.5f);// .8f);
         }
         public void ResetLimbTargetPosition()
         {
+         //   Debug.Log("set heiht pos 2");
             var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
             m_heightAdjustment.position = gaitPos;
             m_ikTarget.localPosition = Vector3.zero;
         }
         public void ResetLimb()
         {
-            m_shoulderServoController.Reset();
-            m_elbowServoController.Reset();
-            m_wristServoController.Reset();
+             m_shoulderServoController.Reset();
+             m_elbowServoController.Reset();
+             m_wristServoController.Reset();
+
+            SetLimbHeight(m_startHeight);
+            m_ikTarget.localPosition = Vector3.zero;
+            // m_positionerOffset.y = -m_desiredLimbHeight;// - height;
+
+            //ResetLimbTargetPosition();
+
+            //  ReturnToStartHeight();
+
+            //var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
+            //m_heightAdjustment.position = gaitPos;
+
+
+        }
+
+        public void SetHeightAdjustmentToFoot()
+        {
+            Debug.Log("set height adjustment to 0");
+            var tempPos = m_heightAdjustementOrigin.transform.position;
+            tempPos.y = 0;
+            m_heightAdjustementOrigin.transform.position = tempPos;
+
+
+            SetIKTargetPos(m_heightAdjustment.position);
         }
 
         public ILimbPositioner GetPositioner()

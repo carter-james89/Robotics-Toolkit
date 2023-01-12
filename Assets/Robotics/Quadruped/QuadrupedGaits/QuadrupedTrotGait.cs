@@ -201,9 +201,39 @@ namespace RoboticToolkit.Robotics.Gaits
             }
         }
 
-
         public void RunGait()
         {
+            if (m_running)
+            {
+                List<ILimbPositioner> m_limbsAtTarget = new List<ILimbPositioner>();
+                foreach (var limb in m_limbs)
+                {
+                    //limb.GetPositioner().Run();
+                    //if (m_rotatingLimbs[0] == limb || m_rotatingLimbs[1] == limb)
+                    //{
+                    //    limb.RunLimb(true, true);
+                    //}
+                    //else
+                    //{
+                    //    limb.RunLimb(true, true);
+                    //}
+                    if (limb.GetPositioner().StrideComplete() == true)
+                    {
+                        //   Debug.Log(limb.GetPositioner().cu);
+                        m_limbsAtTarget.Add(limb.GetPositioner());
+                    }
+                    else
+                    {
+                        // Debug.Log("Waiting for : " + limb.GetGameObject().name);
+                    }
+                }
+                //Debug.Log(m_limbsAtTarget.Count);
+                if (m_limbsAtTarget.Count >= 3)
+                {
+                    m_postStrideCooldown = true;
+                }
+            }
+
             if (m_postStrideCooldown)
             {
                 m_postStrideCooldownTime += Time.deltaTime;
@@ -226,46 +256,16 @@ namespace RoboticToolkit.Robotics.Gaits
                     }
                 }
             }
-            if (m_postStrideCooldown)
-            {
-                // Debug.Log("cooldown");
-                foreach (var limb in m_limbs)
-                {
-                    limb.RunLimb(true, true);
-                }
-                return;
-            }
-            if (m_running)
-            {
-                List<ILimbPositioner> m_limbsAtTarget = new List<ILimbPositioner>();
-                foreach (var limb in m_limbs)
-                {
-
-                    limb.GetPositioner().Run();
-                    if (m_rotatingLimbs[0] == limb || m_rotatingLimbs[1] == limb)
-                    {
-                        limb.RunLimb(true, true);
-                    }
-                    else
-                    {
-                        limb.RunLimb(true, true);
-                    }
-                    if (limb.GetPositioner().StrideComplete() == true)
-                    {
-                        //   Debug.Log(limb.GetPositioner().cu);
-                        m_limbsAtTarget.Add(limb.GetPositioner());
-                    }
-                    else
-                    {
-                        // Debug.Log("Waiting for : " + limb.GetGameObject().name);
-                    }
-                }
-                //Debug.Log(m_limbsAtTarget.Count);
-                if (m_limbsAtTarget.Count >= 3)
-                {
-                    m_postStrideCooldown = true;
-                }
-            }
+            //if (m_postStrideCooldown)
+            //{
+            //    // Debug.Log("cooldown");
+            //    foreach (var limb in m_limbs)
+            //    {
+            //        limb.RunLimb(true, true);
+            //    }
+            //    return;
+            //}
+           
         }
 
         public bool IsRunning()

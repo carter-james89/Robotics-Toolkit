@@ -782,6 +782,8 @@ MonoBehaviour:
   m_currentGaitLocalOffset: {x: 0, y: 0, z: 0}
   m_shoulderTarget: {fileID: 6341994640522781626}
   m_baseTarget: {fileID: 4764333809625285617}
+  m_leftLeg: 0
+  DebugCube: {fileID: 0}
   heightOffset: 0
   m_shoulderServoObject: {fileID: 7017852121102698579}
   m_heightAdjustment: {fileID: 89923859767411000}
@@ -789,7 +791,6 @@ MonoBehaviour:
   m_elbowServoObject: {fileID: 5094296156725450225}
   m_wristServoObject: {fileID: 7751966334099608286}
   m_endPoint: {fileID: 6775419115243840382}
-  DebugCube: {fileID: 0}
 --- !u!171741748 &5116823880097563152
 ArticulationBody:
   m_ObjectHideFlags: 0
@@ -1482,7 +1483,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732bec42d223af54c88828f7cd122c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_servoSpeed: 15
+  m_servoSpeed: 100
   rotationState: 0
 --- !u!114 &1696291730238299238
 MonoBehaviour:
@@ -1961,38 +1962,29 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0.30015224
-      outSlope: 0.30015224
+      inSlope: 0.58998424
+      outSlope: 0.58998424
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.03122752
+      outWeight: 0.032450795
     - serializedVersion: 3
-      time: 0.366964
-      value: 0.09502697
-      inSlope: 0.13193306
-      outSlope: 0.13193306
+      time: 0.4799359
+      value: 0.09076812
+      inSlope: 0.006383805
+      outSlope: 0.006383805
       tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.042004813
-    - serializedVersion: 3
-      time: 0.9972141
-      value: 0.013016414
-      inSlope: -0.11593179
-      outSlope: -0.11593179
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.05648487
-      outWeight: 0.33333334
+      outWeight: 0.10150676
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: -0.063199006
-      outSlope: -0.063199006
+      inSlope: -0.5654784
+      outSlope: -0.5654784
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.04437524
+      inWeight: 0.03057089
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -2374,7 +2366,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732bec42d223af54c88828f7cd122c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_servoSpeed: 1
+  m_servoSpeed: 100
   rotationState: 0
 --- !u!114 &2244703776719461689
 MonoBehaviour:
@@ -2721,7 +2713,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 732bec42d223af54c88828f7cd122c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_servoSpeed: 15
+  m_servoSpeed: 100
   rotationState: 0
 --- !u!114 &533933208602816659
 MonoBehaviour:

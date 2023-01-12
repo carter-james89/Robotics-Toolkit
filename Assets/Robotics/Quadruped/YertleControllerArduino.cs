@@ -70,7 +70,7 @@ namespace RoboticsToolkit.Robotics
             {                            
                 if (m_logCMDResponce)
                 {
-                    m_arduinoConnection.WriteToArduino(1, JsonUtility.ToJson(groundStationData));
+                    m_arduinoConnection.WriteToArduino(3, JsonUtility.ToJson(groundStationData));
                     Debug.Log(m_arduinoConnection.ReadFromArduino());
                 }
                 else
@@ -93,21 +93,20 @@ namespace RoboticsToolkit.Robotics
             m_robot = robot;
             m_desiredPosition = robot.GetGameObject().transform.position;
             m_desiredRotation = robot.GetGameObject().transform.rotation;
-            foreach (var ab in robot.GetGameObject().GetComponentsInChildren<ArticulationBody>())
-            {
-                //ab.mass = 0;
-                ab.useGravity = false;
-            }
+            //foreach (var ab in robot.GetGameObject().GetComponentsInChildren<ArticulationBody>())
+            //{
+            //    ab.useGravity = false;
+            //}
             m_initialized = true;
 
-            m_ground.GetComponent<Collider>().enabled = false;
+          //  m_ground.GetComponent<Collider>().enabled = false;
             return true;
         }
 
         private void FixedUpdate()
         {
-            if (m_initialized)
-                PositionTransform();
+          //  if (m_initialized)
+               // PositionTransform();
         }
 
         private void PositionTransform()
@@ -117,6 +116,11 @@ namespace RoboticsToolkit.Robotics
             ab.TeleportRoot(lerpedPosition, m_desiredRotation);
             ab.velocity = Vector3.zero;
             ab.angularVelocity = Vector3.zero;
+        }
+
+        public void ResetController()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
