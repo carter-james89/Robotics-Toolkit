@@ -176,6 +176,10 @@ namespace RoboticToolkit.Robotics.Limbs
 
         public void RunLimb(bool positionServoImmediate, bool adjustHeight = false)
         {
+            if (m_positioner != null)
+            {
+                m_positioner.Run();
+            }
             if (adjustHeight)
             {
                 heightOffset = transform.position.y - m_baseTarget.position.y;
@@ -228,12 +232,17 @@ namespace RoboticToolkit.Robotics.Limbs
              m_wristServoController.Reset();
 
             SetLimbHeight(m_startHeight);
-            m_positionerOffset.y = -m_desiredLimbHeight;// - height;
+            m_ikTarget.localPosition = Vector3.zero;
+            // m_positionerOffset.y = -m_desiredLimbHeight;// - height;
+
+            //ResetLimbTargetPosition();
+
+            //  ReturnToStartHeight();
 
             //var gaitPos = m_heightAdjustementOrigin.TransformPoint(m_positionerOffset);
             //m_heightAdjustment.position = gaitPos;
 
-         
+
         }
 
         public void SetHeightAdjustmentToFoot()

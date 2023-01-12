@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class QuadrupedSimulationPositioner : MonoBehaviour, IQuadrupedPositioner
+public class QuadrupedSimulationPositioner : MonoBehaviour, IQuadrupedPositioner, IRobotEventListener
 {
     private IRobot m_robot;
-    private Vector3 m_startPos;
+    private Vector3 m_startPos = Vector3.zero;
+
+    private bool m_firstSet = true;
     public GameObject GetGameObject()
     {
         return gameObject;
@@ -15,7 +17,8 @@ public class QuadrupedSimulationPositioner : MonoBehaviour, IQuadrupedPositioner
     public bool Initialize(IRobot robot)
     {
         m_robot = robot;
-        m_startPos = robot.GetGameObject().transform.localPosition;
+        robot.SubscribeToEvents(this);
+        m_startPos = m_robot.GetGameObject().transform.position;
         return true;
     }
 
@@ -32,7 +35,7 @@ public class QuadrupedSimulationPositioner : MonoBehaviour, IQuadrupedPositioner
     public void BeginResetPositioner()
     {
         m_resetting = true;
-       
+
     }
     public void CompletePositionerReset()
     {
@@ -48,6 +51,28 @@ public class QuadrupedSimulationPositioner : MonoBehaviour, IQuadrupedPositioner
             ab.TeleportRoot(m_startPos, Quaternion.identity);
             ab.velocity = Vector3.zero;
             ab.angularVelocity = Vector3.zero;
+        }
+    }
+
+    public void OnRobotEventOccured(IRobotEventListener.EventData eventData)
+    {
+        switch (eventData.EventType)
+        {
+            case IRobotEventListener.EventType.OnRobotInitialized:
+                break;
+            case IRobotEventListener.EventType.OnRobotInPosition:
+                if (m_firstSet)
+                {
+                    m_startPos = m_robot.GetGameObject().transform.position;
+                    m_firstSet = false;
+                }
+                break;
+            case IRobotEventListener.EventType.OnEmergencyStop:
+                break;
+            case IRobotEventListener.EventType.OnReset:
+                break;
+            default:
+                break;
         }
     }
 }

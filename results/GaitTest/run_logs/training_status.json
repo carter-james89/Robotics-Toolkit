@@ -1,4 +1,44 @@
 {
+    "Yertle B Gait": {
+        "checkpoints": [
+            {
+                "steps": 499998,
+                "file_path": "results\\GaitTest\\Yertle B Gait\\Yertle B Gait-499998.onnx",
+                "reward": 175.4202021499013,
+                "creation_time": 1673492476.9480624,
+                "auxillary_file_paths": [
+                    "results\\GaitTest\\Yertle B Gait\\Yertle B Gait-499998.pt"
+                ]
+            },
+            {
+                "steps": 999981,
+                "file_path": "results\\GaitTest\\Yertle B Gait\\Yertle B Gait-999981.onnx",
+                "reward": 265.9079512357712,
+                "creation_time": 1673493588.3712108,
+                "auxillary_file_paths": [
+                    "results\\GaitTest\\Yertle B Gait\\Yertle B Gait-999981.pt"
+                ]
+            },
+            {
+                "steps": 1026584,
+                "file_path": "results\\GaitTest\\Yertle B Gait\\Yertle B Gait-1026584.onnx",
+                "reward": 255.87583696963836,
+                "creation_time": 1673493642.6420548,
+                "auxillary_file_paths": [
+                    "results\\GaitTest\\Yertle B Gait\\Yertle B Gait-1026584.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1026584,
+            "file_path": "results\\GaitTest\\Yertle B Gait.onnx",
+            "reward": 255.87583696963836,
+            "creation_time": 1673493642.6420548,
+            "auxillary_file_paths": [
+                "results\\GaitTest\\Yertle B Gait\\Yertle B Gait-1026584.pt"
+            ]
+        }
+    },
     "metadata": {
         "stats_format_version": "0.3.0",
         "mlagents_version": "0.28.0",

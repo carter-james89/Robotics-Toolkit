@@ -38,6 +38,7 @@ namespace RoboticsToolkit.Robotics
         {
             OnRobotInitialized,
             OnRobotInPosition,
+            OnLimbsPositioned,
             OnEmergencyStop,
             OnReset
         }

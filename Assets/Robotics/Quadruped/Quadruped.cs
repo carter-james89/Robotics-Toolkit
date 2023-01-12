@@ -40,7 +40,7 @@ namespace RoboticsToolkit.Robotics
         [SerializeField]
         private Transform m_com;
 
-        private bool m_resetPosition = false;
+       // private bool m_resetPosition = false;
         private QuadrupedGroundStationData m_servoValues;
         private bool m_firstReset = true;
         private float m_resetCount = 0;
@@ -49,6 +49,7 @@ namespace RoboticsToolkit.Robotics
         private enum Status
         {
             NotRunning,
+            Resetting,
             MovingToStartPosition,
             Ready,
         }
@@ -154,16 +155,6 @@ namespace RoboticsToolkit.Robotics
                 RunRoboticController();
                 m_servoCMDRelay.RelayServoCommands(m_servoValues);
             }
-            //   
-            //if (m_controlType != ControlType.Simulation)
-            //{
-            //    m_servoCMDRelay.RelayServoCommands(m_servoValues);
-            //}
-          
-            //if (m_controlType != ControlType.Simulation)
-            //{
-            //    m_servoCMDRelay.RelayServoCommands(m_servoValues);
-            //}
 
             m_com.localPosition = m_articulationBody.centerOfMass;
 
@@ -177,66 +168,30 @@ namespace RoboticsToolkit.Robotics
         }
         public void ResetController()
         {
-            //if (m_firstReset)
-            //{
-            //    m_firstReset = false;
-            //    return;
-            //}
-            //  m_articulationBody.immovable = true;
+            m_resetCount = 0;
+            m_status = Status.Resetting;
+
+            m_ground.GetComponent<Collider>().enabled = false;
+            m_transformPositioner.BeginResetPositioner();
+
             foreach (var limb in m_limbs)
             {
                 limb.ResetLimb();
-                // limb.SetLimbHeight(m_startHeight);
-
-                //limb.SetIKTargetPos()
             }
-
-            m_resetPosition = true;
-            m_ground.GetComponent<Collider>().enabled = false;
-            m_transformPositioner.BeginResetPositioner();
         }
         private void FixedUpdate()
         {
-            if (m_resetPosition)
+            if (m_status == Status.Resetting)
             {
-                if (m_resetCount == 0)
-                {
-                    //m_articulationBody.velocity = Vector3.zero;
-                    //m_articulationBody.angularVelocity = Vector3.zero;
-                    //m_ground.GetComponent<Collider>().enabled = false;
-                    //  m_roboticController.ResetController();
-                  //  m_transformPositioner.ResetPositioner();
-                    //foreach (var limb in m_limbs)
-                    //{
-                    //    limb.ResetLimb();
-                    //    // limb.SetLimbHeight(m_startHeight);
-
-                    //    //limb.SetIKTargetPos()
-                    //}
-                    // m_roboticController.ResetController();
-                    // m_articulationBody.TeleportRoot(m_ground.position + new Vector3(0, m_startHeight, 0), Quaternion.identity);
-                    // m_articulationBody.immovable = false;
-                   // m_status = Status.MovingToStartPosition;
-
-                    //m_ground.GetComponent<Collider>().enabled = true;
-                    // m_resetPosition = false;
-                }
-                //foreach (var limb in m_limbs)
-                //{
-                //    limb.ResetLimb();
-                //    // limb.SetLimbHeight(m_startHeight);
-
-                //    //limb.SetIKTargetPos()
-                //}
                 m_resetCount++;
-                if (m_resetCount > 50)
+                if (m_resetCount > 30)
                 {
                     m_transformPositioner.CompletePositionerReset();
                     m_ground.GetComponent<Collider>().enabled = true;
-                    NotifyEventListeners(IRobotEventListener.EventType.OnReset);
+             
                     m_status = Status.MovingToStartPosition;
                     m_resetCount = 0;
-                    m_resetPosition = false;
+                    NotifyEventListeners(IRobotEventListener.EventType.OnReset);
                 }
                 return;
             }
@@ -248,14 +203,6 @@ namespace RoboticsToolkit.Robotics
                 if(m_servoCMDRelay != null)
                 m_servoCMDRelay.RelayServoCommands(m_servoValues);
             }
-
-            //if(m_controlType != ControlType.Arduino)
-            //{
-            //    RunRoboticController();
-            //}
-
-            //RunRoboticController();
-
         }
         private bool SetTransformValues()
         {
@@ -277,8 +224,6 @@ namespace RoboticsToolkit.Robotics
                 bool atTarget = true;
                 foreach (var limb in m_limbs)
                 {
-                    limb.RunLimb(true, true);
-
                     if (!limb.LimbAtTarget() || !limb.BaseAtTarget())
                     {
                         atTarget = false;
@@ -286,27 +231,28 @@ namespace RoboticsToolkit.Robotics
                 }
                 if (atTarget)
                 {
-                    Debug.Log("robot in position");
                     m_status = Status.Ready;
                     NotifyEventListeners(IRobotEventListener.EventType.OnRobotInPosition);
                 }
-            }
-
-            foreach (var limb in m_limbs)
-            {
-                limb.GetPositioner().GetGameObject().transform.rotation = Quaternion.LookRotation(GetGimbal().GetGameObject().transform.forward, GetGimbal().GetGameObject().transform.up);
-            }
-            if (m_gaitController != null && m_gaitController.IsRunning() && IsRunning)
-            {
-                m_gaitController.Run();
             }
             else
             {
                 foreach (var limb in m_limbs)
                 {
-                    limb.RunLimb(true, true);
+                    limb.GetPositioner().GetGameObject().transform.rotation = Quaternion.LookRotation(GetGimbal().GetGameObject().transform.forward, GetGimbal().GetGameObject().transform.up);
+                }
+                if (m_gaitController != null && m_gaitController.IsRunning() && IsRunning)
+                {
+                    m_gaitController.Run();
                 }
             }
+
+            foreach (var limb in m_limbs)
+            {
+                limb.RunLimb(true, true);
+            }
+
+            NotifyEventListeners(IRobotEventListener.EventType.OnLimbsPositioned);
 
             m_servoValues = new QuadrupedGroundStationData();
 
@@ -325,6 +271,8 @@ namespace RoboticsToolkit.Robotics
             m_servoValues.BR0 = (int)m_brLimb.GetServoControllers()[0].GetSetAngle();
             m_servoValues.BR1 = (int)m_brLimb.GetServoControllers()[1].GetSetAngle();
             m_servoValues.BR2 = (int)m_brLimb.GetServoControllers()[2].GetSetAngle();
+
+          //  Debug.Log(m_status);
         }
 
         private void PositionGimble()
@@ -360,9 +308,8 @@ namespace RoboticsToolkit.Robotics
             {
                 //limb.ResetLimbTargetPosition();
             }
-            NotifyEventListeners(IRobotEventListener.EventType.OnEmergencyStop);
+         //   NotifyEventListeners(IRobotEventListener.EventType.OnEmergencyStop);
         }
- 
 
         private void NotifyEventListeners(IRobotEventListener.EventType eventType)
         {
