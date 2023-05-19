@@ -739,6 +739,7 @@ GameObject:
   - component: {fileID: 8726330582397548527}
   - component: {fileID: 5116823880097563152}
   - component: {fileID: 5507466448645774657}
+  - component: {fileID: 2410657625444761289}
   m_Layer: 0
   m_Name: Yertle Leg
   m_TagString: Untagged
@@ -791,6 +792,7 @@ MonoBehaviour:
   m_elbowServoObject: {fileID: 5094296156725450225}
   m_wristServoObject: {fileID: 7751966334099608286}
   m_endPoint: {fileID: 6775419115243840382}
+  ServoAngle: 0
 --- !u!171741748 &5116823880097563152
 ArticulationBody:
   m_ObjectHideFlags: 0
@@ -856,6 +858,21 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.001, y: 0.001, z: 0.001}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2410657625444761289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2326164859709567417}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 582d505482a049e41af0374baae74c60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_baseServoObject: {fileID: 7017852121102698579}
+  m_hipServoObject: {fileID: 5094296156725450225}
+  m_kneeServoObject: {fileID: 7751966334099608286}
 --- !u!1 &2678236321626584936
 GameObject:
   m_ObjectHideFlags: 0
