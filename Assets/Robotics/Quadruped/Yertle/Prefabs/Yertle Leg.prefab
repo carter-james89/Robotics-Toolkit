@@ -870,9 +870,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 582d505482a049e41af0374baae74c60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_baseServoObject: {fileID: 7017852121102698579}
-  m_hipServoObject: {fileID: 5094296156725450225}
-  m_kneeServoObject: {fileID: 7751966334099608286}
+  m_baseRoboticLimbSegmentObject: {fileID: 7017852121102698579}
+  m_hipRoboticLimbSegmentObject: {fileID: 5094296156725450225}
+  m_kneeRoboticLimbSegmentObject: {fileID: 7751966334099608286}
+  m_contactPoint: {fileID: 3833935170518536798}
+  IKTarget: {fileID: 0}
 --- !u!1 &2678236321626584936
 GameObject:
   m_ObjectHideFlags: 0
@@ -1412,6 +1414,7 @@ GameObject:
   - component: {fileID: 6375231984377756840}
   - component: {fileID: 4207787119814807677}
   - component: {fileID: 1202563570476939452}
+  - component: {fileID: 2450110543636939080}
   m_Layer: 0
   m_Name: Shoulder Servo
   m_TagString: Untagged
@@ -1578,6 +1581,19 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 7577626250499227884, guid: c772d04effc53db4589514469d8e8f60, type: 3}
+--- !u!114 &2450110543636939080
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5094296156725450225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec3e248cb55bf0b4b895826cf68343c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_endpoint: {fileID: 7751966334099608286}
 --- !u!1 &5120113205480300038
 GameObject:
   m_ObjectHideFlags: 0
@@ -2294,6 +2310,7 @@ GameObject:
   - component: {fileID: 4063126453019108574}
   - component: {fileID: 5780390248985079434}
   - component: {fileID: 4576326134993840860}
+  - component: {fileID: 4473891386054208909}
   m_Layer: 0
   m_Name: Arm Elevation Servo
   m_TagString: Untagged
@@ -2461,6 +2478,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.057311013, y: 0.034198068, z: 0.052953556}
   m_Center: {x: 0.032057993, y: 0, z: 0.009637736}
+--- !u!114 &4473891386054208909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7017852121102698579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec3e248cb55bf0b4b895826cf68343c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_endpoint: {fileID: 5094296156725450225}
 --- !u!1 &7534096709214346190
 GameObject:
   m_ObjectHideFlags: 0
@@ -2642,6 +2672,7 @@ GameObject:
   - component: {fileID: 2508933642395124084}
   - component: {fileID: 5791392690995526889}
   - component: {fileID: 2799093240600529457}
+  - component: {fileID: 7517777827337471768}
   m_Layer: 0
   m_Name: Knee Servo
   m_TagString: Untagged
@@ -2808,6 +2839,19 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1416815100415894154, guid: 88d398cd64bef894a8a90da3035ce793, type: 3}
+--- !u!114 &7517777827337471768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7751966334099608286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec3e248cb55bf0b4b895826cf68343c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_endpoint: {fileID: 3833935170518536798}
 --- !u!1 &7788453245098806459
 GameObject:
   m_ObjectHideFlags: 0

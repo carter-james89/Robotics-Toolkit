@@ -28,7 +28,12 @@ public class EulerServo : MonoBehaviour, IServo
 
     public void SetServoPosition(float position)
     {
-       
+        var tempPos = transform.localEulerAngles;
+        tempPos.x = position;
+         transform.localRotation = Quaternion.Euler(tempPos);  
+       // transform.localEulerAngles = tempPos;
+
+       // transform.localRotation = Quaternion.AngleAxis(position, transform.parent.right);
     }
 
     public void SetServoPosition(float position, float speed)

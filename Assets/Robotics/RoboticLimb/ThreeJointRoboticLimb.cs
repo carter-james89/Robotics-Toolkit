@@ -14,11 +14,11 @@ namespace RoboticToolkit.Robotics.Limbs
         public Transform GetEndPoint();
         public Transform GetTargetBasePosition();
         public IServoController[] GetServoControllers();
+
+        public IRoboticLimbSegment[] GetSegments();
         public void RunLimb(bool positionImmediate, bool adjustHeight = false);
         public void ResetLimb();
         public void ResetLimbTargetPosition();
-
-
 
         public void SetIKTargetPos(Vector3 globalPos);
         public Vector3 GetIKTargetPos();
@@ -96,6 +96,8 @@ namespace RoboticToolkit.Robotics.Limbs
 
         private float m_startHeight;
 
+        private List<IRoboticLimbSegment> m_limbSegments = new List<IRoboticLimbSegment>();
+
 
         private void Awake()
         {
@@ -107,6 +109,11 @@ namespace RoboticToolkit.Robotics.Limbs
             m_servoControllers[0] = m_shoulderServoController;
             m_servoControllers[1] = m_elbowServoController;
             m_servoControllers[2] = m_wristServoController;
+
+            m_limbSegments.Add(m_shoulderServoController.GetServo().GetGameObject().GetComponent<IRoboticLimbSegment>());
+            m_limbSegments.Add(m_elbowServoController.GetServo().GetGameObject().GetComponent<IRoboticLimbSegment>());
+            m_limbSegments.Add(m_wristServoController.GetServo().GetGameObject().GetComponent<IRoboticLimbSegment>());
+
 
             m_positioner = GetComponentInChildren<ILimbPositioner>();
 
@@ -259,6 +266,11 @@ namespace RoboticToolkit.Robotics.Limbs
         public ILimbPositioner GetPositioner()
         {
             return m_positioner;
+        }
+
+        public IRoboticLimbSegment[] GetSegments()
+        {
+            return m_limbSegments.ToArray();
         }
     }
 }

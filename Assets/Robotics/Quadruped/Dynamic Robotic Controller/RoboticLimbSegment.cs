@@ -5,9 +5,27 @@ using UnityEngine;
 
 public class RoboticLimbSegment : MonoBehaviour, IRoboticLimbSegment
 {
+    [SerializeField]
+    private GameObject m_endpoint;
     public Vector3 GetEndPoint()
     {
-       return transform.GetChild(0).localPosition;
+        // var childrenLimb = gameObject.GetComponentsInChildren<IRoboticLimbSegment>();
+
+        // foreach (var item in childrenLimb)
+        // {
+        //     if((item as RoboticLimbSegment) != this)
+        //     {
+        //         return item.GetGameObject().transform.localPosition;
+        //     }
+        // }
+        //return Vector3.zero;
+       // Debug.Log(name);
+       return m_endpoint.transform.localPosition;
+    }
+
+    public GameObject GetGameObject()
+    {
+       return gameObject;
     }
 
     public float GetLength()
@@ -18,5 +36,22 @@ public class RoboticLimbSegment : MonoBehaviour, IRoboticLimbSegment
     public IServo[] GetServos()
     {
         return GetComponents<IServo>(); 
+    }
+
+    public void SetRenderType(IRoboticLimbSegment.RenderType type)
+    {
+        switch (type)
+        {
+            case IRoboticLimbSegment.RenderType.Line:
+                //Debug.Log(name + " draw line to " + GetEndPoint());
+                var lineRenderer = gameObject.GetComponent<LineRenderer>();
+                lineRenderer.useWorldSpace = false;
+                lineRenderer.SetPosition(1, GetEndPoint()); 
+                break;
+            case IRoboticLimbSegment.RenderType.Mesh:
+                break;
+            default:
+                break;
+        }
     }
 }

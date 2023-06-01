@@ -27,6 +27,9 @@ public class SimulatedQuadruped : MonoBehaviour, IQuadruped, IRobot
     private ThreeJointRoboticLimb m_blLimb;
     private List<ThreeJointRoboticLimb> m_limbs = new List<ThreeJointRoboticLimb>();
 
+    [SerializeField]
+    private bool m_runOwnIK;
+
     private List<QuadrupedLeg> m_quadrupedLegs = new List<QuadrupedLeg>();
 
     [SerializeField]
@@ -76,7 +79,6 @@ public class SimulatedQuadruped : MonoBehaviour, IQuadruped, IRobot
             limb.Initialize(this, false);
         }
         m_baseTargets.transform.position = new Vector3(transform.position.x, m_walkHeight, transform.position.z);
-
     }
 
     private void FixedUpdate()
@@ -88,6 +90,10 @@ public class SimulatedQuadruped : MonoBehaviour, IQuadruped, IRobot
     }
     public void RunRoboticController()
     {
+        if (!m_runOwnIK)
+        {
+            return;
+        }
         PositionGimble();
 
         //if (m_status == Status.MovingToStartPosition)
