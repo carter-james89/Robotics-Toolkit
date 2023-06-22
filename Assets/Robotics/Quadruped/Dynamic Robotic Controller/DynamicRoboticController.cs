@@ -52,22 +52,22 @@ public class DynamicRoboticController : MonoBehaviour
         transform.localPosition = m_robot.GetGameObject().transform.localPosition;
         transform.localRotation = m_robot.GetGameObject().transform.localRotation;
 
-        m_flMirrorLeg = ConstructDynamicLeg(m_robot.GetLegs()[0], "FL Mirror Leg", true);
-        m_frMirrorLeg = ConstructDynamicLeg(m_robot.GetLegs()[1],"FR Mirror Leg");
-        m_brMirrorLeg = ConstructDynamicLeg(m_robot.GetLegs()[2],"BR Mirror Leg");
-        m_blMirrorLeg = ConstructDynamicLeg(m_robot.GetLegs()[3], "BL Mirror Leg", true);
+        m_flMirrorLeg = ConstructDynamicLeg(m_robot.GetLegs()[0], "FL Mirror Leg", Color.black, true);
+        m_frMirrorLeg = ConstructDynamicLeg(m_robot.GetLegs()[1],"FR Mirror Leg", Color.black);
+        m_brMirrorLeg = ConstructDynamicLeg(m_robot.GetLegs()[2],"BR Mirror Leg", Color.black);
+        m_blMirrorLeg = ConstructDynamicLeg(m_robot.GetLegs()[3], "BL Mirror Leg", Color.black, true);
 
-        m_flIKLeg = ConstructDynamicLeg(m_robot.GetLegs()[0], "FL IK Leg", true);
-        m_frIKLeg = ConstructDynamicLeg(m_robot.GetLegs()[1], "FR IK Leg");
-        m_brIKLeg = ConstructDynamicLeg(m_robot.GetLegs()[2], "BR IK Leg");
-        m_blIKLeg = ConstructDynamicLeg(m_robot.GetLegs()[3], "BL IK Leg", true);
+        m_flIKLeg = ConstructDynamicLeg(m_robot.GetLegs()[0], "FL IK Leg", Color.green, true);
+        m_frIKLeg = ConstructDynamicLeg(m_robot.GetLegs()[1], "FR IK Leg", Color.green);
+        m_brIKLeg = ConstructDynamicLeg(m_robot.GetLegs()[2], "BR IK Leg", Color.green);
+        m_blIKLeg = ConstructDynamicLeg(m_robot.GetLegs()[3], "BL IK Leg", Color.green, true);
 
         m_dynamicLimbPrefab.gameObject.SetActive(false);
 
-       // m_legBundles.Add(new LegBundle(m_robot.GetLegs()[0], m_flIKLeg, m_flMirrorLeg));
-        m_legBundles.Add(new LegBundle(m_robot.GetLegs()[1], m_frIKLeg, m_frMirrorLeg));
-       // m_legBundles.Add(new LegBundle(m_robot.GetLegs()[2], m_brIKLeg, m_blMirrorLeg));
-      //  m_legBundles.Add(new LegBundle(m_robot.GetLegs()[3], m_brIKLeg, m_brMirrorLeg));
+        m_legBundles.Add(new LegBundle(m_flMirrorLeg, m_flIKLeg, m_robot.GetLegs()[0]));
+        m_legBundles.Add(new LegBundle(m_frMirrorLeg, m_frIKLeg , m_robot.GetLegs()[1]));
+        m_legBundles.Add(new LegBundle(m_brMirrorLeg, m_brIKLeg, m_robot.GetLegs()[2]));
+        m_legBundles.Add(new LegBundle(m_blMirrorLeg, m_blIKLeg, m_robot.GetLegs()[3]));
 
         foreach (var limb in m_robot.GetLegs())
         {
@@ -79,20 +79,23 @@ public class DynamicRoboticController : MonoBehaviour
         }
     }
 
-    private QuadrupedLeg ConstructDynamicLeg(IQuadrupedLeg leg, string name, bool left = false)
+    private QuadrupedLeg ConstructDynamicLeg(IQuadrupedLeg leg, string name, Color color, bool left = false)
     {
         var newLeg = Instantiate(m_dynamicLimbPrefab).GetComponent<QuadrupedLeg>();
         newLeg.name = name; 
         newLeg.transform.SetParent(transform);
         newLeg.transform.localPosition = leg.GetGameObject().transform.localPosition;
 
+
+        newLeg.transform.localEulerAngles = new Vector3(0, 90, 0);
+
         if (left)
         {
-            newLeg.transform.localEulerAngles = new Vector3(0, -90, 0);
+        //    newLeg.transform.localEulerAngles = new Vector3(0, -90, 0);
         }
         else
         {
-            newLeg.transform.localEulerAngles = new Vector3(0, 90, 0);
+            //newLeg.transform.localEulerAngles = new Vector3(0, 90, 0);
             //foreach (var item in newLeg.GetLimbSegments())
             //{
             //    item.GetGameObject().transform.localEulerAngles += new Vector3(0, 180, 0);
@@ -122,7 +125,7 @@ public class DynamicRoboticController : MonoBehaviour
         foreach (var item in newLeg.GetLimbSegments())
         {
             
-            item.SetRenderType(IRoboticLimbSegment.RenderType.Line);
+            item.SetRenderType(IRoboticLimbSegment.RenderType.Line, color);
         }
         return newLeg;
     }
@@ -136,14 +139,39 @@ public class DynamicRoboticController : MonoBehaviour
 
         transform.rotation = m_robot.GetGameObject().transform.rotation;
 
-        foreach (var limbPair in m_limbMirrors)
+        foreach (var limbPair in m_legBundles)
         {
            // limbPair.Key.GetPositioner().SetLimbPosition(m_robot.GetGameObject().transform.TransformPoint(GetRobotGimbalOffset((limbPair.Value as QuadrupedLeg).IKTarget.position)),false);
+        }
+        var servo = m_robot.GetLegs()[0].GetHipSegment().GetServos()[0];
+       // Debug.Log(servo.GetGameObject().name + " " + servo.GetCurrentAngle());
+       // int legCount = 0;
+        foreach (var bundle in m_legBundles)
+        {
+           var limbSegments = bundle.MirrorLeg.GetLimbSegments();
+            //  Debug.Log(limbSegments[1].GetServos()[0].GetGameObject().name, limbSegments[1].GetServos()[0].GetGameObject());
+
+          //  if ((bundle.IKLeg as QuadrupedLeg) == m_frIKLeg)
+            {
+                limbSegments[1].GetServos()[0].SetServoPosition(bundle.RobotLeg.GetHipSegment().GetServos()[0].GetCurrentAngle());
+                limbSegments[2].GetServos()[0].SetServoPosition(-bundle.RobotLeg.GetKneeSegment().GetServos()[0].GetCurrentAngle());
+            }
+      
+            bundle.IKLeg.CalculateIK();
+            //legCount++;
         }
 
         foreach (var bundle in m_legBundles)
         {
-           bundle.IKLeg.CalculateIK();
+            //if ((bundle.IKLeg as QuadrupedLeg) == m_frIKLeg)
+            {
+               // Debug.Log(bundle.IKLeg.GetHipSegment().GetServos()[0].GetCurrentAngle());
+
+                bundle.RobotLeg.GetKneeSegment().GetServos()[0].SetServoPosition(-bundle.IKLeg.GetKneeSegment().GetServos()[0].GetCurrentAngle());
+                bundle.RobotLeg.GetHipSegment().GetServos()[0].SetServoPosition(bundle.IKLeg.GetHipSegment().GetServos()[0].GetCurrentAngle());
+
+               // bundle.RobotLeg.GetHipSegment().GetServos()[0].GetCurrentAngle();
+            }
         }
 
         //foreach (var limbPair in m_limbMirrors)

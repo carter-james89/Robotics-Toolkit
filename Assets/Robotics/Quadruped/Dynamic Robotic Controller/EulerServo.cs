@@ -6,16 +6,30 @@ using UnityEngine;
 
 public class EulerServo : MonoBehaviour, IServo
 {
+    [SerializeField]
+    private float m_offset = 0;
     public float GetCurrentAngle()
     {
-        return transform.rotation.eulerAngles.x;
+        float rawAngle = Quaternion.Angle(Quaternion.identity, transform.localRotation);
+        var point = transform.TransformPoint(new Vector3(0, 0, 10));
+        var localPoint = transform.parent.InverseTransformPoint(point);
+        var final = rawAngle;
+        if(localPoint.y > 0)
+        {
+            final = -final;
+        }           
+       // Debug.Log(name + " Raw : " + rawAngle + " Final : " + final +" : " + Vector3.Dot(transform.up, transform.parent.up));
+        return final;
     }
 
     public GameObject GetGameObject()
     {
        return gameObject;
     }
-
+    private void Awake()
+    {
+       // m_offset = GetCurrentAngle();
+    }
     public bool IsEnabled()
     {
         return enabled;
@@ -28,12 +42,36 @@ public class EulerServo : MonoBehaviour, IServo
 
     public void SetServoPosition(float position)
     {
-        var tempPos = transform.localEulerAngles;
-        tempPos.x = position;
-         transform.localRotation = Quaternion.Euler(tempPos);  
-       // transform.localEulerAngles = tempPos;
+      //  var delta = position - transform.localEulerAngles.x;
 
-       // transform.localRotation = Quaternion.AngleAxis(position, transform.parent.right);
+        //transform.Rotate(transform.right, delta,Space.Self);
+      //  transform.Rotate(new Vector3(delta, 0, 0));
+      //  return;
+      //  position = Mathf.Abs(position);
+       // float adjustedAngle = position > 180 ? position - 360 : position;
+
+        var tempPos = transform.localEulerAngles;
+        tempPos.x = position + m_offset;// adjustedAngle;
+                             //  Debug.Log(name + " set to " + adjustedAngle);
+                             // transform.localRotation = Quaternion.Euler(tempPos);
+        //transform.localRotation = Quaternion.AngleAxis(position, transform.parent.TransformDirection(transform.parent.right));
+       // Debug.Log(name + " actual angle " + transform.localEulerAngles.x);
+        Quaternion rotation = Quaternion.AngleAxis(position + m_offset, transform.parent.InverseTransformDirection(transform.parent.right));
+        transform.localRotation = rotation;
+        //Quaternion rotation = Quaternion.Euler(30, 0, 0);
+        //  transform.localRotation = Quaternion.Inverse(transform.parent.rotation) * rotation;
+
+        //Vector3 desiredRotation = new Vector3(30, 0, 0);
+        //Quaternion rotation = Quaternion.identity;
+        //rotation.SetFromToRotation(transform.up, transform.parent.TransformDirection(desiredRotation));
+        //transform.localRotation = rotation;
+
+        //transform.localEulerAngles = tempPos;
+
+        //Vector3 parentLocalXAxis = transform.parent.TransformDirection(Vector3.right);
+        // transform.rotation = Quaternion.AngleAxis(30, parentLocalXAxis);
+
+        // transform.localRotation = Quaternion.
     }
 
     public void SetServoPosition(float position, float speed)
@@ -49,17 +87,5 @@ public class EulerServo : MonoBehaviour, IServo
     public void SetServoSpeed(float speed)
     {
        
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

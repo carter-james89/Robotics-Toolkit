@@ -11,7 +11,7 @@ public interface IRoboticLimbSegment
         Mesh
     }
 
-    public void SetRenderType(RenderType type);
+    public void SetRenderType(RenderType type, Color color);
     public IServo[] GetServos();
 
 

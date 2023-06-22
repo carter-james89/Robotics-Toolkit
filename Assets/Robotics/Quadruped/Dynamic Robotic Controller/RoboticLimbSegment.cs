@@ -38,7 +38,7 @@ public class RoboticLimbSegment : MonoBehaviour, IRoboticLimbSegment
         return GetComponents<IServo>(); 
     }
 
-    public void SetRenderType(IRoboticLimbSegment.RenderType type)
+    public void SetRenderType(IRoboticLimbSegment.RenderType type, Color color)
     {
         switch (type)
         {
@@ -47,6 +47,7 @@ public class RoboticLimbSegment : MonoBehaviour, IRoboticLimbSegment
                 var lineRenderer = gameObject.GetComponent<LineRenderer>();
                 lineRenderer.useWorldSpace = false;
                 lineRenderer.SetPosition(1, GetEndPoint()); 
+                lineRenderer.material.color = color;    
                 break;
             case IRoboticLimbSegment.RenderType.Mesh:
                 break;

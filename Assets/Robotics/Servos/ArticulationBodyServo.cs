@@ -30,6 +30,9 @@ namespace RoboticToolKit.Robotics.Servos
         private Transform m_anchorTransform;
         private ArticulationBody m_articulation;
 
+        [SerializeField]
+        private float m_offset = 0;
+
         //private float m_startAngle;
 
         private bool m_firstSet = true;
@@ -59,7 +62,8 @@ namespace RoboticToolKit.Robotics.Servos
             {
                 m_articulation = GetComponent<ArticulationBody>();
             }
-            return m_articulation.jointPosition[0] * Mathf.Rad2Deg;
+            Debug.Log("raw angle : " + (m_articulation.jointPosition[0] * Mathf.Rad2Deg) + " adjusted : " + ((m_articulation.jointPosition[0] * Mathf.Rad2Deg) + m_offset));
+            return (m_articulation.jointPosition[0] * Mathf.Rad2Deg) + m_offset;
         }
         public void SetServoSpeed(float speed)
         {
@@ -75,8 +79,9 @@ namespace RoboticToolKit.Robotics.Servos
         }
         public void SetServoPosition(float position)
         {
-            SetServoPosition(position, m_servoSpeed);
-            RotateTo(position);
+            //SetServoPosition(position, m_servoSpeed);
+            //Debug.Log(name + " Raw Set : " + position + " Adjusted : " + (position - m_offset));
+            RotateTo(position - m_offset);
         }
         public void SetServoPositionImmediate(float position)
         {
