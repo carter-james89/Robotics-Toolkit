@@ -54,76 +54,12 @@ public class QuadrupedLeg : MonoBehaviour, IQuadrupedLeg
 
         //   GetPositioner();
     }
-    public void CalculateIK1()
-    {
-        //  m_anchorMatrix.SetTRS(GetHipSegment().GetGameObject().transform.position, GetBaseSegment().GetGameObject().transform.rotation, Vector3.one);
-        var offset = IKTarget.localPosition - m_hipRoboticLimbSegment.GetGameObject().transform.localPosition;
-        // var offset = m_anchorMatrix.inverse.MultiplyPoint(IKTarget.transform.position);
-        //var offset = m_hipRoboticLimbSegment.GetGameObject().transform.InverseTransformPoint(IKTarget.transform.position);
-        double targetX = offset.x; // Desired end effector x-coordinate
-        double targetY = offset.y; // Desired end effector y-coordinate
-        double segmentLength1 = m_hipRoboticLimbSegment.GetLength(); // Length of the first robot arm segment
-        double segmentLength2 = m_kneeRoboticLimbSegment.GetLength(); // Length of the second robot arm segment
-
-        //double[] angles = CalculateInverseKinematics(targetX, targetY, segmentLength1, segmentLength2);
-
-        //  GetHipSegment().GetServos()[0].SetServoPosition(RadToDegree(angles[0]));
-        //GetKneeSegment().GetServos()[0].SetServoPosition(RadToDegree(angles[1]));
-
-        // Debug.Log((RadToDegree(angles[1])));
-
-        //Console.WriteLine("Joint angles: Theta1 = " + angles[0] + ", Theta2 = " + angles[1]);
-    }
 
     private static float RadToDegree(double radian)
     {
         return (float)(radian *Mathf.Rad2Deg);
     }
 
-    public void CalculateIK()
-    {
-       // var offset = IKTarget.localPosition - m_hipRoboticLimbSegment.GetGameObject().transform.localPosition;
-        // var offset = m_anchorMatrix.inverse.MultiplyPoint(IKTarget.transform.position);
-        var offset = m_hipRoboticLimbSegment.GetGameObject().transform.parent.InverseTransformPoint(IKTarget.transform.position);
-
-       // Debug.Log(offset);
-
-        double desiredX = .2f;// -offset.y; // Desired end effector x-coordinate
-        double desiredY = .2f;// offset.z; // Desired end effector y-coordinate
-        IKTarget.transform.position = m_hipRoboticLimbSegment.GetGameObject().transform.parent.TransformPoint(new Vector3(0, -(float)desiredY, (float)desiredX));
-
-        // Arm segment lengths
-        double segment1Length = .13;// m_hipRoboticLimbSegment.GetLength(); 
-        double segment2Length = .13;// m_kneeRoboticLimbSegment.GetLength();
-
-        // Calculate the distance from the base to the end effector
-        double distance = Math.Sqrt((desiredX * desiredX) + (desiredY * desiredY));
-
-        // Check if the desired position is reachable
-        if (distance > segment1Length + segment2Length)
-        {
-            Debug.LogWarning("Desired position is out of reach!");
-            return;
-        }
-
-        // Calculate the angles using inverse kinematics
-        double cosAngle2 = (distance * distance - segment1Length * segment1Length - segment2Length * segment2Length) / (2 * segment1Length * segment2Length);
-        double sinAngle2 = Math.Sqrt(1 - (cosAngle2 * cosAngle2));
-
-        double angle1 = Math.Atan2(desiredY, desiredX) - Math.Atan2(segment2Length * sinAngle2, segment1Length + segment2Length * cosAngle2);
-        double angle2 = Math.Atan2(sinAngle2, cosAngle2);
-
-        // Convert the angles from radians to degrees
-        double angle1Degrees = angle1 * (180.0 / Math.PI);
-        double angle2Degrees = angle2 * (180.0 / Math.PI);
-
-        // Print the calculated angles
-       // Console.WriteLine("Joint 1 angle: " + angle1Degrees + " degrees");
-       // Console.WriteLine("Joint 2 angle: " + angle2Degrees + " degrees");
-
-        GetHipSegment().GetServos()[0].SetServoPosition((float)angle1Degrees);
-        GetKneeSegment().GetServos()[0].SetServoPosition((float)angle2Degrees);
-    }
     public KeyValuePair<float, float> CalculateDuelIK(IServo elbow, IServo wrist, Vector3 limbEndPoint, Vector3 targetPoint)
     {
 
@@ -237,12 +173,19 @@ public class QuadrupedLeg : MonoBehaviour, IQuadrupedLeg
 
         //return m_anchorMatrix.inverse.MultiplyPoint(targetPoint);
     }
+    public void CalculateIK(bool adjustHeight = false)
+    {
+        var targetOffset = CalculateTargetOffset(GetHipSegment().GetServos()[0], IKTarget.position);
+        var x = targetOffset.z;
+        var y = targetOffset.y;
+        CalculateIK(x, y);
+    }
     public void CalculateIK(float targetX, float targetY)
     {
         double distance = Math.Sqrt(targetX * targetX + targetY * targetY);
 
-        var armLength1 = .13f;
-        var armLength2 = .13f;
+        var armLength1 = m_hipRoboticLimbSegment.GetLength();// .13f;
+        var armLength2 = m_kneeRoboticLimbSegment.GetLength();// .13f;
 
         float angle1;
         float angle2;
@@ -270,6 +213,22 @@ public class QuadrupedLeg : MonoBehaviour, IQuadrupedLeg
 
             //   Debug.Log("Angles " + jointAngle1 + " : " + jointAngle2);
 
+            //IServo baseServo = GetBaseSegment().GetServos()[0];
+
+            //var localPoint = baseServo.GetGameObject().transform.parent.InverseTransformPoint(IKTarget.position);
+            //localPoint.z += GetBaseSegment().GetLength();
+            //// var globalPoint = baseServo.GetGameObject().transform.parent.TransformPoint(IKTarget.position);
+            //var targetOffset = localPoint;
+            ////var targetOffset = CalculateTargetOffset(baseServo, globalPoint);
+            //var adjValue = -targetOffset.z;
+            //var oppositeValue = -targetOffset.y;
+
+            //float jointAngle = 0;
+
+            //jointAngle = RadToDegree(Math.Atan2((double)oppositeValue, (double)adjValue));
+
+           // GetBaseSegment().GetServos()[0].SetServoPosition(jointAngle);
+
             //  if (!float.IsNaN(jointAngle1))
             {
                 GetHipSegment().GetServos()[0].SetServoPosition(jointAngle1);
@@ -280,110 +239,7 @@ public class QuadrupedLeg : MonoBehaviour, IQuadrupedLeg
             }
         }
     }
-    public void CalculateIK(bool adjustHeight = false)
-    {
-        // var servoValues = CalculateDuelIK(m_hipRoboticLimbSegment.GetServos()[0], m_kneeRoboticLimbSegment.GetServos()[0], m_contactPoint.transform.position, IKTarget.position);
-
-        //    GetHipSegment().GetServos()[0].SetServoPosition(servoValues.Key);
-        //var kneeAngle = CalculateSingleIK(m_kneeRoboticLimbSegment.GetServos()[0], IKTarget.position, true);
-        //Debug.Log(kneeAngle);
-        //GetKneeSegment().GetServos()[0].SetServoPosition(kneeAngle);
-        //return;
-        var targetOffset = CalculateTargetOffset(GetHipSegment().GetServos()[0], IKTarget.position);
-        var adjValue = targetOffset.z;
-        var oppositeValue = targetOffset.y;
-
-       // Debug.Log("Offset " + targetOffset.z+" "+ targetOffset.y);
-
-        var x = targetOffset.z;
-        var y = targetOffset.y;
-
-        CalculateIK(x, -y);
-        return;
-
-        x = .1f;
-        y = .2f;
-
-        Debug.Log("X : " + x + " , " + "Y :" + y);
-
-        var Length1 = .13f;
-        var Length2 = .13f;
-
-        double[] angles = new double[2];  // Array to store the joint angles
-
-        // Calculate the distance from the origin to the end effector
-        double distance = Math.Sqrt(x * x + y * y);
-
-        // Check if the desired position is reachable
-        if (distance > Length1 + Length2 || distance < Math.Abs(Length1 - Length2))
-        {
-            Debug.Log("Desired position is out of reach________________________!");
-            return;  // Return zero angles
-        }
-
-        // Calculate the angle between the line connecting the first joint to the end effector and the x-axis
-        double theta = Math.Atan2(y, x);
-
-        // Calculate the distance between the first joint and the end effector projected onto the x-axis
-        double d = Math.Sqrt(distance * distance - Length2 * Length2);
-
-        // Calculate the angle of the first joint
-        angles[0] = Math.Atan2(Length2, d) + theta;
-
-        // Calculate the angle of the second joint
-        angles[1] = Math.PI -Math.Acos((Length1 * Length1 + Length2 * Length2 - distance * distance) / (2 * Length1 * Length2));    
-
-        var jointAngle1 = RadToDegree(angles[0]);
-        var jointAngle2 = RadToDegree(angles[1]);
-
-        //   Debug.Log("Angles " + jointAngle1 + " : " + jointAngle2);
-
-        //  if (!float.IsNaN(jointAngle1))
-        {
-            GetHipSegment().GetServos()[0].SetServoPosition(-jointAngle1);
-        }
-        //if (!float.IsNaN(jointAngle2))
-        {
-            GetKneeSegment().GetServos()[0].SetServoPosition(jointAngle2);
-        }
-           
-
-        //CalculateIK();
-        //if (adjustHeight)
-        //{
-        //    heightOffset = transform.position.y - m_baseTarget.position.y;
-        //    PositionGaitHeight(-heightOffset);
-        //}
-        //else
-        //{
-        //    PositionGaitHeight(0);
-        //}
-        // var tempPos = transform.InverseTransformPoint(IKTarget.position);
-        // tempPos.x -= m_hipFootOffset;
-        // var baseTarget = transform.TransformPoint(tempPos);
-        // if (DebugCube)
-        // {
-        //     DebugCube.position = baseTarget;
-        // }
-        // var limbBaseAngle = IKCalculator.CalculateSingleIK(m_shoulderServoController.GetServo().GetGameObject().GetComponent<ArticulationBody>(),
-        //baseTarget, true);
-
-        // m_shoulderServoController.SetAndRunServo(limbBaseAngle, positionServoImmediate);
-
-
-        //  var elbowWristAngles = IKCalculator.CalculateDuelIK(GetHipSegment().GetServos()[0].GetGameObject().GetComponent<ArticulationBody>(),
-        //      m_kneeRoboticLimbSegment.GetServos()[0].GetGameObject().GetComponent<ArticulationBody>(),
-        //      m_contactPoint.transform.position, IKTarget.position);
-
-        ////  m_elbowServoController.SetAndRunServo(elbowWristAngles.Key, positionServoImmediate);
-        ////  m_wristServoController.SetAndRunServo(elbowWristAngles.Value, positionServoImmediate);
-
-        //  GetHipSegment().GetServos()[0].SetServoPosition(elbowWristAngles.Key);
-        //  GetKneeSegment().GetServos()[0].SetServoPosition(elbowWristAngles.Value);
-
-        //m_elbowServoController.SetAndRunServo(ServoAngle, positionServoImmediate);
-        //m_wristServoController.SetAndRunServo(ServoAngle, positionServoImmediate);
-    }
+ 
     //public void PositionGaitHeight(float height)
     //{
     //    //  Debug.Log("set limb height");

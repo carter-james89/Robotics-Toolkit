@@ -14,7 +14,7 @@ public class EulerServo : MonoBehaviour, IServo
         var point = transform.TransformPoint(new Vector3(0, 0, 10));
         var localPoint = transform.parent.InverseTransformPoint(point);
         var final = rawAngle;
-        if(localPoint.y > 0)
+        if(localPoint.y < 0)
         {
             final = -final;
         }           
@@ -50,13 +50,13 @@ public class EulerServo : MonoBehaviour, IServo
       //  position = Mathf.Abs(position);
        // float adjustedAngle = position > 180 ? position - 360 : position;
 
-        var tempPos = transform.localEulerAngles;
-        tempPos.x = position + m_offset;// adjustedAngle;
+        //var tempPos = transform.localEulerAngles;
+      //  tempPos.x = position + m_offset;// adjustedAngle;
                              //  Debug.Log(name + " set to " + adjustedAngle);
                              // transform.localRotation = Quaternion.Euler(tempPos);
         //transform.localRotation = Quaternion.AngleAxis(position, transform.parent.TransformDirection(transform.parent.right));
        // Debug.Log(name + " actual angle " + transform.localEulerAngles.x);
-        Quaternion rotation = Quaternion.AngleAxis(position + m_offset, transform.parent.InverseTransformDirection(transform.parent.right));
+        Quaternion rotation = Quaternion.AngleAxis(position + m_offset, transform.parent.InverseTransformDirection(-transform.parent.right));
         transform.localRotation = rotation;
         //Quaternion rotation = Quaternion.Euler(30, 0, 0);
         //  transform.localRotation = Quaternion.Inverse(transform.parent.rotation) * rotation;

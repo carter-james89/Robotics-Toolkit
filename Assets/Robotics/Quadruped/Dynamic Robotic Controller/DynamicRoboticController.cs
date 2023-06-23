@@ -87,7 +87,7 @@ public class DynamicRoboticController : MonoBehaviour
         newLeg.transform.localPosition = leg.GetGameObject().transform.localPosition;
 
 
-        newLeg.transform.localEulerAngles = new Vector3(0, 90, 0);
+        newLeg.transform.localEulerAngles = new Vector3(0, 270, 180);
 
         if (left)
         {
@@ -154,10 +154,10 @@ public class DynamicRoboticController : MonoBehaviour
           //  if ((bundle.IKLeg as QuadrupedLeg) == m_frIKLeg)
             {
                 limbSegments[1].GetServos()[0].SetServoPosition(bundle.RobotLeg.GetHipSegment().GetServos()[0].GetCurrentAngle());
-                limbSegments[2].GetServos()[0].SetServoPosition(-bundle.RobotLeg.GetKneeSegment().GetServos()[0].GetCurrentAngle());
+                limbSegments[2].GetServos()[0].SetServoPosition(bundle.RobotLeg.GetKneeSegment().GetServos()[0].GetCurrentAngle());
             }
-      
-            bundle.IKLeg.CalculateIK();
+           // if ((bundle.IKLeg as QuadrupedLeg) == m_flIKLeg)
+                bundle.IKLeg.CalculateIK();
             //legCount++;
         }
 
@@ -167,7 +167,7 @@ public class DynamicRoboticController : MonoBehaviour
             {
                // Debug.Log(bundle.IKLeg.GetHipSegment().GetServos()[0].GetCurrentAngle());
 
-                bundle.RobotLeg.GetKneeSegment().GetServos()[0].SetServoPosition(-bundle.IKLeg.GetKneeSegment().GetServos()[0].GetCurrentAngle());
+                bundle.RobotLeg.GetKneeSegment().GetServos()[0].SetServoPosition(bundle.IKLeg.GetKneeSegment().GetServos()[0].GetCurrentAngle());
                 bundle.RobotLeg.GetHipSegment().GetServos()[0].SetServoPosition(bundle.IKLeg.GetHipSegment().GetServos()[0].GetCurrentAngle());
 
                // bundle.RobotLeg.GetHipSegment().GetServos()[0].GetCurrentAngle();

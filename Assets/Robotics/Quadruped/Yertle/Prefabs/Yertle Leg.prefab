@@ -2712,7 +2712,7 @@ ArticulationBody:
   m_ParentAnchorPosition: {x: -0.013249883, y: 0.00004118122, z: 0.1300412}
   m_ParentAnchorRotation: {x: -0.00000005172683, y: -0.97438663, z: 0.2248801, w: 0.00000047402324}
   m_AnchorPosition: {x: 0, y: 0, z: 0}
-  m_AnchorRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_AnchorRotation: {x: 0, y: 0, z: 1, w: -0.00000004371139}
   m_MatchAnchors: 1
   m_ArticulationJointType: 2
   m_LinearX: 2
@@ -2722,8 +2722,8 @@ ArticulationBody:
   m_SwingZ: 2
   m_Twist: 1
   m_XDrive:
-    lowerLimit: -270
-    upperLimit: 270
+    lowerLimit: -360
+    upperLimit: 360
     stiffness: 100000
     damping: 100
     forceLimit: 3.4028235e+38

@@ -1,4 +1,5 @@
 using RoboticToolKit.Robotics.Servos;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,7 @@ public class RoboticLimbSegment : MonoBehaviour, IRoboticLimbSegment
 {
     [SerializeField]
     private GameObject m_endpoint;
+    
     public Vector3 GetEndPoint()
     {
         // var childrenLimb = gameObject.GetComponentsInChildren<IRoboticLimbSegment>();
@@ -30,7 +32,7 @@ public class RoboticLimbSegment : MonoBehaviour, IRoboticLimbSegment
 
     public float GetLength()
     {
-        return GetEndPoint().magnitude;
+        return Math.Abs(GetEndPoint().z);
     }
 
     public IServo[] GetServos()
