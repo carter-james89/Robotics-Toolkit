@@ -8,13 +8,15 @@ public class EulerServo : MonoBehaviour, IServo
 {
     [SerializeField]
     private float m_offset = 0;
+    [SerializeField]
+    private float m_currentAngle;
     public float GetCurrentAngle()
     {
         float rawAngle = Quaternion.Angle(Quaternion.identity, transform.localRotation);
         var point = transform.TransformPoint(new Vector3(0, 0, 10));
         var localPoint = transform.parent.InverseTransformPoint(point);
         var final = rawAngle;
-        if(localPoint.y < 0)
+        if(localPoint.y > 0)
         {
             final = -final;
         }           
@@ -33,6 +35,11 @@ public class EulerServo : MonoBehaviour, IServo
     public bool IsEnabled()
     {
         return enabled;
+    }
+
+    private void Update()
+    {
+            m_currentAngle = GetCurrentAngle();
     }
 
     public void ResetServo(float resetAngle)

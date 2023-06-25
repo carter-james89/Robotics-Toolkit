@@ -62,8 +62,8 @@ namespace RoboticToolKit.Robotics.Servos
             {
                 m_articulation = GetComponent<ArticulationBody>();
             }
-            Debug.Log("raw angle : " + (m_articulation.jointPosition[0] * Mathf.Rad2Deg) + " adjusted : " + ((m_articulation.jointPosition[0] * Mathf.Rad2Deg) + m_offset));
-            return (m_articulation.jointPosition[0] * Mathf.Rad2Deg) + m_offset;
+           // Debug.Log("raw angle : " + (m_articulation.jointPosition[0] * Mathf.Rad2Deg) + " adjusted : " + ((m_articulation.jointPosition[0] * Mathf.Rad2Deg) + m_offset));
+            return -((m_articulation.jointPosition[0] * Mathf.Rad2Deg) + m_offset);//not sure why reports negative
         }
         public void SetServoSpeed(float speed)
         {

@@ -13,7 +13,7 @@ namespace RoboticToolkit.Robotics.Limbs
         public ILimbPositioner GetPositioner();
         public Transform GetEndPoint();
         public Transform GetTargetBasePosition();
-        public IServoController[] GetServoControllers();
+        //public IServoController[] GetServoControllers();
 
         public IRoboticLimbSegment[] GetSegments();
         public void RunLimb(bool positionImmediate, bool adjustHeight = false);
