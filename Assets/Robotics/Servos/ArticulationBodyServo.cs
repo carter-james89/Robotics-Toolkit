@@ -46,7 +46,9 @@ namespace RoboticToolKit.Robotics.Servos
           //  xDrive.forceLimit *= 2;
             m_articulation.xDrive = xDrive;
 
-            SetServoPositionImmediate(0);
+            //SetServoPositionImmediate(0);
+
+            m_articulation.parentAnchorPosition = transform.localPosition;
 
             m_anchorTransform = new GameObject("Anchor").transform;
             m_anchorTransform.SetParent(transform);
@@ -103,6 +105,7 @@ namespace RoboticToolKit.Robotics.Servos
 
         public void ResetServo(float resetAngle)
         {
+            SetServoPosition(resetAngle);
             //  SetAngleImmediate(resetAngle);
             //  m_articulation.jointR
             // m_articulation.jointPosition = new ArticulationReducedSpace(resetAngle, 0f, 0f);
@@ -117,7 +120,7 @@ namespace RoboticToolKit.Robotics.Servos
             //m_articulation.jointVelocity = new ArticulationReducedSpace(0f, 0f, 0f);
             //m_articulation.ResetInertiaTensor();
             //m_articulation.ResetCenterOfMass();
-            RotateTo(resetAngle);   
+           // RotateTo(resetAngle);   
         }
         
 

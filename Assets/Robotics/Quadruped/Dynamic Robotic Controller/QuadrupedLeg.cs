@@ -78,6 +78,7 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
         //return m_anchorMatrix.inverse.MultiplyPoint(targetPoint);
     }
 
+  
     private float m_xOffset = .03f;
     private float m_yOffset = .03f;
     public void CalculateIK(bool adjustHeight = false)
@@ -92,8 +93,7 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
             var targetOffset = CalculateTargetOffset(GetHipSegment().GetServos()[0], IKTarget.position);
             x = targetOffset.z;
             y = targetOffset.y;
-        }
-       
+        }    
        
         CalculateIK(x,y);
     }
@@ -152,7 +152,7 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
             var jointAngle1 = RadToDegree(angle1);
             var jointAngle2 = RadToDegree(angle2);
 
-              Debug.Log("Angles " + jointAngle1 + " : " + jointAngle2);
+            //  Debug.Log("Angles " + jointAngle1 + " : " + jointAngle2);
             //  if (!float.IsNaN(jointAngle1))
             {
                 GetHipSegment().GetServos()[0].SetServoPosition(jointAngle1);
@@ -163,6 +163,13 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
             }
         }
     }
+
+    internal void CalculateIK(float v)
+    {
+        m_yOffset += v;
+        CalculateIK(false);
+    }
+
     public IRoboticLimbSegment GetBaseSegment()
     {
         return m_baseRoboticLimbSegment;
@@ -212,7 +219,9 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
 
     public void ResetLimb()
     {
-        throw new NotImplementedException();
+       // m_baseRoboticLimbSegment.GetServos()[0].ResetServo(0);
+        m_hipRoboticLimbSegment.GetServos()[0].ResetServo(80);
+        m_kneeRoboticLimbSegment.GetServos()[0].ResetServo(-140);
     }
 
     public void ResetLimbTargetPosition()

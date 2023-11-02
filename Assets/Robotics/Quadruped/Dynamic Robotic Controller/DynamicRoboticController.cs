@@ -5,12 +5,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DynamicRoboticController : MonoBehaviour
+public class DynamicRoboticController : MonoBehaviour, IRobotEventListener
 {
     [SerializeField]
     private GameObject m_robotObject;
 
-    private IQuadruped m_robot;
+    private IRobot m_robot;
 
     private QuadrupedLeg m_frMirrorLeg;
     private QuadrupedLeg m_flMirrorLeg;
@@ -21,6 +21,9 @@ public class DynamicRoboticController : MonoBehaviour
     private QuadrupedLeg m_flIKLeg;
     private QuadrupedLeg m_brIKLeg;
     private QuadrupedLeg m_blIKLeg;
+
+    [SerializeField]
+    private Transform m_heightController;
 
     //private Dictionary<IRoboticLimb, IRoboticLimb> m_limbMirrors = new Dictionary<IRoboticLimb, IRoboticLimb>();
 
@@ -39,15 +42,34 @@ public class DynamicRoboticController : MonoBehaviour
     }
     private List<LegBundle> m_legBundles = new List<LegBundle>();
 
+    [SerializeField]
+    private Transform m_ikTargets;
+
+    private enum Status
+    {
+        NotRunning,
+        Resetting,
+        MovingToStartPosition,
+        Ready,
+    }
+    private Status m_status = Status.NotRunning;
+
+
+
     private void Start()
     {
-        ConstructQuadrupedTwin(m_robotObject.GetComponent<IQuadruped>());
+      //  m_robotObject.GetComponent<IRobot>().SubscribeToEvents(this);
+        //ConstructQuadrupedTwin(m_robotObject.GetComponent<IRob>());
+
+        
     }
+
+
     [SerializeField]
     private EulerServo m_servoPrefab;
     [SerializeField]
     private QuadrupedLeg m_dynamicLimbPrefab;
-    private void ConstructQuadrupedTwin(IQuadruped robot)
+    private void ConstructQuadrupedTwin(IRobot robot)
     {
         m_robot = robot;
         transform.localPosition = m_robot.GetGameObject().transform.localPosition;
@@ -65,6 +87,7 @@ public class DynamicRoboticController : MonoBehaviour
         m_brIKLeg = ConstructDynamicLeg(m_robot.GetLimbs()[2], "BR IK Leg", Color.green);
         m_blIKLeg = ConstructDynamicLeg(m_robot.GetLimbs()[3], "BL IK Leg", Color.green, true);
 
+
         m_dynamicLimbPrefab.gameObject.SetActive(false);
 
         m_legBundles.Add(new LegBundle(m_flMirrorLeg, m_flIKLeg, m_robot.GetLimbs()[0]));
@@ -72,7 +95,18 @@ public class DynamicRoboticController : MonoBehaviour
         m_legBundles.Add(new LegBundle(m_brMirrorLeg, m_brIKLeg, m_robot.GetLimbs()[2]));
         m_legBundles.Add(new LegBundle(m_blMirrorLeg, m_blIKLeg, m_robot.GetLimbs()[3]));
 
-        foreach (var limb in m_robot.GetLimbs())
+        m_ikTargets.transform.position = transform.position;
+        m_ikTargets.transform.rotation = transform.rotation;
+
+       // m_ikTargets.transform.position = tran
+
+        foreach (var bundle in m_legBundles)
+        {
+
+            (bundle.IKLeg as QuadrupedLeg).IKTarget.SetParent(m_ikTargets);
+        }
+
+            foreach (var limb in m_robot.GetLimbs())
         {
             //var newLeg
             // ConstructDynamicLeg(limb);
@@ -113,6 +147,14 @@ public class DynamicRoboticController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            ConstructQuadrupedTwin(m_robotObject.GetComponent<IRobot>());
+        }
+        if(m_robot == null)
+        {
+            return;
+        }
         var tempPos = transform.localPosition;
         tempPos.y = m_robot.GetGameObject().transform.localPosition.y;
         transform.localPosition = tempPos;
@@ -131,6 +173,9 @@ public class DynamicRoboticController : MonoBehaviour
            var mirrorSegments = bundle.MirrorLeg.GetSegments();
             var robotSegments = bundle.RobotLeg.GetSegments();
             //  Debug.Log(mirrorSegments[1].GetServos()[0].GetGameObject().name, mirrorSegments[1].GetServos()[0].GetGameObject());
+
+
+          //  (bundle.IKLeg as QuadrupedLeg).CalculateIK(m_heightController.localPosition.y - transform.localPosition.y);
             (bundle.IKLeg as QuadrupedLeg).CalculateIK();
             //  if ((bundle.IKLeg as QuadrupedLeg) == m_frIKLeg)
             {
@@ -139,10 +184,6 @@ public class DynamicRoboticController : MonoBehaviour
                 mirrorSegments[1].GetServos()[0].SetServoPosition(robotSegments[1].GetServos()[0].GetCurrentAngle());
                 mirrorSegments[2].GetServos()[0].SetServoPosition(robotSegments[2].GetServos()[0].GetCurrentAngle());
             }
-         //   if ((bundle.IKLeg as QuadrupedLeg) == m_flIKLeg)
-               // bundle.IKLeg.CalculateIK();
-           
-            //legCount++;
         }
 
         foreach (var bundle in m_legBundles)
@@ -175,5 +216,25 @@ public class DynamicRoboticController : MonoBehaviour
     public Vector3 GetGimbalOffset(Vector3 globalPos)
     {
         return transform.InverseTransformPoint(globalPos);
+    }
+
+    public void OnRobotEventOccured(IRobotEventListener.EventData eventData)
+    {
+        switch (eventData.EventType)
+        {
+            case IRobotEventListener.EventType.OnRobotInitialized:
+                ConstructQuadrupedTwin(eventData.Robot);
+                break;
+            case IRobotEventListener.EventType.OnRobotInPosition:
+                break;
+            case IRobotEventListener.EventType.OnLimbsPositioned:
+                break;
+            case IRobotEventListener.EventType.OnEmergencyStop:
+                break;
+            case IRobotEventListener.EventType.OnReset:
+                break;
+            default:
+                break;
+        }
     }
 }

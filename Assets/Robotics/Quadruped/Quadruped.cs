@@ -73,6 +73,7 @@ namespace RoboticsToolkit.Robotics
             Gimbal = GetComponentInChildren<IGimbal>();
         }
 
+
         void Start()
         {
             m_startHeight = transform.localPosition.y;

@@ -160,7 +160,7 @@ public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
     public void Takeoff()
     {
        // Debug.Log("Simulator TakeOff");
-       // _motorCalculator = new MotorThrustCalculator();
+      //  _motorCalculator = new MotorThrustCalculator();
         _motorCalculator.Initialize(_quadToControl.GetGameObject().transform.eulerAngles.y);
         _motorCalculator.SetAltitudeHold(1);
         _onFlightStatusChanged.Invoke(FlightStatus.Launching);

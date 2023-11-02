@@ -113,29 +113,19 @@ public class WindGenerator : MonoBehaviour
     {
         if (!_gustActive)
         {
-            // StartCoroutine(GenerateGust());
             _gustActive = true;
             _gustLength = UnityEngine.Random.Range(5, 10);
 
             var gustDirY = UnityEngine.Random.Range(-_osselationY, _osselationY);
-            var gustDirX = UnityEngine.Random.Range(-_osselationX, _osselationX);
+            var gustDirX = UnityEngine.Random.Range(-_osselationX, _osselationX);         
 
-           
-
-            //  transform.localEulerAngles = new Vector3(0, gustDirY, 0);
             _gust.localEulerAngles = new Vector3(gustDirX, gustDirY, 0);
 
             _gustStrength = UnityEngine.Random.Range(minWind, maxWind);
 
-            //_gustForce = _gust.transform.position + (_gust.transform.forward * _gustStrength);
-            _gustForce = (_gust.transform.forward * _gustStrength);
-
-            Debug.Log("start gust : " + _gustLength);
-
-
-            //  Debug.Log("gusting for seconds " + gustLength + " : gust power " + _gustForce);
-
-         
+            _gustForce = (_gust.transform.forward * _gustStrength);     
+            
+            Debug.Log("Start gust : " + _gustForce);    
         }
         else
         {
