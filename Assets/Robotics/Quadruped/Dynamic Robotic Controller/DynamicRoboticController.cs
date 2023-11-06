@@ -10,7 +10,7 @@ public class DynamicRoboticController : MonoBehaviour, IRobotEventListener
     [SerializeField]
     private GameObject m_robotObject;
 
-    private IRobot m_robot;
+    private IQuadruped _quadruped;
 
     private QuadrupedLeg m_frMirrorLeg;
     private QuadrupedLeg m_flMirrorLeg;
@@ -69,31 +69,31 @@ public class DynamicRoboticController : MonoBehaviour, IRobotEventListener
     private EulerServo m_servoPrefab;
     [SerializeField]
     private QuadrupedLeg m_dynamicLimbPrefab;
-    private void ConstructQuadrupedTwin(IRobot robot)
+    public void ConstructQuadrupedTwin(IQuadruped robot)
     {
-        m_robot = robot;
-        transform.localPosition = m_robot.GetGameObject().transform.localPosition;
-        transform.localRotation = m_robot.GetGameObject().transform.localRotation;
+        _quadruped = robot;
+        transform.localPosition = _quadruped.GetGameObject().transform.localPosition;
+        transform.localRotation = _quadruped.GetGameObject().transform.localRotation;
 
         GetComponent<MeshFilter>().mesh = robot.GetGameObject().GetComponent<MeshFilter>().mesh;
 
-        m_flMirrorLeg = ConstructDynamicLeg(m_robot.GetLimbs()[0], "FL Mirror Leg", Color.black, true);
-        m_frMirrorLeg = ConstructDynamicLeg(m_robot.GetLimbs()[1],"FR Mirror Leg", Color.black);
-        m_brMirrorLeg = ConstructDynamicLeg(m_robot.GetLimbs()[2],"BR Mirror Leg", Color.black);
-        m_blMirrorLeg = ConstructDynamicLeg(m_robot.GetLimbs()[3], "BL Mirror Leg", Color.black, true);
+        m_flMirrorLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[0], "FL Mirror Leg", Color.black, true);
+        m_frMirrorLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[1],"FR Mirror Leg", Color.black);
+        m_brMirrorLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[2],"BR Mirror Leg", Color.black);
+        m_blMirrorLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[3], "BL Mirror Leg", Color.black, true);
 
-        m_flIKLeg = ConstructDynamicLeg(m_robot.GetLimbs()[0], "FL IK Leg", Color.green, true);
-        m_frIKLeg = ConstructDynamicLeg(m_robot.GetLimbs()[1], "FR IK Leg", Color.green);
-        m_brIKLeg = ConstructDynamicLeg(m_robot.GetLimbs()[2], "BR IK Leg", Color.green);
-        m_blIKLeg = ConstructDynamicLeg(m_robot.GetLimbs()[3], "BL IK Leg", Color.green, true);
+        m_flIKLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[0], "FL IK Leg", Color.green, true);
+        m_frIKLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[1], "FR IK Leg", Color.green);
+        m_brIKLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[2], "BR IK Leg", Color.green);
+        m_blIKLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[3], "BL IK Leg", Color.green, true);
 
 
         m_dynamicLimbPrefab.gameObject.SetActive(false);
 
-        m_legBundles.Add(new LegBundle(m_flMirrorLeg, m_flIKLeg, m_robot.GetLimbs()[0]));
-        m_legBundles.Add(new LegBundle(m_frMirrorLeg, m_frIKLeg , m_robot.GetLimbs()[1]));
-        m_legBundles.Add(new LegBundle(m_brMirrorLeg, m_brIKLeg, m_robot.GetLimbs()[2]));
-        m_legBundles.Add(new LegBundle(m_blMirrorLeg, m_blIKLeg, m_robot.GetLimbs()[3]));
+        m_legBundles.Add(new LegBundle(m_flMirrorLeg, m_flIKLeg, _quadruped.GetLimbs()[0]));
+        m_legBundles.Add(new LegBundle(m_frMirrorLeg, m_frIKLeg , _quadruped.GetLimbs()[1]));
+        m_legBundles.Add(new LegBundle(m_brMirrorLeg, m_brIKLeg, _quadruped.GetLimbs()[2]));
+        m_legBundles.Add(new LegBundle(m_blMirrorLeg, m_blIKLeg, _quadruped.GetLimbs()[3]));
 
         m_ikTargets.transform.position = transform.position;
         m_ikTargets.transform.rotation = transform.rotation;
@@ -106,7 +106,7 @@ public class DynamicRoboticController : MonoBehaviour, IRobotEventListener
             (bundle.IKLeg as QuadrupedLeg).IKTarget.SetParent(m_ikTargets);
         }
 
-            foreach (var limb in m_robot.GetLimbs())
+            foreach (var limb in _quadruped.GetLimbs())
         {
             //var newLeg
             // ConstructDynamicLeg(limb);
@@ -129,11 +129,11 @@ public class DynamicRoboticController : MonoBehaviour, IRobotEventListener
 
         var ogSegments = leg.GetSegments();
         //newLeg.GetBaseSegment().GetGameObject().transform.localPosition = Vector3.zero;
-        var hipOffset = m_robot.GetGameObject().transform.InverseTransformPoint(ogSegments[1].GetGameObject().transform.position);
+        var hipOffset = _quadruped.GetGameObject().transform.InverseTransformPoint(ogSegments[1].GetGameObject().transform.position);
         newLeg.GetHipSegment().GetGameObject().transform.parent.position = transform.TransformPoint(hipOffset);
         newLeg.GetKneeSegment().GetGameObject().transform.parent.localPosition = new Vector3(0,0, ogSegments[1].GetLength());
         newLeg.GetContactPoint().transform.localPosition = new Vector3(0,0, ogSegments[2].GetLength());
-        var ikPoint = transform.TransformPoint(m_robot.GetGameObject().transform.InverseTransformPoint(leg.GetEndPoint().transform.position));
+        var ikPoint = transform.TransformPoint(_quadruped.GetGameObject().transform.InverseTransformPoint(leg.GetEndPoint().transform.position));
           newLeg.IKTarget.position = ikPoint;
         //newLeg.IKTarget.position = newLeg.GetContactPoint().transform.position;
 
@@ -147,19 +147,19 @@ public class DynamicRoboticController : MonoBehaviour, IRobotEventListener
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            ConstructQuadrupedTwin(m_robotObject.GetComponent<IRobot>());
-        }
-        if(m_robot == null)
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    ConstructQuadrupedTwin(m_robotObject.GetComponent<IQuadruped>());
+        //}
+        if(_quadruped == null)
         {
             return;
         }
         var tempPos = transform.localPosition;
-        tempPos.y = m_robot.GetGameObject().transform.localPosition.y;
+        tempPos.y = _quadruped.GetGameObject().transform.localPosition.y;
         transform.localPosition = tempPos;
 
-        transform.rotation = m_robot.GetGameObject().transform.rotation;
+        transform.rotation = _quadruped.GetGameObject().transform.rotation;
 
         foreach (var limbPair in m_legBundles)
         {
@@ -211,7 +211,7 @@ public class DynamicRoboticController : MonoBehaviour, IRobotEventListener
     }
     public Vector3 GetRobotGimbalOffset(Vector3 globalPos)
     {
-        return m_robot.GetGameObject().transform.InverseTransformPoint(globalPos);
+        return _quadruped.GetGameObject().transform.InverseTransformPoint(globalPos);
     }
     public Vector3 GetGimbalOffset(Vector3 globalPos)
     {
@@ -223,7 +223,7 @@ public class DynamicRoboticController : MonoBehaviour, IRobotEventListener
         switch (eventData.EventType)
         {
             case IRobotEventListener.EventType.OnRobotInitialized:
-                ConstructQuadrupedTwin(eventData.Robot);
+               // ConstructQuadrupedTwin(eventData.Robot);
                 break;
             case IRobotEventListener.EventType.OnRobotInPosition:
                 break;

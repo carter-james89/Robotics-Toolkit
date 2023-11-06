@@ -12,6 +12,8 @@ public interface IQuadruped
 {
     public GameObject GetGameObject();
     public IRoboticLimb[] GetLimbs();
+
+    public void PositionTransform();
 }
 
 
@@ -19,6 +21,8 @@ public class SimulatedQuadruped : MonoBehaviour, IQuadruped, IRobot, IPortCommun
 {
     [SerializeField]
     private IRoboticLimb[] m_limbs;
+
+    public void PositionTransform() { }
 
     [SerializeField]
     private QuadrupedLeg m_frLimb;
@@ -67,6 +71,7 @@ public class SimulatedQuadruped : MonoBehaviour, IQuadruped, IRobot, IPortCommun
     PortCommunication server;
     private void Start()
     {
+
       //  server = new PortCommunication();
       //  server.SubscribeToCommunicatonEvents(this);
         // server.ConnectToServer();
@@ -216,7 +221,7 @@ public class SimulatedQuadruped : MonoBehaviour, IQuadruped, IRobot, IPortCommun
 
 
     private List<IRobotEventListener> m_listeners = new List<IRobotEventListener>();
-    private UDPCommunicationManager client;
+    private UDPCommunicationListener client;
 
     public void SubscribeToEvents(IRobotEventListener listener)
     {

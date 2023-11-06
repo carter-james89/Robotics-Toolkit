@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 
-public class UDPCommunicationManager 
+public class UDPCommunicationListener 
 {
     protected IPHostEntry ipHostInfo;
     protected IPAddress ipAddress;
@@ -16,7 +16,7 @@ public class UDPCommunicationManager
     protected Socket dataSocket;
 
     private UdpClient _udpClient;
-    public UDPCommunicationManager(int port, string ipAddress)
+    public UDPCommunicationListener(int port, string ipAddress)
     {
         //  ipAddress = "192.168.86.50"
         this.port = port;
