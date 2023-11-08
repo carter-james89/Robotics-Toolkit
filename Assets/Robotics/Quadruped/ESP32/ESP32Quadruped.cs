@@ -15,16 +15,27 @@ namespace Toolkit.Robotics.Quadruped
         UdpClient udpClient;
         IPEndPoint remoteEndPoint;
         IPAddress _ipAddress;
+        private bool _connected = false;
         public void EstablishConnection(IUDPConnectionEventListener.EventData eventData)
         {
-            _ipAddress = eventData.IP;
-            udpClient = new UdpClient(eventData.ListenPort);
-            remoteEndPoint = new IPEndPoint(eventData.IP, eventData.ListenPort);
+            Debug.Log("_____________________");
+            _ipAddress = IPAddress.Parse(eventData.ConnectionData.IP);
+            udpClient = new UdpClient(eventData.ConnectionData.Port);
+            remoteEndPoint = new IPEndPoint(_ipAddress, eventData.ConnectionData.Port);
             byte[] sendBytes = Encoding.UTF8.GetBytes("Digital Twin Connection Established");
             udpClient.Send(sendBytes, sendBytes.Length, remoteEndPoint);
             //  sender.Close();
-            //Debug.Log("Sent UDP response to " + ipAddress + ":" + port);
+            Debug.Log("Sent UDP response to " + _ipAddress + ":" + eventData.ConnectionData.Port);
+            _connected = true;
 
+        }
+
+        private void Update()
+        {
+            if (_connected)
+            {
+                PositionTransform();
+            }
         }
 
         public override void PositionTransform()
