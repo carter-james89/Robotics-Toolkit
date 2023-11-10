@@ -26,10 +26,10 @@ namespace Toolkit.Robotics.Quadruped
             Debug.Log("Factor event occured");
             //DynamicRoboticController dynamicRoboticController = new GameObject(eventData.ConnectionData.Name + " Robotic Controller").AddComponent<DynamicRoboticController>();
             //  ESP32Quadruped newRobot = new GameObject(eventData.Name + " Quadruped").AddComponent<ESP32Quadruped>();
-            Debug.Log("what the fuck");
+           // Debug.Log("what the fuck");
           //  dynamicRoboticController.transform.SetParent(transform, false);
             // newRobot.transform.SetParent(transform, false);
-            Debug.Log("what the fuck2");
+           // Debug.Log("what the fuck2");
             if (eventData.ConnectionData.BoardType.ToLower().Contains("esp32"))
             {
                 if (eventData.ConnectionData.Name.ToLower().Contains("bittle"))
@@ -54,7 +54,7 @@ namespace Toolkit.Robotics.Quadruped
             {
                 Debug.Log("Not a ESP32");
             }
-            Debug.Log("what the fuck 3");
+     
         }
 
         private void Awake()

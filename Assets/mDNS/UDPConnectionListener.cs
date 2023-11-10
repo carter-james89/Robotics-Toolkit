@@ -48,12 +48,13 @@ namespace Toolkit.NetworkUtilites
     {
         private UdpClient listener;
         private bool isListening;
-        private const int listenPort = 5500; // The port number to listen on
+        private const int listenPort = 5501; // The port number to listen on
 
         private InterfaceEventManager<IUDPConnectionEventListener> _listenerManager = new InterfaceEventManager<IUDPConnectionEventListener>("UDP Listener");
 
         void Start()
         {
+            Application.targetFrameRate = 60;
             isListening = true;
             listener = new UdpClient(listenPort);
             listener.BeginReceive(new AsyncCallback(ReceiveCallback), null);
@@ -63,10 +64,9 @@ namespace Toolkit.NetworkUtilites
 
         private void ReceiveCallback(IAsyncResult ar)
         {
-            Debug.Log("Received UDP message from)");// " + remoteEndPoint.Address + " : " + receivedString);
+            Debug.Log("Received UDP message from ");// " + remoteEndPoint.Address + " : " + receivedString);
             IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, listenPort);
             byte[] receivedBytes = listener.EndReceive(ar, ref remoteEndPoint);
-
             
             // Convert the byte array to a string
             string receivedString = Encoding.UTF8.GetString(receivedBytes);
@@ -100,15 +100,6 @@ namespace Toolkit.NetworkUtilites
           NotifyListeners(new IUDPConnectionEventListener.EventData(IUDPConnectionEventListener.Type.OnRobotConnected,ip,listenPort,connectionData));
         }
 
-        private void SendUDPResponse(string ipAddress, int port, string message)
-        {
-            UdpClient sender = new UdpClient();
-            IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Parse(ipAddress), port);
-            byte[] sendBytes = Encoding.UTF8.GetBytes(message);
-            sender.Send(sendBytes, sendBytes.Length, remoteEndPoint);
-            sender.Close();
-            Debug.Log("Sent UDP response to " + ipAddress + ":" + port);
-        }
 
         private void OnDisable()
         {
