@@ -9,16 +9,49 @@ using System;
 
 namespace Toolkit.Robotics.Quadruped
 {
-    public class ESP32Quadruped : Quadruped
+    [RequireComponent(typeof(UDPCommunicationListener))]
+    public class ESP32Quadruped : Quadruped, IUDPConnectionEventListener
     {
         UdpClient udpClient;
         IPEndPoint remoteEndPoint;
         IPAddress _ipAddress;
         private bool _connected = false;
         private System.Diagnostics.Stopwatch connectionStopwatch = new System.Diagnostics.Stopwatch();
+
+        [SerializeField]
+        private string _name = "bittle";
+        protected override void Start()
+        {
+            if (SimulationMode())
+            {
+                base.Start();
+                return;
+            }
+            UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
+        }
+        public void OnConnectionEventOccured(IUDPConnectionEventListener.EventData eventData)
+        {
+            Debug.Log("Check broadcast for correct esp32 info");
+            if (eventData.ConnectionData.BoardType.ToLower().Contains("esp32"))
+            {
+                if (eventData.ConnectionData.Name.ToLower().Contains(_name))
+                {
+                    EstablishConnection(eventData);
+                }
+                else
+                {
+                    Debug.Log("Not a bittle");
+                }
+            }
+            else
+            {
+                Debug.Log("Not a ESP32");
+            }
+        }
+
         public void EstablishConnection(IUDPConnectionEventListener.EventData eventData)
         {
-            UnityEngine.Debug.Log("Attempt to establish connection");
+            Debug.Log("Attempt to establish connection");
             _ipAddress = IPAddress.Parse(eventData.ConnectionData.IP);
             udpClient = new UdpClient(eventData.ConnectionData.Port);
             remoteEndPoint = new IPEndPoint(_ipAddress, eventData.ConnectionData.Port);
@@ -26,30 +59,32 @@ namespace Toolkit.Robotics.Quadruped
             connectionStopwatch.Start();
             _connected = true;
             UnityEngine.Debug.Log("CONNECTED");
-            //onConnectionTime = Time.timeSinceLevelLoad;
+            UDPConnectionListener.Instance.UnsubscribeFromConnectionEvents(this);
+            //Bootup();
         }
 
-        private void Update()
+        protected override void Update()
         {
-            if (_connected)
+            if(_connected && !_isRunning)
             {
-                RunSpeedTest();
-                //PositionTransform();
+                Bootup();//needs to be done on this thread pretty sure
             }
+            base.Update();
         }
 
         private byte[] SendUDPMessageAndWaitForResponse(int header, byte[] message, int timeout = 10000)
         {
+            if (SimulationMode())
+            {
+                Debug.LogWarning("Should not be sending udp messages in simulation mode");
+                return null;
+            }
             // Combine the header and the message into one byte array
             byte[] headerBytes = BitConverter.GetBytes(header);
             byte[] packet = new byte[headerBytes.Length + message.Length];
             Buffer.BlockCopy(headerBytes, 0, packet, 0, headerBytes.Length);
             Buffer.BlockCopy(message, 0, packet, headerBytes.Length, message.Length);
-           // Debug.Log("Send message with header " + header.ToString());
-            // Send the packet
             udpClient.Send(packet, packet.Length, remoteEndPoint);
-
-            // Set the timeout duration in milliseconds
             udpClient.Client.ReceiveTimeout = timeout;
 
             try
@@ -67,17 +102,10 @@ namespace Toolkit.Robotics.Quadruped
                     // Confirm that the received header matches the sent header
                     if (receivedHeader == header)
                     {
-                       // Debug.Log("Response header was correct");
                         // Create a new array to hold the remaining bytes after the header
                         byte[] remainingBytes = new byte[bytes.Length - sizeof(int)];
                         Buffer.BlockCopy(bytes, sizeof(int), remainingBytes, 0, remainingBytes.Length);
-
-                       // Debug.Log("message length " + remainingBytes.Length);
-
                         return remainingBytes; // Return the remaining bytes
-
-
-
                     }
                     else
                     {
@@ -93,15 +121,29 @@ namespace Toolkit.Robotics.Quadruped
             {
                 if (ex.SocketErrorCode == SocketError.TimedOut)
                 {
-                    Debug.LogWarning("Timeout, no response received.");
+                    OnTimeOut();
                 }
                 else
                 {
-                    Debug.LogError("SocketException occurred: " + ex.Message);
+                    OnConnectionError("SocketException occurred: " + ex.Message);
                 }
             }
-
             return null; // Return null if no response was received or if headers do not match
+        }
+
+        private void OnTimeOut()
+        {
+            Debug.LogWarning("Timeout, no response received.");
+            OnConnectionShutdown();
+        }
+        private void OnConnectionError(string error)
+        {
+            Debug.LogWarning(error);
+            OnConnectionShutdown();
+        }
+        private void OnConnectionShutdown()
+        {
+            UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
         }
 
         public void RunSpeedTest()
@@ -131,9 +173,14 @@ namespace Toolkit.Robotics.Quadruped
             }
         }
 
-
-        public override void PositionTransform()
+        protected override void PositionTransform()
         {
+            if (SimulationMode())
+            {
+                return;
+            }
+            RunSpeedTest();
+            return;
             // Example usage of the new SendUDPMessageAndWaitForResponse method
             int header = 2; // Example header
             byte[] message = new byte[0]; // No additional message content
@@ -142,11 +189,10 @@ namespace Toolkit.Robotics.Quadruped
        
         }
 
-
-
         void OnDestroy()
         {
             udpClient?.Close();
+            UDPConnectionListener.Instance.Shutdown();
         }
     }
 }

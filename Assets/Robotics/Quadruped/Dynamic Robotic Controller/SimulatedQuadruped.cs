@@ -10,10 +10,13 @@ using ProcessCommunicationToolkit.SocketPortConnection;
 
 public interface IQuadruped
 {
+    public void Bootup();
     public GameObject GetGameObject();
     public IRoboticLimb[] GetLimbs();
 
-    public void PositionTransform();
+    public bool SimulationMode();
+
+    public void Run();
 }
 
 
@@ -254,6 +257,21 @@ public class SimulatedQuadruped : MonoBehaviour, IQuadruped, IRobot, IPortCommun
     public void OnCommunicatonEventOccured(IPortCommunicationEventListener.CommunicationEventData eventData)
     {
         var message = eventData.Message;
+    }
+
+    public bool SimulationMode()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Bootup()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Run()
+    {
+        throw new NotImplementedException();
     }
 }
 

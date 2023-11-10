@@ -78,6 +78,22 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
         //return m_anchorMatrix.inverse.MultiplyPoint(targetPoint);
     }
 
+    public void SetLimbValues(float baseAngle, float hipAngle, float kneeAngle)
+    {
+        if(m_baseRoboticLimbSegment != null)
+        {
+            m_baseRoboticLimbSegment.GetServos()[0].SetServoPosition(baseAngle);
+        }
+        if (m_hipRoboticLimbSegment != null)
+        {
+            m_hipRoboticLimbSegment.GetServos()[0].SetServoPosition(hipAngle);
+        }
+        if (m_kneeRoboticLimbSegment != null)
+        {
+            m_kneeRoboticLimbSegment.GetServos()[0].SetServoPosition(kneeAngle);
+        }
+    }
+
   
     private float m_xOffset = .03f;
     private float m_yOffset = .03f;
@@ -176,7 +192,11 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
     }
     public IRoboticLimbSegment[] GetLimbSegments()
     {
-        return new IRoboticLimbSegment[3] { m_baseRoboticLimbSegment, m_hipRoboticLimbSegment, m_kneeRoboticLimbSegment };
+        if(m_baseRoboticLimbSegment != null)
+        {
+            return new IRoboticLimbSegment[3] { m_baseRoboticLimbSegment, m_hipRoboticLimbSegment, m_kneeRoboticLimbSegment };
+        }
+        return new IRoboticLimbSegment[3] {null,m_hipRoboticLimbSegment, m_kneeRoboticLimbSegment };
     }
     public IRoboticLimbSegment GetHipSegment()
     {
