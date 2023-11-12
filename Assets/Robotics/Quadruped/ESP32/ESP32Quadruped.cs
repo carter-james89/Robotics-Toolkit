@@ -58,7 +58,7 @@ namespace Toolkit.Robotics.Quadruped
             SendUDPMessageAndWaitForResponse(0, new byte[0]);
             connectionStopwatch.Start();
             _connected = true;
-            UnityEngine.Debug.Log("CONNECTED");
+            Debug.Log("CONNECTED");
             UDPConnectionListener.Instance.UnsubscribeFromConnectionEvents(this);
             //Bootup();
         }
@@ -102,9 +102,21 @@ namespace Toolkit.Robotics.Quadruped
                     // Confirm that the received header matches the sent header
                     if (receivedHeader == header)
                     {
-                        // Create a new array to hold the remaining bytes after the header
-                        byte[] remainingBytes = new byte[bytes.Length - sizeof(int)];
-                        Buffer.BlockCopy(bytes, sizeof(int), remainingBytes, 0, remainingBytes.Length);
+                        // Assuming the time information is right after the header
+                        long esp32TimeSinceConnection = BitConverter.ToInt32(bytes, sizeof(int));
+
+                        // Get the time since connection in milliseconds from the Stopwatch
+                        long unityTimeSinceConnection = connectionStopwatch.ElapsedMilliseconds;
+
+                        // Compare the two times
+                        long timeDifference = unityTimeSinceConnection - esp32TimeSinceConnection;
+
+                        Debug.Log($"Time difference: {timeDifference} ms");
+
+                        // Create a new array to hold the remaining bytes after the header and time
+                        int remainingBytesLength = bytes.Length - sizeof(int) - sizeof(int);
+                        byte[] remainingBytes = new byte[remainingBytesLength];
+                        Buffer.BlockCopy(bytes, sizeof(int) + sizeof(int), remainingBytes, 0, remainingBytes.Length);
                         return remainingBytes; // Return the remaining bytes
                     }
                     else
@@ -179,14 +191,123 @@ namespace Toolkit.Robotics.Quadruped
             {
                 return;
             }
-            RunSpeedTest();
-            return;
-            // Example usage of the new SendUDPMessageAndWaitForResponse method
-            int header = 2; // Example header
+            Debug.Log("position transform");
+            int header = 1; // Example header
             byte[] message = new byte[0]; // No additional message content
             byte[] response = SendUDPMessageAndWaitForResponse(header, message);
+            QuadrupedData data = ParsePhysicalRobotData(response);
 
-       
+            Debug.Log(data.FLBaseAngle);
+
+        }
+        public class QuadrupedData
+        {
+            public short VelocityX;
+            public short VelocityY;
+            public short VelocityZ;
+            public short GyroX;
+            public short GyroY;
+            public short GyroZ;
+            public int FLBaseAngle;
+            public int FLHipAngle;
+            public int FLKneeAngle;
+            public int FRBaseAngle;
+            public int FRHipAngle;
+            public int FRKneeAngle;
+            public int BRBaseAngle;
+            public int BRHipAngle;
+            public int BRKneeAngle;
+            public int BLBaseAngle;
+            public int BLHipAngle;
+            public int BLKneeAngle;
+
+            // Constructor
+            public QuadrupedData(short velocityX, short velocityY, short velocityZ, short gyroX, short gyroY, short gyroZ,
+                                 int flBaseAngle, int flHipAngle, int flKneeAngle,
+                                 int frBaseAngle, int frHipAngle, int frKneeAngle,
+                                 int brBaseAngle, int brHipAngle, int brKneeAngle,
+                                 int blBaseAngle, int blHipAngle, int blKneeAngle)
+            {
+                VelocityX = velocityX;
+                VelocityY = velocityY;
+                VelocityZ = velocityZ;
+                GyroX = gyroX;
+                GyroY = gyroY;
+                GyroZ = gyroZ;
+                FLBaseAngle = flBaseAngle;
+                FLHipAngle = flHipAngle;
+                FLKneeAngle = flKneeAngle;
+                FRBaseAngle = frBaseAngle;
+                FRHipAngle = frHipAngle;
+                FRKneeAngle = frKneeAngle;
+                BRBaseAngle = brBaseAngle;
+                BRHipAngle = brHipAngle;
+                BRKneeAngle = brKneeAngle;
+                BLBaseAngle = blBaseAngle;
+                BLHipAngle = blHipAngle;
+                BLKneeAngle = blKneeAngle;
+            }
+        }
+        private QuadrupedData ParsePhysicalRobotData(byte[] bytes)
+        {
+            int offset = 0;
+            short velocityX = BitConverter.ToInt16(bytes, offset); offset += 2;
+            short velocityY = BitConverter.ToInt16(bytes, offset); offset += 2;
+            short velocityZ = BitConverter.ToInt16(bytes, offset); offset += 2;
+            short gyroX = BitConverter.ToInt16(bytes, offset); offset += 2;
+            short gyroY = BitConverter.ToInt16(bytes, offset); offset += 2;
+            short gyroZ = BitConverter.ToInt16(bytes, offset); offset += 2;
+            int flBaseAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int flHipAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int flKneeAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int frBaseAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int frHipAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int frKneeAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int brBaseAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int brHipAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int brKneeAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int blBaseAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int blHipAngle = BitConverter.ToInt32(bytes, offset); offset += 4;
+            int blKneeAngle = BitConverter.ToInt32(bytes, offset);
+
+            return new QuadrupedData(velocityX, velocityY, velocityZ, gyroX, gyroY, gyroZ,
+                                     flBaseAngle, flHipAngle, flKneeAngle,
+                                     frBaseAngle, frHipAngle, frKneeAngle,
+                                     brBaseAngle, brHipAngle, brKneeAngle,
+                                     blBaseAngle, blHipAngle, blKneeAngle);
+        
+
+
+        PhysicalRobotData data = new PhysicalRobotData();
+            try
+            {
+               
+
+                offset = 0;
+
+                data.GyroVelocityX = BitConverter.ToInt64(bytes, offset);
+                offset += sizeof(long);
+
+                data.GyroVelocityY = BitConverter.ToInt64(bytes, offset);
+                offset += sizeof(long);
+
+                data.GyroVelocityZ = BitConverter.ToInt64(bytes, offset);
+                offset += sizeof(long);
+
+                // Repeat for all other fields
+                data.FlBaseServoAngle = BitConverter.ToInt32(bytes, offset);
+                offset += sizeof(int);
+                // ... Continue for the rest of the integers ...
+
+                Debug.Log(data.FlBaseServoAngle);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning(e.Message);
+            }
+          
+
+            return null;
         }
 
         void OnDestroy()
@@ -195,4 +316,27 @@ namespace Toolkit.Robotics.Quadruped
             UDPConnectionListener.Instance.Shutdown();
         }
     }
+    public class PhysicalRobotData
+    {
+        public long GyroVelocityX { get; set; }
+        public long GyroVelocityY { get; set; }
+        public long GyroVelocityZ { get; set; }
+
+        public int FlBaseServoAngle { get; set; }
+        public int FlHipServoAngle { get; set; }
+        public int FlKneeServoAngle { get; set; }
+
+        public int FrBaseServoAngle { get; set; }
+        public int FrHipServoAngle { get; set; }
+        public int FrKneeServoAngle { get; set; }
+
+        public int BrBaseServoAngle { get; set; }
+        public int BrHipServoAngle { get; set; }
+        public int BrKneeServoAngle { get; set; }
+
+        public int BlBaseServoAngle { get; set; }
+        public int BlHipServoAngle { get; set; }
+        public int BlKneeServoAngle { get; set; }
+    }
+
 }
