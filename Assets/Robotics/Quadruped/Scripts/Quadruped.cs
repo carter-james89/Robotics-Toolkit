@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Toolkit.Robotics.Quadruped
 {
+    [Serializable]
     public class QuadrupedLimbData
     {
         public float FLBaseAngle;
@@ -23,6 +24,27 @@ namespace Toolkit.Robotics.Quadruped
         public float BLBaseAngle;
         public float BLHipAngle;
         public float BLKneeAngle;
+
+        public QuadrupedLimbData() { }
+
+        public QuadrupedLimbData(QuadrupedData data)
+        {
+            FLBaseAngle = data.FLBaseAngle;
+            FLHipAngle = data.FLHipAngle;
+            FLKneeAngle = data.FLKneeAngle;
+
+            FRBaseAngle = data.FRBaseAngle;
+            FRHipAngle = data.FRHipAngle;
+            FRKneeAngle = data.FRKneeAngle;
+
+            BRBaseAngle = data.BRBaseAngle;
+            BRHipAngle = data.BRHipAngle;
+            BRKneeAngle = data.BRKneeAngle;
+
+            BLBaseAngle = data.BLBaseAngle;
+            BLHipAngle = data.BLHipAngle;
+            BLKneeAngle = data.BLKneeAngle;
+        }
 
         public QuadrupedLimbData(float flBaseAngle, float flHipAngle, float flKneeAngle,
                               float frBaseAngle, float frHipAngle, float frKneeAngle,
@@ -63,6 +85,9 @@ namespace Toolkit.Robotics.Quadruped
         [SerializeField]
         private QuadrupedLeg m_blLimb;
 
+        [SerializeField]
+        private int _startupDelay = 100;
+
         protected bool _isRunning = false;
 
         [SerializeField]
@@ -71,26 +96,26 @@ namespace Toolkit.Robotics.Quadruped
 
         protected virtual void Awake()
         {
-            
+   
         }
         protected virtual void Start()
         {
-            //if(GetComponent<ArticulationBody>().)
-            Bootup();
-        }
-        public void Bootup()
-        {
-            Debug.Log("Quadruped Bootup");
-
             if (SimulationMode())
             {
                 var hipAngle = 80;
                 var kneeAngle = -160;
                 SetLimbs(new QuadrupedLimbData(0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle));
             }
-        
-            _controllerObject.GetComponent<IQuadrupedRoboticController>().Initialize(this);
+        }
+        public void Bootup()
+        {
+            Debug.Log("Quadruped Bootup");
+
+
+
+          //  _controllerObject.GetComponent<IQuadrupedRoboticController>().Initialize(this);
             _controller = _controllerObject.GetComponent<IQuadrupedRoboticController>();
+            _controller.Initialize(this);
             _isRunning = true;
         }
         protected virtual void Update()
@@ -98,14 +123,14 @@ namespace Toolkit.Robotics.Quadruped
             Run();
         }
 
-        private void SetLimbs(QuadrupedLimbData limbData)
+        protected void SetLimbs(QuadrupedLimbData limbData)
         {
             m_frLimb.SetLimbValues(limbData.FRBaseAngle, limbData.FRHipAngle, limbData.FRKneeAngle);
             m_flLimb.SetLimbValues(limbData.FLBaseAngle, limbData.FLHipAngle, limbData.FLKneeAngle);
             m_brLimb.SetLimbValues(limbData.BRBaseAngle, limbData.BRHipAngle, limbData.BRKneeAngle);
             m_blLimb.SetLimbValues(limbData.BLBaseAngle, limbData.BLHipAngle, limbData.BLKneeAngle);
         }
-      
+
 
         public GameObject GetGameObject()
         {
@@ -114,14 +139,14 @@ namespace Toolkit.Robotics.Quadruped
 
         public IRoboticLimb[] GetLimbs()
         {
-            if(m_limbs == null)
+            if (m_limbs == null)
             {
                 m_limbs = new IRoboticLimb[4] { m_flLimb, m_frLimb, m_brLimb, m_blLimb };
             }
             return m_limbs;
         }
 
-     
+
 
         public bool SimulationMode()
         {
@@ -132,6 +157,10 @@ namespace Toolkit.Robotics.Quadruped
         {
             if (!_isRunning)
             {
+                if (SimulationMode() && Time.frameCount > _startupDelay)
+                {
+                    Bootup();
+                }
                 return;
             }
             PositionTransform();
@@ -141,12 +170,24 @@ namespace Toolkit.Robotics.Quadruped
         {
 
         }
-        private void PositionLimbs()
+        protected virtual void PositionLimbs()
         {
             var limbData = _controller.CalculateLimbData(this);
+
+            if (SimulationMode())
+            {
+                SetLimbs(limbData);
+            }
+
+            OnLimbsPositioned(limbData);
         }
 
-      
+        protected virtual void OnLimbsPositioned(QuadrupedLimbData limbData)
+        {
+
+        }
+
+
     }
 
 }

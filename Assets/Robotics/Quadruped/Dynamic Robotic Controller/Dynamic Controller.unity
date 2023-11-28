@@ -893,7 +893,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd6e484f00c3aca4c8bb82b6fa025880, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _simulationMode: 1
+  _simulationMode: 0
   m_frLimb: {fileID: 1959053589}
   m_flLimb: {fileID: 8265781004712646825}
   m_brLimb: {fileID: 1795980754}

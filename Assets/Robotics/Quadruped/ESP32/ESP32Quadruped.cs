@@ -1,14 +1,65 @@
-
 using UnityEngine;
 using System.Net.Sockets;
 using Toolkit.NetworkUtilites;
 using System.Net;
 using System.Text;
 using System;
-
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+using System.Collections.Generic;
 
 namespace Toolkit.Robotics.Quadruped
 {
+
+    
+    public class QuadrupedData
+    {
+        public short VelocityX;
+        public short VelocityY;
+        public short VelocityZ;
+        public short GyroX;
+        public short GyroY;
+        public short GyroZ;
+        public int FLBaseAngle;
+        public int FLHipAngle;
+        public int FLKneeAngle;
+        public int FRBaseAngle;
+        public int FRHipAngle;
+        public int FRKneeAngle;
+        public int BRBaseAngle;
+        public int BRHipAngle;
+        public int BRKneeAngle;
+        public int BLBaseAngle;
+        public int BLHipAngle;
+        public int BLKneeAngle;
+
+        // Constructor
+        public QuadrupedData(short velocityX, short velocityY, short velocityZ, short gyroX, short gyroY, short gyroZ,
+                             int flBaseAngle, int flHipAngle, int flKneeAngle,
+                             int frBaseAngle, int frHipAngle, int frKneeAngle,
+                             int brBaseAngle, int brHipAngle, int brKneeAngle,
+                             int blBaseAngle, int blHipAngle, int blKneeAngle)
+        {
+            VelocityX = velocityX;
+            VelocityY = velocityY;
+            VelocityZ = velocityZ;
+            GyroX = gyroX;
+            GyroY = gyroY;
+            GyroZ = gyroZ;
+            FLBaseAngle = flBaseAngle;
+            FLHipAngle = flHipAngle;
+            FLKneeAngle = flKneeAngle;
+            FRBaseAngle = frBaseAngle;
+            FRHipAngle = frHipAngle;
+            FRKneeAngle = frKneeAngle;
+            BRBaseAngle = brBaseAngle;
+            BRHipAngle = brHipAngle;
+            BRKneeAngle = brKneeAngle;
+            BLBaseAngle = blBaseAngle;
+            BLHipAngle = blHipAngle;
+            BLKneeAngle = blKneeAngle;
+        }
+    }
     [RequireComponent(typeof(UDPCommunicationListener))]
     public class ESP32Quadruped : Quadruped, IUDPConnectionEventListener
     {
@@ -17,6 +68,8 @@ namespace Toolkit.Robotics.Quadruped
         IPAddress _ipAddress;
         private bool _connected = false;
         private System.Diagnostics.Stopwatch connectionStopwatch = new System.Diagnostics.Stopwatch();
+
+        private QuadrupedData _receivedData;
 
         [SerializeField]
         private string _name = "bittle";
@@ -60,16 +113,68 @@ namespace Toolkit.Robotics.Quadruped
             _connected = true;
             Debug.Log("CONNECTED");
             UDPConnectionListener.Instance.UnsubscribeFromConnectionEvents(this);
-            //Bootup();
         }
 
         protected override void Update()
         {
-            if(_connected && !_isRunning)
+            if (_connected && !_isRunning)
             {
                 Bootup();//needs to be done on this thread pretty sure
             }
             base.Update();
+
+            if (_connected)
+            {
+                try
+                {
+                    // This will block the thread until a message is received or timeout occurs
+                    IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                    byte[] bytes = udpClient.Receive(ref remoteIpEndPoint);
+
+                    // Check if the received bytes array is long enough to contain a header
+                    if (bytes.Length >= sizeof(int))
+                    {
+                        // Extract the header from the received bytes
+                        int receivedHeader = BitConverter.ToInt32(bytes, 0);
+
+                        // Assuming the time information is right after the header
+                        long esp32TimeSinceConnection = BitConverter.ToInt32(bytes, sizeof(int));
+
+                        // Get the time since connection in milliseconds from the Stopwatch
+                        long unityTimeSinceConnection = connectionStopwatch.ElapsedMilliseconds;
+
+                        // Compare the two times
+                        long timeDifference = unityTimeSinceConnection - esp32TimeSinceConnection;
+
+                        Debug.Log($"Time difference: {timeDifference} ms");
+
+                        // Create a new array to hold the remaining bytes after the header and time
+                        int remainingBytesLength = bytes.Length - sizeof(int) - sizeof(int);
+                        byte[] remainingBytes = new byte[remainingBytesLength];
+                        Buffer.BlockCopy(bytes, sizeof(int) + sizeof(int), remainingBytes, 0, remainingBytes.Length);
+                        // Return the remaining bytes
+
+                        _receivedData = ParsePhysicalRobotData(remainingBytes);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Received bytes do not contain a complete header.");
+                    }
+                }
+                catch (SocketException ex)
+                {
+                    if (ex.SocketErrorCode == SocketError.TimedOut)
+                    {
+                        // OnTimeOut();
+                    }
+                    else
+                    {
+                        // OnConnectionError("SocketException occurred: " + ex.Message);
+                    }
+                }
+                //return null; // Return null if no response was received or if headers do not match
+            }
+
         }
 
         private byte[] SendUDPMessageAndWaitForResponse(int header, byte[] message, int timeout = 10000)
@@ -175,8 +280,8 @@ namespace Toolkit.Robotics.Quadruped
                 // Compare the two times
                 long timeDifference = unityTimeSinceConnection - esp32TimeSinceConnection;
 
-               // Debug.Log($"ESP32 time since connection: {esp32TimeSinceConnection} ms");
-               // Debug.Log($"Unity time since connection: {unityTimeSinceConnection} ms");
+                // Debug.Log($"ESP32 time since connection: {esp32TimeSinceConnection} ms");
+                // Debug.Log($"Unity time since connection: {unityTimeSinceConnection} ms");
                 Debug.Log($"Time difference: {timeDifference} ms");
             }
             else
@@ -191,63 +296,70 @@ namespace Toolkit.Robotics.Quadruped
             {
                 return;
             }
-            Debug.Log("position transform");
-            int header = 1; // Example header
-            byte[] message = new byte[0]; // No additional message content
-            byte[] response = SendUDPMessageAndWaitForResponse(header, message);
-            QuadrupedData data = ParsePhysicalRobotData(response);
-
-            Debug.Log(data.FLBaseAngle);
-
-        }
-        public class QuadrupedData
-        {
-            public short VelocityX;
-            public short VelocityY;
-            public short VelocityZ;
-            public short GyroX;
-            public short GyroY;
-            public short GyroZ;
-            public int FLBaseAngle;
-            public int FLHipAngle;
-            public int FLKneeAngle;
-            public int FRBaseAngle;
-            public int FRHipAngle;
-            public int FRKneeAngle;
-            public int BRBaseAngle;
-            public int BRHipAngle;
-            public int BRKneeAngle;
-            public int BLBaseAngle;
-            public int BLHipAngle;
-            public int BLKneeAngle;
-
-            // Constructor
-            public QuadrupedData(short velocityX, short velocityY, short velocityZ, short gyroX, short gyroY, short gyroZ,
-                                 int flBaseAngle, int flHipAngle, int flKneeAngle,
-                                 int frBaseAngle, int frHipAngle, int frKneeAngle,
-                                 int brBaseAngle, int brHipAngle, int brKneeAngle,
-                                 int blBaseAngle, int blHipAngle, int blKneeAngle)
+            if (!_connected || _receivedData == null)
             {
-                VelocityX = velocityX;
-                VelocityY = velocityY;
-                VelocityZ = velocityZ;
-                GyroX = gyroX;
-                GyroY = gyroY;
-                GyroZ = gyroZ;
-                FLBaseAngle = flBaseAngle;
-                FLHipAngle = flHipAngle;
-                FLKneeAngle = flKneeAngle;
-                FRBaseAngle = frBaseAngle;
-                FRHipAngle = frHipAngle;
-                FRKneeAngle = frKneeAngle;
-                BRBaseAngle = brBaseAngle;
-                BRHipAngle = brHipAngle;
-                BRKneeAngle = brKneeAngle;
-                BLBaseAngle = blBaseAngle;
-                BLHipAngle = blHipAngle;
-                BLKneeAngle = blKneeAngle;
+                return;
             }
+            SetLimbs(new QuadrupedLimbData(_receivedData));
+
+
+          
+
+            //int header = 2;
+            //byte[] message = new byte[0];
+            //byte[] headerBytes = BitConverter.GetBytes(header);
+            //byte[] packet = new byte[headerBytes.Length + message.Length];
+            //Buffer.BlockCopy(headerBytes, 0, packet, 0, headerBytes.Length);
+            //Buffer.BlockCopy(message, 0, packet, headerBytes.Length, message.Length);
+            //udpClient.Send(packet, packet.Length, remoteEndPoint);
         }
+
+   
+
+        protected override void OnLimbsPositioned(QuadrupedLimbData limbData)
+        {
+            base.OnLimbsPositioned(limbData);
+            if (SimulationMode())
+            {
+                return;
+            }
+            List<byte> byteList = new List<byte>();
+
+            // Serialize each float field to bytes
+            byteList.AddRange(BitConverter.GetBytes(limbData.FLBaseAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FLHipAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FLKneeAngle));
+
+            byteList.AddRange(BitConverter.GetBytes(limbData.FRBaseAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FRHipAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FRKneeAngle));
+
+            byteList.AddRange(BitConverter.GetBytes(limbData.BRBaseAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BRHipAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BRKneeAngle));
+
+            byteList.AddRange(BitConverter.GetBytes(limbData.BLBaseAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BLHipAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BLKneeAngle));
+
+            byte[] serializedData = byteList.ToArray();
+
+            //BinaryFormatter formatter = new BinaryFormatter();
+            //MemoryStream memoryStream = new MemoryStream();
+            //formatter.Serialize(memoryStream, limbData);
+            //byte[] serializedData = memoryStream.ToArray();
+
+            //// Prepare the packet with header and serialized data
+            int header = 2;
+            byte[] headerBytes = BitConverter.GetBytes(header);
+            byte[] packet = new byte[headerBytes.Length + serializedData.Length];
+            Buffer.BlockCopy(headerBytes, 0, packet, 0, headerBytes.Length);
+            Buffer.BlockCopy(serializedData, 0, packet, headerBytes.Length, serializedData.Length);
+
+            //// Send the packet over UDP
+            udpClient.Send(packet, packet.Length, remoteEndPoint);
+        }
+
         private QuadrupedData ParsePhysicalRobotData(byte[] bytes)
         {
             int offset = 0;
@@ -275,13 +387,13 @@ namespace Toolkit.Robotics.Quadruped
                                      frBaseAngle, frHipAngle, frKneeAngle,
                                      brBaseAngle, brHipAngle, brKneeAngle,
                                      blBaseAngle, blHipAngle, blKneeAngle);
-        
 
 
-        PhysicalRobotData data = new PhysicalRobotData();
+
+            PhysicalRobotData data = new PhysicalRobotData();
             try
             {
-               
+
 
                 offset = 0;
 
@@ -305,7 +417,7 @@ namespace Toolkit.Robotics.Quadruped
             {
                 Debug.LogWarning(e.Message);
             }
-          
+
 
             return null;
         }

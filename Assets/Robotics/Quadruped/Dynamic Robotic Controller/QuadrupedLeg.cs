@@ -251,12 +251,12 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
 
     public void SetIKTargetPos(Vector3 globalPos)
     {
-        throw new NotImplementedException();
+        IKTarget.position = globalPos;
     }
 
     public Vector3 GetIKTargetPos()
     {
-        throw new NotImplementedException();
+        return IKTarget.position;
     }
 
     public bool LimbAtTarget()

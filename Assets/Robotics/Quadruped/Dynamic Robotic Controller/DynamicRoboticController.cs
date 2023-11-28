@@ -36,11 +36,12 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
 
     //private Dictionary<IRoboticLimb, IRoboticLimb> m_limbMirrors = new Dictionary<IRoboticLimb, IRoboticLimb>();
 
-    public struct LegBundle
+    public class LegBundle
     {
         public IRoboticLimb MirrorLeg;
         public IRoboticLimb IKLeg;
         public IRoboticLimb RobotLeg;
+        public Vector3 DefaultPositionOffset;
 
         public LegBundle(IRoboticLimb mirrorLeg, IRoboticLimb ikLeg, IRoboticLimb robotLeg)
         {
@@ -165,37 +166,61 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
 
         transform.rotation = _quadruped.GetGameObject().transform.rotation;
 
-        foreach (var bundle in m_legBundles)
-        {
-           var mirrorSegments = bundle.MirrorLeg.GetSegments();
-            var robotSegments = bundle.RobotLeg.GetSegments();
 
-            (bundle.IKLeg as QuadrupedLeg).CalculateIK();
-            {
-                if(robotSegments[0] != null)
+
+        //foreach (var bundle in m_legBundles)
+        //{
+        //   var mirrorSegments = bundle.MirrorLeg.GetSegments();
+        //    var robotSegments = bundle.RobotLeg.GetSegments();
+
+        //    (bundle.IKLeg as QuadrupedLeg).CalculateIK();
+        //    {
+        //        if(robotSegments[0] != null)
+        //        mirrorSegments[0].GetServos()[0].SetServoPosition(robotSegments[0].GetServos()[0].GetCurrentAngle());
+        //        mirrorSegments[1].GetServos()[0].SetServoPosition(robotSegments[1].GetServos()[0].GetCurrentAngle());
+        //        mirrorSegments[2].GetServos()[0].SetServoPosition(robotSegments[2].GetServos()[0].GetCurrentAngle());
+        //    }
+        //}
+        QuadrupedLimbData returnData = new QuadrupedLimbData();
+        for (int i = 0; i < 4; i++)
+        {
+            var mirrorSegments = m_legBundles[i].MirrorLeg.GetSegments();
+            var robotSegments = m_legBundles[i].RobotLeg.GetSegments();
+            var ikSegments = m_legBundles[i].IKLeg.GetSegments();
+
+            (m_legBundles[i].IKLeg as QuadrupedLeg).CalculateIK();
+
+            if (robotSegments[0] != null)
                 mirrorSegments[0].GetServos()[0].SetServoPosition(robotSegments[0].GetServos()[0].GetCurrentAngle());
-                mirrorSegments[1].GetServos()[0].SetServoPosition(robotSegments[1].GetServos()[0].GetCurrentAngle());
-                mirrorSegments[2].GetServos()[0].SetServoPosition(robotSegments[2].GetServos()[0].GetCurrentAngle());
-            }
-        }
-        return null;
-        foreach (var bundle in m_legBundles)
-        {
-            var robotSegments = bundle.RobotLeg.GetSegments();
-            var ikSegments = bundle.IKLeg.GetSegments();
-            // if ((bundle.IKLeg as QuadrupedLeg) == m_flIKLeg)
+            mirrorSegments[1].GetServos()[0].SetServoPosition(robotSegments[1].GetServos()[0].GetCurrentAngle());
+            mirrorSegments[2].GetServos()[0].SetServoPosition(robotSegments[2].GetServos()[0].GetCurrentAngle());
+
+            if (i == 0)
             {
-                // Debug.Log(bundle.IKLeg.GetBaseSegment().GetServos()[0].GetCurrentAngle());
-                if (robotSegments[0] != null)
-                    robotSegments[0].GetServos()[0].SetServoPosition(ikSegments[0].GetServos()[0].GetCurrentAngle());
-                robotSegments[1].GetServos()[0].SetServoPosition( ikSegments[1].GetServos()[0].GetCurrentAngle());
-                robotSegments[2].GetServos()[0].SetServoPosition( ikSegments[2].GetServos()[0].GetCurrentAngle());
-
-               // bundle.RobotLeg.GetHipSegment().GetServos()[0].GetCurrentAngle();
+                returnData.FLBaseAngle = ikSegments[0].GetServos()[0].GetCurrentAngle();
+                returnData.FLHipAngle = ikSegments[1].GetServos()[0].GetCurrentAngle();
+                returnData.FLKneeAngle = ikSegments[2].GetServos()[0].GetCurrentAngle();
             }
+            else if (i == 1)
+            {
+                returnData.FRBaseAngle = ikSegments[0].GetServos()[0].GetCurrentAngle();
+                returnData.FRHipAngle = ikSegments[1].GetServos()[0].GetCurrentAngle();
+                returnData.FRKneeAngle = ikSegments[2].GetServos()[0].GetCurrentAngle();
+            }
+            else if (i == 2)
+            {
+                returnData.BRBaseAngle = ikSegments[0].GetServos()[0].GetCurrentAngle();
+                returnData.BRHipAngle = ikSegments[1].GetServos()[0].GetCurrentAngle();
+                returnData.BRKneeAngle = ikSegments[2].GetServos()[0].GetCurrentAngle();
+            }
+            else if (i == 3)
+            {
+                returnData.BLBaseAngle = ikSegments[0].GetServos()[0].GetCurrentAngle();
+                returnData.BLHipAngle = ikSegments[1].GetServos()[0].GetCurrentAngle();
+                returnData.BLKneeAngle = ikSegments[2].GetServos()[0].GetCurrentAngle();
+            }    
         }
-     
-
+        return returnData;
     }
     public Vector3 GetRobotGimbalOffset(Vector3 globalPos)
     {
@@ -206,11 +231,38 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
         return transform.InverseTransformPoint(globalPos);
     }
 
+    void Update()
+    {
+        foreach (var limbBundle in m_legBundles)
+        {
+            Debug.Log("set ik to correct position");
+            //  limbBundle.IKLeg.SetIKTargetPos(limbBundle.IKLeg.GetGameObject().transform.TransformPoint(limbBundle.DefaultPositionOffset));
+            //   limbBundle.IKLeg.SetIKTargetPos(limbBundle.MirrorLeg.GetEndPoint().position);
+
+
+          //  limbBundle.DefaultPositionOffset = limbBundle.MirrorLeg.GetGameObject().transform.InverseTransformPoint(limbBundle.MirrorLeg.GetEndPoint().position);
+          //  limbBundle.IKLeg.SetIKTargetPos(limbBundle.IKLeg.GetGameObject().transform.TransformPoint(limbBundle.DefaultPositionOffset));
+        }
+    }
+
+    Vector3 _defaultOffset;
+
 
     public void Initialize(IQuadruped quadToControl)
     {
         Debug.Log("Initialize Robotic Controller");
         ConstructQuadrupedTwin(quadToControl);
+        CalculateLimbData(quadToControl);
+
+        foreach (var limbBundle in m_legBundles)
+        {
+            Debug.Log("set ik to correct position");
+           
+            Debug.Log("Mirror End Point", limbBundle.MirrorLeg.GetEndPoint());
+            //  Debug.Log("IK End Point", limbBundle.IKLeg.GetIKTargetPos());
+            limbBundle.DefaultPositionOffset = limbBundle.MirrorLeg.GetGameObject().transform.InverseTransformPoint(limbBundle.MirrorLeg.GetEndPoint().position);
+         //   limbBundle.IKLeg.SetIKTargetPos(limbBundle.MirrorLeg.GetEndPoint().position);
+        }
     }
 
 }

@@ -84,10 +84,6 @@ namespace Toolkit.NetworkUtilites
             // Deserialize the JSON string into the ConnectionData class
             ConnectionData data = JsonUtility.FromJson<ConnectionData>(receivedString);
 
-            //Debug.Log(data.BoardType);
-            //Debug.Log(data.IP);
-            //Debug.Log(data.Port);
-
             NotifyListeners(new IUDPConnectionEventListener.EventData(IUDPConnectionEventListener.Type.OnBroadcastReceived, remoteEndPoint.Address, listenPort, data));
 
             // Continue listening for UDP messages
