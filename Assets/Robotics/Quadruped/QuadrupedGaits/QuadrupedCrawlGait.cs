@@ -45,6 +45,11 @@ namespace RoboticToolkit.Robotics.Gaits
             throw new System.NotImplementedException();
         }
 
+        public void SetNextCycle(Vector3 direction, ILimbPositioner[] limbPositioners, bool rotate)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void Stop()
         {
             throw new System.NotImplementedException();

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ILimbPositioner 
+public interface ILimbPositioner
 {
     public GameObject GetGameObject();
     public void RotateToPosition(Vector3 globalPosition, Quaternion rotationAxis, float time, bool localSpace);
@@ -25,6 +25,8 @@ public interface ILimbPositioner
     public void SubscribeToEvents(ILimbPositionerEventListener listener);
     public void UnsubscribeFromEvents(ILimbPositionerEventListener listener);
 }
+
+
 
 public interface ILimbPositionerEventListener
 {

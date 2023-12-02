@@ -244,7 +244,7 @@ namespace RoboticsToolkit.Robotics
                 }
                 if (m_gaitController != null && m_gaitController.IsRunning() && IsRunning)
                 {
-                    m_gaitController.Run();
+                  //  m_gaitController.Run();
                 }
             }
 

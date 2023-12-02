@@ -1,4 +1,5 @@
 using RoboticsToolkit.Robotics;
+using RoboticToolkit.Robotics.Limbs;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,7 +29,9 @@ namespace RoboticToolkit.Robotics.Gaits
             TROT
         }
         public void Initialize(IRobot robot);
-        public void Run();
+        public void Run(IRoboticLimb[] mirrorLimbs, ILimbPositioner[] limbs);
+
+        public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern patern, Vector3 direction, bool rotate);
 
         public void SetGaitPattern(GaitPattern type);
         public GaitPattern GetGaitPattern();

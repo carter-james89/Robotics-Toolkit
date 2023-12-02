@@ -1,7 +1,10 @@
+using RoboticsToolkit.Robotics;
+using RoboticToolkit.Robotics.Gaits;
 using RoboticToolkit.Robotics.Limbs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace Toolkit.Robotics.Quadruped
@@ -12,18 +15,22 @@ namespace Toolkit.Robotics.Quadruped
         public float FLBaseAngle;
         public float FLHipAngle;
         public float FLKneeAngle;
+        public Vector3 FLTargetPos;
 
         public float FRBaseAngle;
         public float FRHipAngle;
         public float FRKneeAngle;
+        public Vector3 FRTargetPos;
 
         public float BRBaseAngle;
         public float BRHipAngle;
         public float BRKneeAngle;
+        public Vector3 BRTargetPos;
 
         public float BLBaseAngle;
         public float BLHipAngle;
         public float BLKneeAngle;
+        public Vector3 BLTargetPos;
 
         public QuadrupedLimbData() { }
 
@@ -69,7 +76,7 @@ namespace Toolkit.Robotics.Quadruped
         }
     }
 
-    public class Quadruped : MonoBehaviour, IQuadruped
+    public class Quadruped : MonoBehaviour, IQuadruped, IRobot, IQuadrupedRoboticControllerEventListener
     {
         [SerializeField]
         private bool _simulationMode = false;
@@ -85,8 +92,19 @@ namespace Toolkit.Robotics.Quadruped
         [SerializeField]
         private QuadrupedLeg m_blLimb;
 
+     
+
         [SerializeField]
-        private int _startupDelay = 100;
+        private int _startupDelay = 10;
+
+        protected enum Status
+        {
+            NotReady,
+            MovingToReadyHeight,
+            Ready,
+            WaitingForPhysics
+        }
+        protected Status _status = Status.NotReady;
 
         protected bool _isRunning = false;
 
@@ -94,9 +112,15 @@ namespace Toolkit.Robotics.Quadruped
         private GameObject _controllerObject;
         private IQuadrupedRoboticController _controller;
 
+        
+
+        private float _physicsInitializedTime = -1;
+        [SerializeField]
+        private float _readyHeight = 1f;
+
         protected virtual void Awake()
         {
-   
+           
         }
         protected virtual void Start()
         {
@@ -105,22 +129,89 @@ namespace Toolkit.Robotics.Quadruped
                 var hipAngle = 80;
                 var kneeAngle = -160;
                 SetLimbs(new QuadrupedLimbData(0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle));
+                _status = Status.WaitingForPhysics;
+                _physicsInitializedTime = Time.timeSinceLevelLoad;
+                ToggleColliders(false);
             }
+        }
+        private void ToggleColliders(bool toggle)
+        {
+            Debug.Log("toggle colliders " + toggle);
+            foreach (var item in GetComponentsInChildren<Collider>(true))
+            {
+                item.enabled = toggle;
+            }
+        }
+
+        private Vector3 GetLowestFoot()
+        {
+            Vector3 returnPoint = transform.position;
+            foreach (var item in m_limbs)
+            {
+                if (item.GetEndPoint().transform.position.y < returnPoint.y)
+                {
+                    returnPoint.y = item.GetEndPoint().transform.position.y;
+                }
+            }
+            return returnPoint;
         }
         public void Bootup()
         {
             Debug.Log("Quadruped Bootup");
-
-
-
-          //  _controllerObject.GetComponent<IQuadrupedRoboticController>().Initialize(this);
             _controller = _controllerObject.GetComponent<IQuadrupedRoboticController>();
+            _controller.SubscribeToControllerEvents(this);
             _controller.Initialize(this);
             _isRunning = true;
+
+            var height = transform.position.y - GetLowestFoot().y;
+
+           GetComponent<ArticulationBody>().TeleportRoot(new Vector3(transform.position.x, height + .05f, transform.position.z), transform.rotation);
+
+
+            ToggleColliders(true);
+           GetComponent<ArticulationBody>().immovable = false;
+
+
+            _controller.SetRobotHeight(_readyHeight, .01f);
+            _status =  Status.MovingToReadyHeight;
+
+        
         }
+
+ 
         protected virtual void Update()
         {
-            Run();
+          
+
+            switch (_status)
+            {
+                case Status.NotReady:
+                    break;
+                case Status.Ready:
+                    Run();
+                    break;
+                case Status.WaitingForPhysics:
+                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 2)
+                    {
+                        Bootup();
+                    }
+                    break;
+                case Status.MovingToReadyHeight:
+                    Run();
+                    break;
+                default:
+                    break;
+            }
+
+
+
+        }
+        protected virtual void AtReadyHeight()
+        {
+           // (_controller as DynamicRoboticController).OnQuadrupedReady(this);
+            _status = Status.Ready;
+            Debug.Log("Quadruped Ready");
+            NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotInPosition);
         }
 
         protected void SetLimbs(QuadrupedLimbData limbData)
@@ -155,14 +246,6 @@ namespace Toolkit.Robotics.Quadruped
 
         public void Run()
         {
-            if (!_isRunning)
-            {
-                if (SimulationMode() && Time.frameCount > _startupDelay)
-                {
-                    Bootup();
-                }
-                return;
-            }
             PositionTransform();
             PositionLimbs();
         }
@@ -187,7 +270,62 @@ namespace Toolkit.Robotics.Quadruped
 
         }
 
+        public IRobot.RobotData GetRobotData()
+        {
+            return new IRobot.RobotData();
+        }
 
+        public IGimbal GetGimbal()
+        {
+            return null;
+        }
+
+        public void EmergencyStop()
+        {
+           
+        }
+
+        public void ResetController()
+        {
+           
+        }
+
+        public void SubscribeToEvents(IRobotEventListener listener)
+        {
+           _robotEventManager.AddListener(listener);
+        }
+        private InterfaceEventManager<IRobotEventListener> _robotEventManager = new InterfaceEventManager<IRobotEventListener>("Robot");
+        public void UnsubscribeToEvents(IRobotEventListener listener)
+        {
+           _robotEventManager.RemoveListener(listener);
+        }
+        private void NotifyRobotEventListeners(IRobotEventListener.EventType eventType)
+        {
+            foreach (var item in _robotEventManager.GetListeners())
+            {
+                item.OnRobotEventOccured(new IRobotEventListener.EventData(eventType, this, null));
+            }
+        }
+
+        public void OnControllerEventOccured(IQuadrupedRoboticControllerEventListener.QuadrupedRoboticControllerEvendData eventData)
+        {
+            Debug.Log(eventData.EventType);
+            switch (eventData.EventType)
+            {
+                case IQuadrupedRoboticControllerEventListener.EventType.OnControllerInitialized:
+                    break;
+                case IQuadrupedRoboticControllerEventListener.EventType.OnHeightAdjustmentBegin:
+                    break;
+                case IQuadrupedRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd:
+                    if(_status == Status.MovingToReadyHeight)
+                    AtReadyHeight();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        
     }
 
 }

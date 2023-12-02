@@ -339,7 +339,6 @@ MonoBehaviour:
   m_servoSpeed: 1
   rotationState: 0
   m_offset: 0
-  m_flipAngle: 1
 --- !u!1 &3854508090577803092
 GameObject:
   m_ObjectHideFlags: 0
@@ -601,7 +600,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3854508090582863137}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: b40b29c5510b24d40b5213dcc1fcb403, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
@@ -709,7 +708,7 @@ ArticulationBody:
   m_JointFriction: 0.05
   m_Immovable: 0
   m_UseGravity: 1
-  m_CollisionDetectionMode: 0
+  m_CollisionDetectionMode: 1
 --- !u!114 &293236651556090996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -725,7 +724,6 @@ MonoBehaviour:
   m_servoSpeed: 1
   rotationState: 0
   m_offset: 0
-  m_flipAngle: 1
 --- !u!1 &3854508090717071469
 GameObject:
   m_ObjectHideFlags: 0
@@ -775,7 +773,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3854508090717071469}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1

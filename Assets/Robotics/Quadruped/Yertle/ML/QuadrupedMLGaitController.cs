@@ -200,4 +200,14 @@ public class QuadrupedMLGaitController : Agent, IGaitController, IRobotEventList
                 break;
         }
     }
+
+    public void Run(IRoboticLimb[] mirrorLimbs, ILimbPositioner[] limbs)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern patern, Vector3 direction, bool rotate)
+    {
+        throw new System.NotImplementedException();
+    }
 }

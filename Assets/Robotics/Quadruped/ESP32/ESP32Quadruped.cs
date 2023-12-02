@@ -71,13 +71,15 @@ namespace Toolkit.Robotics.Quadruped
 
         private QuadrupedData _receivedData;
 
+   
         [SerializeField]
         private string _name = "bittle";
         protected override void Start()
         {
+            base.Start();
             if (SimulationMode())
             {
-                base.Start();
+              
                 return;
             }
             UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
@@ -113,16 +115,45 @@ namespace Toolkit.Robotics.Quadruped
             _connected = true;
             Debug.Log("CONNECTED");
             UDPConnectionListener.Instance.UnsubscribeFromConnectionEvents(this);
+            // _connectionFrame = Time.frameCount;
+            //SetLimbs(new QuadrupedLimbData(WaitForQuadHeartbeat()));
+           // _status = Status.WaitingForPhysics;
+            _connectionTime = Time.timeSinceLevelLoad;
         }
+
+        float _connectionTime = -1;
 
         protected override void Update()
         {
-            if (_connected && !_isRunning)
-            {
-                Bootup();//needs to be done on this thread pretty sure
-            }
             base.Update();
 
+            if (SimulationMode())
+            {
+                return;
+            }
+
+
+        
+
+            if (_connected && !_isRunning)
+            {
+             
+
+            //    Bootup();//needs to be done on this thread pretty sure
+            }
+        
+
+            //if(_status != Status.NotConnected)
+            //{
+            //    SetLimbs(new QuadrupedLimbData(WaitForQuadHeartbeat()));
+            //}
+
+     
+
+        }
+
+        private QuadrupedData WaitForQuadHeartbeat()
+        {
             if (_connected)
             {
                 try
@@ -155,6 +186,7 @@ namespace Toolkit.Robotics.Quadruped
                         // Return the remaining bytes
 
                         _receivedData = ParsePhysicalRobotData(remainingBytes);
+                        return _receivedData;
                     }
                     else
                     {
@@ -174,7 +206,7 @@ namespace Toolkit.Robotics.Quadruped
                 }
                 //return null; // Return null if no response was received or if headers do not match
             }
-
+            return null;
         }
 
         private byte[] SendUDPMessageAndWaitForResponse(int header, byte[] message, int timeout = 10000)

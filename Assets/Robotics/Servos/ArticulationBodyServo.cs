@@ -84,7 +84,7 @@ namespace RoboticToolKit.Robotics.Servos
         public void SetServoPosition(float position)
         {
             //SetServoPosition(position, m_servoSpeed);
-            Debug.Log(name + " Raw Set : " + position + " Adjusted : " + (position - m_offset));
+           // Debug.Log(name + " Raw Set : " + position + " Adjusted : " + (position - m_offset));
             RotateTo(position - m_offset);
         }
         public void SetServoPositionImmediate(float position)

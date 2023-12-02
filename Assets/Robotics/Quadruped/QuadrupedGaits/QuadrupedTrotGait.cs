@@ -29,12 +29,22 @@ namespace RoboticToolkit.Robotics.Gaits
     }
     public interface IGait
     {
+        public enum Direction
+        {
+            NONE,
+            Forward,
+            Backward,
+            RotatingClockwise,
+            RotatingCounterClockwise,
+            StrafeLeft,
+            StrafeRight,
+        }
         public void Initialize(IRobot robot);
         public void Begin();
         public void ReturnHome();
         public void Stop();
         public void RunGait();
-        public void SetNextCycle();
+        public void SetNextCycle(Vector3 direction, ILimbPositioner[] limbPositioners, bool rotate);
         public bool IsRunning();
         public void SubscribeToEvents(IGaitEventListener listener);
         public void UnubscribeFromEvents(IGaitEventListener listener);
@@ -276,7 +286,7 @@ namespace RoboticToolkit.Robotics.Gaits
         {
             m_direction = direction;
         }
-        public void Begin()
+        public void Begin(ILimbPositioner[] limbPositioners)
         {
             Debug.Log("Begin " + Time.frameCount);
             m_running = true;
@@ -317,6 +327,21 @@ namespace RoboticToolkit.Robotics.Gaits
             {
                 m_listeners.Remove(listener);
             }
+        }
+
+        public void SetNextCycle(ILimbPositioner[] limbPositioners)
+        {
+            
+        }
+
+        public void Begin()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void SetNextCycle(Vector3 direction, ILimbPositioner[] limbPositioners, bool rotate)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

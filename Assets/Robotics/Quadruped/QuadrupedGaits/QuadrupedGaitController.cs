@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RoboticToolkit.Robotics.Gaits
 {
-    public class QuadrupedGaitController : MonoBehaviour, IGaitController, IGaitEventListener
+    public class QuadrupedGaitController : MonoBehaviour, IGaitController, IGaitEventListener, IRobotEventListener
     {
         private IRoboticLimb[] m_limbs;
         private IRobot m_robot;
@@ -27,6 +27,8 @@ namespace RoboticToolkit.Robotics.Gaits
 
             m_trotGait.Initialize(m_robot);
             m_crawlGait.Initialize(m_robot);
+
+            m_robot.SubscribeToEvents(this);
         }
         [SerializeField]
         private float m_forwardTrotStrideDistance = .04f;
@@ -122,7 +124,7 @@ namespace RoboticToolkit.Robotics.Gaits
             if (m_activeGait != null)
             {
                 m_activeGait.SubscribeToEvents(this);
-                m_activeGait.Begin();
+               // m_activeGait.Begin();
             }
         }
         public void Run()
@@ -186,7 +188,7 @@ namespace RoboticToolkit.Robotics.Gaits
                         if (m_beginReturnHome)
                         {
                             m_activeGait.ReturnHome();
-                            m_activeGait.SetNextCycle();
+                          //  m_activeGait.SetNextCycle();
                             m_currentPattern = IGaitController.GaitPattern.RETURNING_HOME;
                             m_beginReturnHome = false;
                         }
@@ -200,7 +202,7 @@ namespace RoboticToolkit.Robotics.Gaits
                         }
                         else
                         {
-                            m_activeGait.SetNextCycle();
+                           // m_activeGait.SetNextCycle();
                         }
                     }
                     break;
@@ -214,6 +216,21 @@ namespace RoboticToolkit.Robotics.Gaits
             //   SetGaitPattern(IGaitController.GaitPattern.NONE);
 
            
+        }
+
+        public void OnRobotEventOccured(IRobotEventListener.EventData eventData)
+        {
+       
+        }
+
+        public void Run(IRoboticLimb[] mirrorLimbs, ILimbPositioner[] limbs)
+        {
+          //  throw new System.NotImplementedException();
+        }
+
+        public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern patern, Vector3 direction, bool rotate)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
