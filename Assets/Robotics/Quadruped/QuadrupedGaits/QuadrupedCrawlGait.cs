@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RoboticToolkit.Robotics.Gaits
+namespace RoboticsToolkit.Robotics.Gaits
 {
     public class QuadrupedCrawlGait : MonoBehaviour, IGait
     {

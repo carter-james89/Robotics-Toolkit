@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Net.Sockets;
-using Toolkit.NetworkUtilites;
+using Utilities.Network;
 using System.Net;
 using System.Text;
 using System;
@@ -8,7 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Collections.Generic;
 
-namespace Toolkit.Robotics.Quadruped
+namespace RoboticsToolkit.Robotics.QuadrupedRobot
 {
 
     

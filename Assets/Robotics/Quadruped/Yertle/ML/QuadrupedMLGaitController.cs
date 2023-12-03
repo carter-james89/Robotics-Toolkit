@@ -1,6 +1,6 @@
 using RoboticsToolkit.Robotics;
-using RoboticToolkit.Robotics.Gaits;
-using RoboticToolkit.Robotics.Limbs;
+using RoboticsToolkit.Robotics.Gaits;
+using RoboticsToolkit.Robotics.Limbs;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.MLAgents;

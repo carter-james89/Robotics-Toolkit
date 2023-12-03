@@ -1,13 +1,16 @@
 using UnityEngine;
 
 
-public interface IGimbal
+namespace RoboticsToolkit.Gimbal
 {
-    public GameObject GetGameObject();
-}
-public class Gimbal : MonoBehaviour, IGimbal
-{
-    public GameObject GetGameObject() => gameObject;
+    public interface IGimbal
+    {
+        public GameObject GetGameObject();
+    }
+    public class Gimbal : MonoBehaviour, IGimbal
+    {
+        public GameObject GetGameObject() => gameObject;
 
 
+    } 
 }

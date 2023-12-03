@@ -1,8 +1,8 @@
-using RoboticsToolkit.Robotics;
+//using RoboticsToolkit.Robotics;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RoboticToolkit.Robotics.Gaits
+namespace RoboticsToolkit.Robotics.Gaits
 {
  
     public class LimbPositioner : MonoBehaviour
@@ -20,7 +20,7 @@ namespace RoboticToolkit.Robotics.Gaits
 
         private Transform m_pivotTransform;
         private Vector3 m_targetPivotOffset;
-        private List<IGaitEventListener> m_listeners = new List<IGaitEventListener>();
+        //private List<IGaitEventListener> m_listeners = new List<IGaitEventListener>();
         private float m_strideHeight = .103f;
 
         public enum MovementStyle
@@ -52,10 +52,10 @@ namespace RoboticToolkit.Robotics.Gaits
         }
 
 
-        public void SubscribeToGaitEvents(IGaitEventListener listener)
-        {
-            m_listeners.Add(listener);
-        }
+        //public void SubscribeToGaitEvents(IGaitEventListener listener)
+        //{
+        //    m_listeners.Add(listener);
+        //}
         public void SetTargetPosition(Vector3 localPosition)
         {
             //Debug.Log(name + " target pos " + localPosition);
@@ -135,10 +135,10 @@ namespace RoboticToolkit.Robotics.Gaits
                 //Debug.Log("AtTarget");
                 GaitAtTarget = true;
                 m_target.localPosition = m_currentDesiredPosition;
-                foreach (var listener in m_listeners)
-                {
-                   // listener.OnLimbAchievedTarget(m_currentDesiredPosition);
-                }
+                //foreach (var listener in m_listeners)
+                //{
+                //   // listener.OnLimbAchievedTarget(m_currentDesiredPosition);
+                //}
                 return;
             }
             GaitAtTarget = false;

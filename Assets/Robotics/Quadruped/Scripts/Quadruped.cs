@@ -1,13 +1,10 @@
-using RoboticsToolkit.Robotics;
-using RoboticToolkit.Robotics.Gaits;
-using RoboticToolkit.Robotics.Limbs;
+using RoboticsToolkit.Robotics.Limbs;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Toolkit.Utilities.Events;
+using Utilities.Events;
 using UnityEngine;
+using RoboticsToolkit.Gimbal;
 
-namespace Toolkit.Robotics.Quadruped
+namespace RoboticsToolkit.Robotics.QuadrupedRobot
 {
     [Serializable]
     public class QuadrupedLimbData
@@ -279,7 +276,10 @@ namespace Toolkit.Robotics.Quadruped
         {
             return null;
         }
-
+        //IGimbal IRobot.GetGimbal()
+        //{
+        //    throw new NotImplementedException();
+        //}
         public void EmergencyStop()
         {
            
@@ -325,7 +325,7 @@ namespace Toolkit.Robotics.Quadruped
             }
         }
 
-        
+    
     }
 
 }

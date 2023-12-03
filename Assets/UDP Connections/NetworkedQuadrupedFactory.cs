@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
-using Toolkit.NetworkUtilites;
+using Utilities.Network;
 using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Toolkit.Robotics.Quadruped
+
+namespace RoboticsToolkit.Robotics.QuadrupedRobot
 {
     public class NetworkedQuadrupedFactory : MonoBehaviour, IUDPConnectionEventListener
     {

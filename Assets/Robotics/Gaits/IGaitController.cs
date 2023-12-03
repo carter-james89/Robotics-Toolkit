@@ -1,10 +1,10 @@
 using RoboticsToolkit.Robotics;
-using RoboticToolkit.Robotics.Limbs;
+using RoboticsToolkit.Robotics.Limbs;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RoboticToolkit.Robotics.Gaits
+namespace RoboticsToolkit.Robotics.Gaits
 {
     public interface IGaitControllerEventListener
     {

@@ -1,11 +1,11 @@
 using RoboticsToolkit.Robotics;
-using RoboticToolkit.Robotics.Limbs;
+using RoboticsToolkit.Robotics.Limbs;
 using System.Collections;
 using System.Collections.Generic;
-using Toolkit.Utilities.Events;
+using Utilities.Events;
 using UnityEngine;
 
-namespace RoboticToolkit.Robotics.Gaits
+namespace RoboticsToolkit.Robotics.Gaits
 {
     public abstract class Gait : MonoBehaviour, IGait
     {

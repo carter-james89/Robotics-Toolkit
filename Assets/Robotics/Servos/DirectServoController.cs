@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RoboticToolKit.Robotics.Servos
+namespace RoboticsToolkit.Robotics.Servos
 {
     public class DirectServoController : MonoBehaviour, IServoController
     {

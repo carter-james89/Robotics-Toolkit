@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace Toolkit.Robotics.Quadruped
+namespace RoboticsToolkit.Robotics.QuadrupedRobot
 {
     public class QuadrupedModel : MonoBehaviour, IQuadrupedModel
     {

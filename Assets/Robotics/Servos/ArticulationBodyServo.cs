@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace RoboticToolKit.Robotics.Servos
+namespace RoboticsToolkit.Robotics.Servos
 {
     public interface IServo
     {

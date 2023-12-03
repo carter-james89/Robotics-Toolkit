@@ -1,8 +1,8 @@
 using RoboticsToolkit.Robotics;
-using RoboticToolkit.Robotics.Limbs;
+using RoboticsToolkit.Robotics.Limbs;
 using UnityEngine;
 
-namespace RoboticToolkit.Robotics.Gaits
+namespace RoboticsToolkit.Robotics.Gaits
 {
     public class QuadrupedGaitController : MonoBehaviour, IGaitController, IGaitEventListener, IRobotEventListener
     {

@@ -1,5 +1,5 @@
 
-using RoboticToolkit.Robotics.Gaits;
+using RoboticsToolkit.Robotics.Gaits;
 using System;
 using UnityEngine;
 
