@@ -1,0 +1,19 @@
+{
+    "name": "QuadcopterASMDF",
+    "rootNamespace": "",
+    "references": [
+        "GUID:5d57245ebc905e74587f30e9c09ef544",
+        "GUID:85e0054f8e64b47309646d35f8851f81",
+        "GUID:e0e8e21cf8e6ca5468c5ed0c2edf3c12",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
