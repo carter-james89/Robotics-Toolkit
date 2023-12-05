@@ -165,7 +165,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
 
             ToggleColliders(true);
-           GetComponent<ArticulationBody>().immovable = false;
+          GetComponent<ArticulationBody>().immovable = false;
 
 
             _controller.SetRobotHeight(_readyHeight, .01f);
@@ -174,6 +174,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         protected virtual void Update()
         {
+          //  Debug.Log("Update" + _status);
             switch (_status)
             {
                 case Status.NotReady:

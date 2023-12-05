@@ -169,11 +169,11 @@ namespace RoboticsToolkit.Robotics.Gaits
         }
         public void Run(IRoboticLimb[] mirrorLimbs, ILimbPositioner[] limbPositioners)
         {
-          //  ProcessUserInput(limbPositioners);
-            //if(m_currentPattern == IGaitController.GaitPattern.NONE)
-            //{
-            //    return;
-            //}
+            //  ProcessUserInput(limbPositioners);
+            if (m_currentPattern == IGaitController.GaitPattern.NONE)
+            {
+                return;
+            }
             //  if (m_running)
             //  {
             List<ILimbPositioner> ikTargetsAtTarget = new List<ILimbPositioner>();
@@ -204,7 +204,7 @@ namespace RoboticsToolkit.Robotics.Gaits
                     m_postStrideCooldown = false;
                     m_postStrideCooldownTime = 0;
 
-                    m_activeGait.SetNextCycle(_currentWalkDirection, limbPositioners, _rotating);
+                    m_trotGait.SetNextCycle(_currentWalkDirection, limbPositioners, _rotating);
                   
 
                     //NotifyListeners(IGaitEventListener.EventType.OnGaitCycleComplete);

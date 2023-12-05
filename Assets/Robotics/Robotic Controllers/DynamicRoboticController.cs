@@ -90,10 +90,12 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
 
         GetComponent<MeshFilter>().mesh = quadToControl.GetGameObject().GetComponent<MeshFilter>().mesh;
         ConstructQuadrupedTwin(_robot.GetLimbs());
-        CalculateLimbData(_robot);
+    
 
         _gaitController = GetComponent<GaitController>();
         _gaitController.Initialize(quadToControl.GetLimbs());
+
+        CalculateLimbData(_robot);
 
         (quadToControl as IRobot).SubscribeToEvents(this);
 
@@ -258,21 +260,21 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         }
 
         //_gaitController.Run(m_legBundles.Select(bundle => bundle.MirrorLeg).ToArray(), m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray());//have the gait controller position the ik targets
-       // _gaitController.Run(MirrorLimbs, IKLimbPositioner);
+       _gaitController.Run(MirrorLimbs, IKLimbPositioner);
         // QuadrupedLimbData returnData = new QuadrupedLimbData();
 
         var returnData = new LimbValues[4];
      
         for (int i = 0; i < 4; i++)
         {
-            var ikSegments = m_legBundles[i].IKLeg.GetSegments();
-            var positioner = m_legBundles[i].IKLimbPositioner;
+            var ikSegments = IKLimbs[i].GetSegments();
+            var positioner = IKLimbPositioner[i];
 
             positioner.transform.localPosition = new Vector3(positioner.transform.localPosition.x, -_robotHeight, positioner.transform.localPosition.z);
             positioner.Run();//have the positioner move its target
-            m_legBundles[i].IKLeg.SetIKTargetPos((positioner as AdvancedLimbPositioner).GetTargetGlobalPosition());// put the IK leg target at the same place as it's positioner target
+            IKLimbs[i].SetIKTargetPos((positioner as AdvancedLimbPositioner).GetTargetGlobalPosition());// put the IK leg target at the same place as it's positioner target
 
-            (m_legBundles[i].IKLeg as QuadrupedLeg).CalculateIK();//calculate the IK
+            (IKLimbs[i] as QuadrupedLeg).CalculateIK();//calculate the IK
 
             returnData[i].LimbTarget = (positioner as AdvancedLimbPositioner).GetTargetGlobalPosition();
 
@@ -339,7 +341,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
                 //}
                 AdvancedLimbPositioner[] positioners = m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray();
 
-                _gaitController.BeginMovement(positioners, IGaitController.GaitPattern.STATIONARYSTEP, Vector3.zero, false);
+               // _gaitController.BeginMovement(positioners, IGaitController.GaitPattern.STATIONARYSTEP, Vector3.zero, false);
                 break;
             case IRobotEventListener.EventType.OnLimbsPositioned:
                 break;
