@@ -162,7 +162,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         //  
 
 
-            _controller.SetRobotHeight(_readyHeight, .01f);
+            _controller.SetRobotHeight(_readyHeight, .09f);
             _status =  Status.MovingToReadyHeight;      
         }
 
@@ -196,7 +196,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                     }
                     break;
                 case Status.WaitingForPhysics:
-                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 10)
+                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 1)
                     {
                         Bootup();
                     }

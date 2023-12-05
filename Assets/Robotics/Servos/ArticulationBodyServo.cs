@@ -2,151 +2,108 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace RoboticsToolkit.Robotics.Servos
 {
     public interface IServo
     {
-        public bool IsEnabled();
-        public GameObject GetGameObject();
-        public float GetCurrentAngle();
-        public void SetServoSpeed(float speed);
-        public void SetServoPosition(float position);
-        public void SetServoPosition(float position,float speed);
-        public void SetServoPositionImmediate(float position);
-        public void ResetServo(float resetAngle);
+        bool IsEnabled();
+        GameObject GetGameObject();
+        float GetCurrentAngle();
+        void SetServoSpeed(float speed);
+        void SetServoPosition(float position);
+        void SetServoPosition(float position, float speed);
+        void SetServoPositionImmediate(float position);
+        void ResetServo(float resetAngle);
     }
 
     public enum RotationDirection { None = 0, Positive = 1, Negative = -1 };
+
     public class ArticulationBodyServo : MonoBehaviour, IServo
     {
         [SerializeField]
-        private float m_servoSpeed = 1;
-        public bool IsEnabled() => enabled;
-        public GameObject GetGameObject() => gameObject;
-        public RotationDirection rotationState = RotationDirection.None;
-        //public float speed = 300.0f;
-
-        private Transform m_anchorTransform;
-        private ArticulationBody m_articulation;
+        private float m_servoSpeed = 1.0f;
 
         [SerializeField]
-        private float m_offset = 0;
+        private float m_offset = 0.0f;
 
-    
-
-        //private float m_startAngle;
-
-        private bool m_firstSet = true;
-
-    //    public bool PrintLog = false;
+        private ArticulationBody m_articulation;
+        private Transform m_anchorTransform;
 
         private void Awake()
         {
             m_articulation = GetComponent<ArticulationBody>();
-            var xDrive = m_articulation.xDrive;
-          //  xDrive.forceLimit *= 2;
-            m_articulation.xDrive = xDrive;
+            if (m_articulation == null)
+            {
+                Debug.LogError("ArticulationBody component not found on the GameObject.");
+                return;
+            }
 
-            //SetServoPositionImmediate(0);
+            var xDrive = m_articulation.xDrive;
+            m_articulation.xDrive = xDrive;
 
             m_articulation.parentAnchorPosition = transform.localPosition;
 
             m_anchorTransform = new GameObject("Anchor").transform;
             m_anchorTransform.SetParent(transform);
+        }
 
-        }
-        private void Start()
-        {
-       
-        }
+        public bool IsEnabled() => enabled;
+
+        public GameObject GetGameObject() => gameObject;
+
         public float GetCurrentAngle()
         {
-            if (m_articulation == null)
-            {
-                m_articulation = GetComponent<ArticulationBody>();
-            }
-           // Debug.Log("raw angle : " + (m_articulation.jointPosition[0] * Mathf.Rad2Deg) + " adjusted : " + ((m_articulation.jointPosition[0] * Mathf.Rad2Deg) + m_offset));
-            return -((m_articulation.jointPosition[0] * Mathf.Rad2Deg) + m_offset);//not sure why reports negative
+            if (m_articulation == null) return 0.0f;
+            return -((m_articulation.jointPosition[0] * Mathf.Rad2Deg) + m_offset);
         }
+
         public void SetServoSpeed(float speed)
         {
             float rotationChange = speed * Time.fixedDeltaTime;
             float rotationGoal = GetCurrentAngle() + rotationChange;
             RotateTo(rotationGoal);
         }
-        public void SetServoPosition(float position, float speed)
-        {
-            var dif = position- GetCurrentAngle();
-            float rotationGoal = GetCurrentAngle() + (dif * Time.deltaTime * speed);
-            RotateTo(rotationGoal);
-        }
+
+
         public void SetServoPosition(float position)
         {
-            //SetServoPosition(position, m_servoSpeed);
-           // Debug.Log(name + " Raw Set : " + position + " Adjusted : " + (position - m_offset));
             RotateTo(position - m_offset);
         }
-        public void SetServoPositionImmediate(float position)
-        {
-            //var rotation = Quaternion.Euler(position, 0, 0);
-            //m_articulation.TeleportRoot(m_articulation.transform.position, transform.rotation * rotation);
-            //m_articulation.velocity = Vector3.zero;
-            //m_articulation.angularVelocity = Vector3.zero;
-             RotateTo(position);
-        }
+
 
         private void RotateTo(float angle)
         {
+            if (m_articulation == null) return;
+
             var drive = m_articulation.xDrive;
             drive.target = angle;
             m_articulation.xDrive = drive;
-
-           // m_articulation.
         }
 
         public void ResetServo(float resetAngle)
         {
             SetServoPosition(resetAngle);
-            //  SetAngleImmediate(resetAngle);
-            //  m_articulation.jointR
-            // m_articulation.jointPosition = new ArticulationReducedSpace(resetAngle, 0f, 0f);
-            //m_articulation.jointAcceleration = new ArticulationReducedSpace(0f, 0f, 0f);
-            //m_articulation.jointForce = new ArticulationReducedSpace(0f, 0f, 0f);
-            //m_articulation.jointVelocity = new ArticulationReducedSpace(0f, 0f, 0f);
-
-            //m_articulation.velocity = Vector3.zero;
-            //m_articulation.angularVelocity = Vector3.zero;
-            //m_articulation.jointAcceleration = new ArticulationReducedSpace(0f, 0f, 0f);
-            //m_articulation.jointForce = new ArticulationReducedSpace(0f, 0f, 0f);
-            //m_articulation.jointVelocity = new ArticulationReducedSpace(0f, 0f, 0f);
-            //m_articulation.ResetInertiaTensor();
-            //m_articulation.ResetCenterOfMass();
-           // RotateTo(resetAngle);   
         }
-        
-
-
 
         private void Update()
         {
-            //  Debug.Log(GetCurrentAngle());
+            if (m_articulation == null) return;
+
             var globalPosition = transform.parent.TransformPoint(m_articulation.parentAnchorPosition);
             var globalRotation = transform.parent.rotation * m_articulation.parentAnchorRotation;
 
             m_anchorTransform.position = globalPosition;
             m_anchorTransform.rotation = globalRotation;
-
-           // m_anchorTransform.position = m_articulation.parentAnchorPosition;
-           // m_anchorTransform.rotation = m_articulation.parentAnchorRotation;
         }
 
-        // MOVEMENT HELPERS
-        //private float CurrentPrimaryAxisRotation()
-        //{
-        //    float currentRotationRads = m_articulation.jointPosition[0];
-        //    float currentRotation = Mathf.Rad2Deg * currentRotationRads;
-        //    return currentRotation;
-        //}
+        public void SetServoPosition(float position, float speed)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void SetServoPositionImmediate(float position)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

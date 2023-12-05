@@ -107,23 +107,36 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
     public bool SegmentsAtTarget(float tolerance)
     {
         bool isBaseAtTarget = true;
+        float baseDifference = 0f;
         if (m_baseRoboticLimbSegment != null)
-            isBaseAtTarget = Math.Abs(m_baseRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetBaseAngle) <= tolerance;
+        {
+            baseDifference = Math.Abs(m_baseRoboticLimbSegment.GetServoAngle() - _targetBaseAngle);
+            isBaseAtTarget = baseDifference <= tolerance;
+        }
 
-        bool isHipAtTarget = Math.Abs(m_hipRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetThighAngle) <= tolerance;
-        bool isKneeAtTarget = Math.Abs(m_kneeRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetCalfAngle) <= tolerance;
+     
+
+        float hipDifference = Math.Abs(m_hipRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetThighAngle);
+        bool isHipAtTarget = hipDifference <= tolerance;
+
+        float kneeDifference = Math.Abs(m_kneeRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetCalfAngle);
+        bool isKneeAtTarget = kneeDifference <= tolerance;
 
         var limbReady = isBaseAtTarget && isHipAtTarget && isKneeAtTarget;
 
         if (_debug)
         {
-            Debug.Log($"Base Angle: {m_baseRoboticLimbSegment?.GetServoAngle()} | Target: {_targetBaseAngle} | At Target: {isBaseAtTarget}");
-            Debug.Log($"Hip Angle: {m_hipRoboticLimbSegment.GetServoAngle()} | Target: {_targetThighAngle} | At Target: {isHipAtTarget}");
-            Debug.Log($"Knee Angle: {m_kneeRoboticLimbSegment.GetServoAngle()} | Target: {_targetCalfAngle} | At Target: {isKneeAtTarget}");
+            Debug.Log("Log Start " + Time.frameCount);
+            Debug.Log(hipDifference);
+            Debug.Log(kneeDifference);
+            Debug.Log($"Base Angle: {m_baseRoboticLimbSegment?.GetServoAngle()} | Target: {_targetBaseAngle} | Difference: {baseDifference} | At Target: {isBaseAtTarget}");
+            Debug.Log($"Hip Angle: {m_hipRoboticLimbSegment.GetServoAngle()} | Target: {_targetThighAngle} | Difference: {hipDifference} | At Target: {isHipAtTarget}");
+           Debug.Log($"Knee Angle: {m_kneeRoboticLimbSegment.GetServoAngle()} | Target: {_targetCalfAngle} | Difference: {kneeDifference} | At Target: {isKneeAtTarget}");
         }
 
         return limbReady;
     }
+
 
 
     private float m_xOffset = .03f;
