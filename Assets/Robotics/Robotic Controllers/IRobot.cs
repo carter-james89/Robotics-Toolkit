@@ -2,7 +2,7 @@ using RoboticsToolkit.Gimbal;
 using RoboticsToolkit.Robotics.Limbs;
 using UnityEngine;
 
-namespace RoboticsToolkit.Robotics
+namespace RoboticsToolkit.Robotics.RoboticControllers
 {
     public interface IRobot 
     {
@@ -17,6 +17,14 @@ namespace RoboticsToolkit.Robotics
                 AngularVelocity = angularVelocity;
             }
         }
+
+        public void Bootup();
+
+        public bool SimulationMode();
+
+        public void Run();
+
+
         public GameObject GetGameObject();
         public IRoboticLimb[] GetLimbs();
         public RobotData GetRobotData();

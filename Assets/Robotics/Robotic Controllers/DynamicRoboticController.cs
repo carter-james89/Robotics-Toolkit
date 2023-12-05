@@ -5,45 +5,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using RoboticsToolkit.Robotics.QuadrupedRobot;
 using Utilities.Events;
 using UnityEngine;
+using RoboticsToolkit.Robotics.RoboticControllers;
 
-public interface IQuadrupedRoboticController
-{
-    public void Initialize(IQuadruped quadToControl);
-    public void SetRobotHeight(float height, float speed);
 
-    public QuadrupedLimbData CalculateLimbData(IQuadruped quadToControl);
-    public void SubscribeToControllerEvents(IQuadrupedRoboticControllerEventListener listener);
-    public void UnsubscribeFromControllerEvents(IQuadrupedRoboticControllerEventListener listener);
-}
-public interface IQuadrupedRoboticControllerEventListener
+
+public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobotEventListener
 {
-    public enum EventType
-    {
-        OnControllerInitialized,
-        OnHeightAdjustmentBegin,
-        OnHeightAdjustmentEnd,
-    }
-    public class QuadrupedRoboticControllerEvendData
-    {
-        public EventType EventType;
-        public IQuadrupedRoboticController Controller;
-        public IRobot Robot;
-        public QuadrupedRoboticControllerEvendData(EventType eventType, IQuadrupedRoboticController controller, IRobot robot)
-        {
-            this.EventType = eventType;
-            this.Controller = controller;
-            this.Robot = robot;
-        }
-    }
-    public void OnControllerEventOccured(QuadrupedRoboticControllerEvendData eventData);
-}
-public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticController, IRobotEventListener
-{
-    private InterfaceEventManager<IQuadrupedRoboticControllerEventListener> _eventManager = new InterfaceEventManager<IQuadrupedRoboticControllerEventListener>("Controlelr");
-    private IQuadruped _quadruped;
+    private InterfaceEventManager<IRoboticControllerEventListener> _eventManager = new InterfaceEventManager<IRoboticControllerEventListener>("Controlelr");
+    // private IQuadruped _quadruped;
 
     private QuadrupedLeg m_frMirrorLeg;
     private QuadrupedLeg m_flMirrorLeg;
@@ -55,8 +26,8 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
     private QuadrupedLeg m_brIKLeg;
     private QuadrupedLeg m_blIKLeg;
 
-    [SerializeField]
-    private EulerServo m_servoPrefab;
+    //[SerializeField]
+    //private EulerServo m_servoPrefab;
     [SerializeField]
     private QuadrupedLeg m_dynamicLimbPrefab;
 
@@ -94,6 +65,8 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
     [SerializeField]
     private Transform m_ikTargets;
 
+    private IRobot _robot;
+
     private enum Status
     {
         NotRunning,
@@ -108,19 +81,25 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
         _limbPositionerPrefab.gameObject.SetActive(false);
     }
 
-    public void Initialize(IQuadruped quadToControl)
+    public bool Initialize(IRobot quadToControl)
     {
         Debug.Log("Initialize Robotic Controller");
-        ConstructQuadrupedTwin(quadToControl);
-        CalculateLimbData(quadToControl);
+        _robot = quadToControl;
+        transform.localPosition = quadToControl.GetGameObject().transform.localPosition;
+        transform.localRotation = quadToControl.GetGameObject().transform.localRotation;
+
+        GetComponent<MeshFilter>().mesh = quadToControl.GetGameObject().GetComponent<MeshFilter>().mesh;
+        ConstructQuadrupedTwin(_robot.GetLimbs());
+        CalculateLimbData(_robot);
 
         _gaitController = GetComponent<GaitController>();
-        _gaitController.Initialize(quadToControl as IRobot);
+        _gaitController.Initialize(quadToControl.GetLimbs());
 
         (quadToControl as IRobot).SubscribeToEvents(this);
 
 
-        NotifyEventListeners(IQuadrupedRoboticControllerEventListener.EventType.OnControllerInitialized);
+        NotifyEventListeners(IRoboticControllerEventListener.EventType.OnControllerInitialized);
+        return true;
     }
 
     public float GetCurrentHeight()
@@ -135,29 +114,29 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
         Debug.Log("Set new Height : " + _targetHeight);
         _heightAdjustmentSpeed = speed;
         _adjustingHeight = true;
-        NotifyEventListeners(IQuadrupedRoboticControllerEventListener.EventType.OnHeightAdjustmentBegin);
+        NotifyEventListeners(IRoboticControllerEventListener.EventType.OnHeightAdjustmentBegin);
     }
 
     #region Construction
 
-    public void ConstructQuadrupedTwin(IQuadruped robot)
+    public void ConstructQuadrupedTwin(IRoboticLimb[] limbs)
     {
         Debug.Log("Construct digital twin");
-        _quadruped = robot;
-        transform.localPosition = _quadruped.GetGameObject().transform.localPosition;
-        transform.localRotation = _quadruped.GetGameObject().transform.localRotation;
+        //  _quadruped = robot;
+        //  transform.localPosition = _quadruped.GetGameObject().transform.localPosition;
+        //  transform.localRotation = _quadruped.GetGameObject().transform.localRotation;
 
-        GetComponent<MeshFilter>().mesh = robot.GetGameObject().GetComponent<MeshFilter>().mesh;
+        //  GetComponent<MeshFilter>().mesh = robot.GetGameObject().GetComponent<MeshFilter>().mesh;
 
-        m_flMirrorLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[0], "FL Mirror Leg", Color.black, true);
-        m_frMirrorLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[1], "FR Mirror Leg", Color.black);
-        m_brMirrorLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[2], "BR Mirror Leg", Color.black);
-        m_blMirrorLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[3], "BL Mirror Leg", Color.black, true);
+        m_flMirrorLeg = ConstructDynamicLeg(limbs[0], "FL Mirror Leg", Color.black, true);
+        m_frMirrorLeg = ConstructDynamicLeg(limbs[1], "FR Mirror Leg", Color.black);
+        m_brMirrorLeg = ConstructDynamicLeg(limbs[2], "BR Mirror Leg", Color.black);
+        m_blMirrorLeg = ConstructDynamicLeg(limbs[3], "BL Mirror Leg", Color.black, true);
 
-        m_flIKLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[0], "FL IK Leg", Color.green, true);
-        m_frIKLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[1], "FR IK Leg", Color.green);
-        m_brIKLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[2], "BR IK Leg", Color.green);
-        m_blIKLeg = ConstructDynamicLeg(_quadruped.GetLimbs()[3], "BL IK Leg", Color.green, true);
+        m_flIKLeg = ConstructDynamicLeg(limbs[0], "FL IK Leg", Color.green, true);
+        m_frIKLeg = ConstructDynamicLeg(limbs[1], "FR IK Leg", Color.green);
+        m_brIKLeg = ConstructDynamicLeg(limbs[2], "BR IK Leg", Color.green);
+        m_blIKLeg = ConstructDynamicLeg(limbs[3], "BL IK Leg", Color.green, true);
 
         m_dynamicLimbPrefab.gameObject.SetActive(false);
 
@@ -173,19 +152,22 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
 
         foreach (var limbBundle in m_legBundles)
         {
-            limbBundle.IKLimbPositioner = Instantiate(_limbPositionerPrefab).GetComponent<AdvancedLimbPositioner>();
-            limbBundle.IKLimbPositioner.gameObject.SetActive(true);
-            limbBundle.IKLimbPositioner.transform.SetParent(m_ikTargets, false);
-            limbBundle.IKLimbPositioner.transform.position = limbBundle.MirrorLeg.GetEndPoint().position;
-            _robotHeight = -transform.InverseTransformPoint(limbBundle.IKLimbPositioner.transform.position).y;
+          
+        
         }
 
         MirrorLimbs = new IRoboticLimb[4] { m_flMirrorLeg, m_frMirrorLeg, m_brMirrorLeg, m_blMirrorLeg };
-        IKLimbs = new IRoboticLimb[4] {m_flMirrorLeg,m_frMirrorLeg,m_brMirrorLeg,m_blMirrorLeg};    
+        IKLimbs = new IRoboticLimb[4] { m_flIKLeg, m_frIKLeg, m_brIKLeg, m_blIKLeg };
+        IKLimbPositioner = new AdvancedLimbPositioner[4];
         for (int i = 0; i < 4; i++)
         {
-
+            IKLimbPositioner[i] = Instantiate(_limbPositionerPrefab).GetComponent<AdvancedLimbPositioner>();
+            IKLimbPositioner[i].gameObject.SetActive(true);
+            IKLimbPositioner[i].transform.SetParent(m_ikTargets, false);
+            IKLimbPositioner[i].transform.position = MirrorLimbs[i].GetEndPoint().position;
+            _robotHeight = -transform.InverseTransformPoint(IKLimbPositioner[i].transform.position).y;
         }
+
 
         Debug.Log("Start Robot Height : " + _robotHeight);
         //foreach (var bundle in m_legBundles)
@@ -206,11 +188,11 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
         newLeg.m_invert = left;
 
         var ogSegments = leg.GetSegments();
-        var hipOffset = _quadruped.GetGameObject().transform.InverseTransformPoint(ogSegments[1].GetGameObject().transform.position);
+        var hipOffset = _robot.GetGameObject().transform.InverseTransformPoint(ogSegments[1].GetGameObject().transform.position);
         newLeg.GetHipSegment().GetGameObject().transform.parent.position = transform.TransformPoint(hipOffset);
         newLeg.GetKneeSegment().GetGameObject().transform.parent.localPosition = new Vector3(0, 0, ogSegments[1].GetLength());
         newLeg.GetContactPoint().transform.localPosition = new Vector3(0, 0, ogSegments[2].GetLength());
-        var ikPoint = transform.TransformPoint(_quadruped.GetGameObject().transform.InverseTransformPoint(leg.GetEndPoint().transform.position));
+        var ikPoint = transform.TransformPoint(_robot.GetGameObject().transform.InverseTransformPoint(leg.GetEndPoint().transform.position));
         newLeg.IKTarget.position = ikPoint;
 
         foreach (var item in newLeg.GetLimbSegments())
@@ -218,24 +200,29 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
             item.SetRenderType(IRoboticLimbSegment.RenderType.Line, color);
         }
 
-        newLeg.SetLimbValues(0, leg.GetSegments()[1].GetServos()[0].GetCurrentAngle(), leg.GetSegments()[2].GetServos()[0].GetCurrentAngle());
+        newLeg.SetLimbValues(0, leg.GetSegments()[1].GetServoAngle(0), leg.GetSegments()[2].GetServoAngle(0));
         return newLeg;
     }
     #endregion
 
     [SerializeField]
     private float _activeBalanceSpeed = 1;
-    public QuadrupedLimbData CalculateLimbData(IQuadruped quadToControl)
+
+
+
+
+
+    public LimbValues[] CalculateLimbData(IRobot quadToControl)
     {
-        if (_quadruped == null)
+        if (_robot == null)
         {
             return null;
         }
         var tempPos = transform.localPosition;
-        tempPos.y = _quadruped.GetGameObject().transform.localPosition.y;
+        tempPos.y = _robot.GetGameObject().transform.localPosition.y;
         transform.localPosition = tempPos;
 
-        transform.rotation = _quadruped.GetGameObject().transform.rotation;
+        transform.rotation = _robot.GetGameObject().transform.rotation;
 
         if (!_adjustingHeight && (Vector3.Angle(transform.up, Vector3.up) > 5))
         {
@@ -262,15 +249,20 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
         {
             var mirrorSegments = m_legBundles[i].MirrorLeg.GetSegments();
             var robotSegments = quadToControl.GetLimbs()[i].GetSegments();
+
             if (robotSegments[0] != null)
-                mirrorSegments[0].GetServos()[0].SetServoPosition(robotSegments[0].GetServos()[0].GetCurrentAngle());
-            mirrorSegments[1].GetServos()[0].SetServoPosition(robotSegments[1].GetServos()[0].GetCurrentAngle());
-            mirrorSegments[2].GetServos()[0].SetServoPosition(robotSegments[2].GetServos()[0].GetCurrentAngle());
+                mirrorSegments[0].SetServoAngle(0, robotSegments[0].GetServoAngle(0));
+
+            mirrorSegments[1].SetServoAngle(0, robotSegments[1].GetServoAngle(0));
+            mirrorSegments[2].SetServoAngle(0, robotSegments[2].GetServoAngle(0));
         }
 
-        _gaitController.Run(m_legBundles.Select(bundle => bundle.MirrorLeg).ToArray(), m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray());//have the gait controller position the ik targets
-       
-        QuadrupedLimbData returnData = new QuadrupedLimbData();
+        //_gaitController.Run(m_legBundles.Select(bundle => bundle.MirrorLeg).ToArray(), m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray());//have the gait controller position the ik targets
+       // _gaitController.Run(MirrorLimbs, IKLimbPositioner);
+        // QuadrupedLimbData returnData = new QuadrupedLimbData();
+
+        var returnData = new LimbValues[4];
+     
         for (int i = 0; i < 4; i++)
         {
             var ikSegments = m_legBundles[i].IKLeg.GetSegments();
@@ -280,53 +272,31 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
             positioner.Run();//have the positioner move its target
             m_legBundles[i].IKLeg.SetIKTargetPos((positioner as AdvancedLimbPositioner).GetTargetGlobalPosition());// put the IK leg target at the same place as it's positioner target
 
-            (m_legBundles[i].IKLeg as QuadrupedLeg).CalculateIK();
+            (m_legBundles[i].IKLeg as QuadrupedLeg).CalculateIK();//calculate the IK
 
+            returnData[i].LimbTarget = (positioner as AdvancedLimbPositioner).GetTargetGlobalPosition();
 
-            if (i == 0)
-            {
-                returnData.FLTargetPos = m_legBundles[i].IKLeg.GetIKTargetPos();
-                returnData.FLBaseAngle = ikSegments[0].GetServos()[0].GetCurrentAngle();
-                returnData.FLHipAngle = ikSegments[1].GetServos()[0].GetCurrentAngle();
-                returnData.FLKneeAngle = ikSegments[2].GetServos()[0].GetCurrentAngle();
-            }
-            else if (i == 1)
-            {
-                returnData.FRTargetPos = m_legBundles[i].IKLeg.GetIKTargetPos();
-                returnData.FRBaseAngle = ikSegments[0].GetServos()[0].GetCurrentAngle();
-                returnData.FRHipAngle = ikSegments[1].GetServos()[0].GetCurrentAngle();
-                returnData.FRKneeAngle = ikSegments[2].GetServos()[0].GetCurrentAngle();
-            }
-            else if (i == 2)
-            {
-                returnData.BRTargetPos = m_legBundles[i].IKLeg.GetIKTargetPos();
-                returnData.BRBaseAngle = ikSegments[0].GetServos()[0].GetCurrentAngle();
-                returnData.BRHipAngle = ikSegments[1].GetServos()[0].GetCurrentAngle();
-                returnData.BRKneeAngle = ikSegments[2].GetServos()[0].GetCurrentAngle();
-            }
-            else if (i == 3)
-            {
-                returnData.BLTargetPos = m_legBundles[i].IKLeg.GetIKTargetPos();
-                returnData.BLBaseAngle = ikSegments[0].GetServos()[0].GetCurrentAngle();
-                returnData.BLHipAngle = ikSegments[1].GetServos()[0].GetCurrentAngle();
-                returnData.BLKneeAngle = ikSegments[2].GetServos()[0].GetCurrentAngle();
-            }
+            returnData[i].ServoAngles = new float[4];
+
+            returnData[i].ServoAngles[0] = ikSegments[0].GetServoAngle();
+            returnData[i].ServoAngles[1] = ikSegments[1].GetServoAngle();
+            returnData[i].ServoAngles[2] = ikSegments[2].GetServoAngle();
         }
-
 
         if (_adjustingHeight)
         {
             if (_robotHeight == _targetHeight)
             {
                 _adjustingHeight = false; // Stop adjusting when the target height is reached
-                NotifyEventListeners(IQuadrupedRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd);
+                NotifyEventListeners(IRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd);
             }
         }
+      //  return null;
         return returnData;
     }
     public Vector3 GetRobotGimbalOffset(Vector3 globalPos)
     {
-        return _quadruped.GetGameObject().transform.InverseTransformPoint(globalPos);
+        return _robot.GetGameObject().transform.InverseTransformPoint(globalPos);
     }
     public Vector3 GetGimbalOffset(Vector3 globalPos)
     {
@@ -340,19 +310,19 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
 
     }
 
-    public void SubscribeToControllerEvents(IQuadrupedRoboticControllerEventListener listener)
+    public void SubscribeToControllerEvents(IRoboticControllerEventListener listener)
     {
         _eventManager.AddListener(listener);
     }
-    public void UnsubscribeFromControllerEvents(IQuadrupedRoboticControllerEventListener listener)
+    public void UnsubscribeFromControllerEvents(IRoboticControllerEventListener listener)
     {
         _eventManager.RemoveListener(listener);
     }
-    private void NotifyEventListeners(IQuadrupedRoboticControllerEventListener.EventType type)
+    private void NotifyEventListeners(IRoboticControllerEventListener.EventType type)
     {
         foreach (var item in _eventManager.GetListeners())
         {
-            item.OnControllerEventOccured(new IQuadrupedRoboticControllerEventListener.QuadrupedRoboticControllerEvendData(type, this, (_quadruped as IRobot)));
+            item.OnControllerEventOccured(new IRoboticControllerEventListener.QuadrupedRoboticControllerEvendData(type, this, _robot));
         }
     }
 
@@ -369,7 +339,7 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
                 //}
                 AdvancedLimbPositioner[] positioners = m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray();
 
-                _gaitController.BeginMovement(positioners, IGaitController.GaitPattern.STATIONARYSTEP, Vector3.zero,false);
+                _gaitController.BeginMovement(positioners, IGaitController.GaitPattern.STATIONARYSTEP, Vector3.zero, false);
                 break;
             case IRobotEventListener.EventType.OnLimbsPositioned:
                 break;
@@ -380,5 +350,27 @@ public class DynamicRoboticController : MonoBehaviour, IQuadrupedRoboticControll
             default:
                 break;
         }
+    }
+
+    public GameObject GetGameObject()
+    {
+        throw new NotImplementedException();
+    }
+
+  
+
+    public bool SetTransformValues()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ResetController()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool IsSimulator()
+    {
+        throw new NotImplementedException();
     }
 }

@@ -9,9 +9,7 @@ using System.IO;
 using System.Collections.Generic;
 
 namespace RoboticsToolkit.Robotics.QuadrupedRobot
-{
-
-    
+{ 
     public class QuadrupedData
     {
         public short VelocityX;

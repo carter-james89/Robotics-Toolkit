@@ -8,6 +8,16 @@ public class RoboticLimbSegment : MonoBehaviour, IRoboticLimbSegment
 {
     [SerializeField]
     private GameObject m_endpoint;
+
+    private IServo[] _servos;
+    private IServo[] GetServos()
+    {
+        if(_servos == null)
+        {
+            _servos = GetComponentsInChildren<IServo>();
+        }
+        return _servos;
+    }
     
     public Vector3 GetEndPoint()
     {
@@ -35,10 +45,6 @@ public class RoboticLimbSegment : MonoBehaviour, IRoboticLimbSegment
         return Math.Abs(GetEndPoint().z);
     }
 
-    public IServo[] GetServos()
-    {
-        return GetComponents<IServo>(); 
-    }
 
     public void SetRenderType(IRoboticLimbSegment.RenderType type, Color color)
     {
@@ -56,5 +62,31 @@ public class RoboticLimbSegment : MonoBehaviour, IRoboticLimbSegment
             default:
                 break;
         }
+    }
+
+
+    public void SetServoAngle(int servo, float angle)
+    {
+        GetServos()[servo].SetServoPosition(angle);
+    }
+
+    public void SetServoAngle(float angle)
+    {
+        GetServos()[0].SetServoPosition(angle);
+    }
+
+    public float GetServoAngle(int servo)
+    {
+        return GetServos()[servo].GetCurrentAngle();
+    }
+
+    public float GetServoAngle()
+    {
+        return GetServos()[0].GetCurrentAngle();
+    }
+
+    public IServo GetServo(int servo)
+    {
+        return GetServos()[servo];
     }
 }

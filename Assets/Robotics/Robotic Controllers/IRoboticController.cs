@@ -2,8 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RoboticsToolkit.Robotics
+namespace RoboticsToolkit.Robotics.RoboticControllers
 {
+    public struct LimbValues
+    {
+        public Vector3 LimbTarget;
+        public float[] ServoAngles;
+
+        public LimbValues(Vector3 limbTarget, float[] servoAngles)
+        {
+            LimbTarget = limbTarget;
+            ServoAngles = servoAngles;
+        }
+    }
     public interface IRoboticController
     {
         public GameObject GetGameObject();
@@ -14,63 +25,33 @@ namespace RoboticsToolkit.Robotics
 
         public bool IsSimulator();
 
-        public bool SendCommands(QuadrupedGroundStationData groundStationData);
+        public void SetRobotHeight(float height, float speed);
+
+        public LimbValues[] CalculateLimbData(IRobot quadToControl);
+        public void SubscribeToControllerEvents(IRoboticControllerEventListener listener);
+        public void UnsubscribeFromControllerEvents(IRoboticControllerEventListener listener);
     }
 
     public interface IRoboticControllerEventListener
     {
-      
-    }
-
-    public class QuadrupedSensorData
-    {
-        public float Y;
-        public float P;
-        public float R;
-        public float H;
-        public float W;
-        public float X;
-        public float QX;
-        public float Z;
-        public int C;
-
-        // public int FL_0;
-        // public int FL_1;
-        //public int FL_2;
-
-        //public int FR_0;
-        //public int FR_1;
-        //public int FR_2;
-
-        //public int BL_0;
-        //public int BL_1;
-        //public int BL_2;
-
-        //public int BR_0;
-        //public int BR_1;
-        //public int BR_2;
-
-    }
-    public class QuadrupedGroundStationData
-    {
-        //public int[] Motors;
-        // public int[] MotorPositions;
-
-
-        public int FL0;
-        public int FL1;
-        public int FL2;
-
-        public int FR0;
-        public int FR1;
-        public int FR2;
-
-        public int BL0;
-        public int BL1;
-        public int BL2;
-
-        public int BR0;
-        public int BR1;
-        public int BR2;
+        public enum EventType
+        {
+            OnControllerInitialized,
+            OnHeightAdjustmentBegin,
+            OnHeightAdjustmentEnd,
+        }
+        public class QuadrupedRoboticControllerEvendData
+        {
+            public EventType EventType;
+            public IRoboticController Controller;
+            public IRobot Robot;
+            public QuadrupedRoboticControllerEvendData(EventType eventType, IRoboticController controller, IRobot robot)
+            {
+                this.EventType = eventType;
+                this.Controller = controller;
+                this.Robot = robot;
+            }
+        }
+        public void OnControllerEventOccured(QuadrupedRoboticControllerEvendData eventData);
     }
 }

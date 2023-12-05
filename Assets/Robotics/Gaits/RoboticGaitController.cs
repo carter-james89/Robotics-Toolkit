@@ -27,18 +27,18 @@ namespace RoboticsToolkit.Robotics.Gaits
 
 
         //Called from keyboard
-        private void BeginMovement(IGaitController.GaitPattern patern, QuadrupedTrotGait.Direction direction)
-        {
-            SetGaitPattern(patern);
-           // (m_activeGait as QuadrupedTrotGait).SetDirection(direction);
-            if (_activeGait != null)
-            {
-               // _activeGait.SubscribeToEvents(this);
-                _activeGait.Begin();
-            }
-        }
+        //private void BeginMovement(IGaitController.GaitPattern patern, QuadrupedTrotGait.Direction direction)
+        //{
+        //    SetGaitPattern(patern);
+        //   // (m_activeGait as QuadrupedTrotGait).SetDirection(direction);
+        //    if (_activeGait != null)
+        //    {
+        //       // _activeGait.SubscribeToEvents(this);
+        //        _activeGait.Begin();
+        //    }
+        //}
 
-        public void Initialize(IRobot robot)
+        public void Initialize(IRoboticLimb[] limbs)
         {
             throw new System.NotImplementedException();
         }

@@ -29,11 +29,11 @@ namespace RoboticsToolkit.Robotics.Gaits
             m_strideHeight = newHeight;
         }
 
-        protected IRobot _robot;
+       // protected IRobot _robot;
         private InterfaceEventManager<IGaitEventListener> _eventManager = new InterfaceEventManager<IGaitEventListener>("Gait");
-        public void Initialize(IRobot robot)
+        public void Initialize()
         {
-            _robot = robot;
+           // _robot = robot;
             //    NotifyListeners(IGaitEventListener.EventType.)
         }
         public void Begin()
@@ -81,7 +81,7 @@ namespace RoboticsToolkit.Robotics.Gaits
         {
             foreach (var item in _eventManager.GetListeners())
             {
-                item.OnGaitEventOccured(new IGaitEventListener.GaitEventData(eventType, _robot, this));
+                item.OnGaitEventOccured(new IGaitEventListener.GaitEventData(eventType, this));
             }
         }
     } 

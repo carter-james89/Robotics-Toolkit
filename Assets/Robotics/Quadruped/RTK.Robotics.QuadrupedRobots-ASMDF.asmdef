@@ -1,0 +1,19 @@
+{
+    "name": "RTK.Robotics.QuadrupedRobots-ASMDF",
+    "rootNamespace": "",
+    "references": [
+        "GUID:34c8c5dd669dc714492daa925d1677e5",
+        "GUID:5e3e3b2d10a34264280bb2328a61719f",
+        "GUID:9f8ff686e9f48fb49adf29678f8fc777",
+        "GUID:76afd34654078a145949466552e6d633"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

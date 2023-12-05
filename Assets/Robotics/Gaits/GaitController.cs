@@ -8,7 +8,7 @@ namespace RoboticsToolkit.Robotics.Gaits
     public class GaitController : MonoBehaviour, IGaitController//,/ IGaitEventListener
     {
         private IRoboticLimb[] m_limbs;
-        private IRobot m_robot;
+       // private IRobot m_robot;
 
         private bool m_postStrideCooldown = false;
         private float m_postStrideCooldownTime = 0;
@@ -17,8 +17,8 @@ namespace RoboticsToolkit.Robotics.Gaits
         private Vector3 _currentWalkDirection;
         private bool _rotating = false;
 
-        [SerializeField]
-        private QuadrupedCrawlGait m_crawlGait;
+      //  [SerializeField]
+       // private QuadrupedCrawlGait m_crawlGait;
         [SerializeField]
         private TrotGait m_trotGait;
 
@@ -28,10 +28,10 @@ namespace RoboticsToolkit.Robotics.Gaits
 
         private IGaitController.GaitPattern m_currentPattern = IGaitController.GaitPattern.NONE;
 
-        public void Initialize(IRobot robot)
+        public void Initialize(IRoboticLimb[] limbs)
         {
-            m_robot = robot;
-            m_limbs = robot.GetLimbs();
+            // m_robot = robot;
+            m_limbs = limbs;// robot.GetLimbs();
 
             // m_activeGait = GetComponent<IGait>();
 
@@ -79,7 +79,7 @@ namespace RoboticsToolkit.Robotics.Gaits
                     m_trotGait.SetStrideDistance(0);
                     break;
                 case IGaitController.GaitPattern.CRAWL:
-                    m_activeGait = m_crawlGait;
+                   // m_activeGait = m_crawlGait;
                     break;
                 case IGaitController.GaitPattern.TROT:
                     m_activeGait = m_trotGait;
@@ -112,7 +112,7 @@ namespace RoboticsToolkit.Robotics.Gaits
                     {
                        // m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
                     }
-                    BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.forward,false);
+                //    BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.forward,false);
                 }
                 else if (Input.GetKey(KeyCode.RightArrow))
                 {
@@ -127,7 +127,7 @@ namespace RoboticsToolkit.Robotics.Gaits
                 if (m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
                   //  m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
-                    BeginMovement(limbs, IGaitController.GaitPattern.TROT, -m_robot.GetGimbal().GetGameObject().transform.forward,false);
+                  //  BeginMovement(limbs, IGaitController.GaitPattern.TROT, -m_robot.GetGimbal().GetGameObject().transform.forward,false);
                 }
             }
             else if (Input.GetKey(KeyCode.RightArrow))
@@ -137,12 +137,12 @@ namespace RoboticsToolkit.Robotics.Gaits
                     if (Input.GetKey(KeyCode.LeftShift))
                     {
                       //  m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
-                        BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right,true);
+                     //   BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right,true);
                     }
                     else
                     {
                       //  m_trotGait.SetStrideValues(m_rotatingTrotStrideDistance, m_rotatingTrotStrideTime, m_rotatingTrotStrideCoolDownTime);
-                        BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right, true);
+                     //   BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right, true);
                     }
                 }
             }
@@ -153,12 +153,12 @@ namespace RoboticsToolkit.Robotics.Gaits
                     if (Input.GetKey(KeyCode.LeftShift))
                     {
                      //   m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
-                        BeginMovement(limbs, IGaitController.GaitPattern.TROT, -m_robot.GetGimbal().GetGameObject().transform.right, false);
+                    //    BeginMovement(limbs, IGaitController.GaitPattern.TROT, -m_robot.GetGimbal().GetGameObject().transform.right, false);
                     }
                     else
                     {
                      //   m_trotGait.SetStrideValues(m_rotatingTrotStrideDistance, m_rotatingTrotStrideTime, m_rotatingTrotStrideCoolDownTime);
-                        BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right, false);
+                      //  BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right, false);
                     }
                 }
             }
@@ -243,7 +243,7 @@ namespace RoboticsToolkit.Robotics.Gaits
                     
                     break;
                 case IGaitController.GaitPattern.CRAWL:
-                    m_activeGait = m_crawlGait;
+                   // m_activeGait = m_crawlGait;
                     break;
                 case IGaitController.GaitPattern.TROT:
                     m_activeGait = m_trotGait;

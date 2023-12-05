@@ -1,0 +1,20 @@
+{
+    "name": "RoboticsToolkit.Robotics.RoboticControllers-ASMDF",
+    "rootNamespace": "",
+    "references": [
+        "GUID:46fea3767d1884147accadf9282961c6",
+        "GUID:5e3e3b2d10a34264280bb2328a61719f",
+        "GUID:85e0054f8e64b47309646d35f8851f81",
+        "GUID:76afd34654078a145949466552e6d633",
+        "GUID:34c8c5dd669dc714492daa925d1677e5"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

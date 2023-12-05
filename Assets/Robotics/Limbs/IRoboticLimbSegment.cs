@@ -12,7 +12,13 @@ public interface IRoboticLimbSegment
     }
 
     public void SetRenderType(RenderType type, Color color);
-    public IServo[] GetServos();
+
+    public void SetServoAngle(int servo, float angle);
+    public void SetServoAngle(float angle);
+    public float GetServoAngle(int servo);
+    public float GetServoAngle();
+
+    public IServo GetServo(int servo);
 
 
     public float GetLength();

@@ -1,7 +1,8 @@
-using RoboticsToolkit.Robotics.Limbs;
 using System;
 using Utilities.Events;
 using UnityEngine;
+using RoboticsToolkit.Robotics.Limbs;
+using RoboticsToolkit.Robotics.RoboticControllers;
 using RoboticsToolkit.Gimbal;
 
 namespace RoboticsToolkit.Robotics.QuadrupedRobot
@@ -73,7 +74,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         }
     }
 
-    public class Quadruped : MonoBehaviour, IQuadruped, IRobot, IQuadrupedRoboticControllerEventListener
+    public class Quadruped : MonoBehaviour, IRobot, IRoboticControllerEventListener
     {
         [SerializeField]
         private bool _simulationMode = false;
@@ -88,8 +89,6 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         private QuadrupedLeg m_brLimb;
         [SerializeField]
         private QuadrupedLeg m_blLimb;
-
-     
 
         [SerializeField]
         private int _startupDelay = 10;
@@ -107,7 +106,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         [SerializeField]
         private GameObject _controllerObject;
-        private IQuadrupedRoboticController _controller;
+        private IRoboticController _controller;
 
         
 
@@ -155,7 +154,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         public void Bootup()
         {
             Debug.Log("Quadruped Bootup");
-            _controller = _controllerObject.GetComponent<IQuadrupedRoboticController>();
+            _controller = _controllerObject.GetComponent<IRoboticController>();
             _controller.SubscribeToControllerEvents(this);
             _controller.Initialize(this);
             _isRunning = true;
@@ -170,16 +169,11 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
 
             _controller.SetRobotHeight(_readyHeight, .01f);
-            _status =  Status.MovingToReadyHeight;
-
-        
+            _status =  Status.MovingToReadyHeight;      
         }
 
- 
         protected virtual void Update()
         {
-          
-
             switch (_status)
             {
                 case Status.NotReady:
@@ -199,9 +193,6 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                 default:
                     break;
             }
-
-
-
         }
         protected virtual void AtReadyHeight()
         {
@@ -248,18 +239,58 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         }
         protected virtual void PositionTransform()
         {
-
+          //  m_frLimb.SetLimbValues(limbData.FRBaseAngle, limbData.FRHipAngle, limbData.FRKneeAngle);
+          //  m_flLimb.SetLimbValues(limbData.FLBaseAngle, limbData.FLHipAngle, limbData.FLKneeAngle);
+          //  m_brLimb.SetLimbValues(limbData.BRBaseAngle, limbData.BRHipAngle, limbData.BRKneeAngle);
+          //  m_blLimb.SetLimbValues(limbData.BLBaseAngle, limbData.BLHipAngle, limbData.BLKneeAngle);
         }
         protected virtual void PositionLimbs()
         {
             var limbData = _controller.CalculateLimbData(this);
 
-            if (SimulationMode())
+            var quadrupedLimbData = new QuadrupedLimbData();
+
+            for (int i = 0; i < limbData.Length; i++)
             {
-                SetLimbs(limbData);
+                switch (i)
+                {
+                    case 0:
+                        quadrupedLimbData.FLTargetPos = limbData[i].LimbTarget;
+                        quadrupedLimbData.FLBaseAngle = limbData[i].ServoAngles[0];
+                        quadrupedLimbData.FLHipAngle = limbData[i].ServoAngles[1];
+                        quadrupedLimbData.FLKneeAngle = limbData[i].ServoAngles[2];
+                        break;
+                    case 1:
+                        quadrupedLimbData.FRTargetPos = limbData[i].LimbTarget;
+                        quadrupedLimbData.FRBaseAngle = limbData[i].ServoAngles[0];
+                        quadrupedLimbData.FRHipAngle = limbData[i].ServoAngles[1];
+                        quadrupedLimbData.FRKneeAngle = limbData[i].ServoAngles[2];
+                        break;
+                    case 2:
+                        quadrupedLimbData.BRTargetPos = limbData[i].LimbTarget;
+                        quadrupedLimbData.BRBaseAngle = limbData[i].ServoAngles[0];
+                        quadrupedLimbData.BRHipAngle = limbData[i].ServoAngles[1];
+                        quadrupedLimbData.BRKneeAngle = limbData[i].ServoAngles[2];
+                        break;
+                    case 3:
+                        quadrupedLimbData.BLTargetPos = limbData[i].LimbTarget;
+                        quadrupedLimbData.BLBaseAngle = limbData[i].ServoAngles[0];
+                        quadrupedLimbData.BLHipAngle = limbData[i].ServoAngles[1];
+                        quadrupedLimbData.BLKneeAngle = limbData[i].ServoAngles[2];
+                        break;
+                    default:
+                        break;
+                }
             }
 
-            OnLimbsPositioned(limbData);
+
+
+            if (SimulationMode())
+            {
+                SetLimbs(quadrupedLimbData);
+            }
+
+            OnLimbsPositioned(quadrupedLimbData);
         }
 
         protected virtual void OnLimbsPositioned(QuadrupedLimbData limbData)
@@ -307,16 +338,16 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             }
         }
 
-        public void OnControllerEventOccured(IQuadrupedRoboticControllerEventListener.QuadrupedRoboticControllerEvendData eventData)
+        public void OnControllerEventOccured(IRoboticControllerEventListener.QuadrupedRoboticControllerEvendData eventData)
         {
             Debug.Log(eventData.EventType);
             switch (eventData.EventType)
             {
-                case IQuadrupedRoboticControllerEventListener.EventType.OnControllerInitialized:
+                case IRoboticControllerEventListener.EventType.OnControllerInitialized:
                     break;
-                case IQuadrupedRoboticControllerEventListener.EventType.OnHeightAdjustmentBegin:
+                case IRoboticControllerEventListener.EventType.OnHeightAdjustmentBegin:
                     break;
-                case IQuadrupedRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd:
+                case IRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd:
                     if(_status == Status.MovingToReadyHeight)
                     AtReadyHeight();
                     break;
@@ -325,7 +356,10 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             }
         }
 
-    
+        IGimbal IRobot.GetGimbal()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

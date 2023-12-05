@@ -1,0 +1,16 @@
+{
+    "name": "RoboticServosASMDF",
+    "rootNamespace": "",
+    "references": [
+        "GUID:e0e8e21cf8e6ca5468c5ed0c2edf3c12"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

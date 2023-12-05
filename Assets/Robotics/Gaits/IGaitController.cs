@@ -28,7 +28,7 @@ namespace RoboticsToolkit.Robotics.Gaits
             CRAWL,
             TROT
         }
-        public void Initialize(IRobot robot);
+        public void Initialize(IRoboticLimb[] limbs);
         public void Run(IRoboticLimb[] mirrorLimbs, ILimbPositioner[] limbs);
 
         public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern patern, Vector3 direction, bool rotate);

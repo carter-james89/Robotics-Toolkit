@@ -992,7 +992,6 @@ GameObject:
   - component: {fileID: 585883527}
   - component: {fileID: 585883526}
   - component: {fileID: 585883525}
-  - component: {fileID: 585883532}
   - component: {fileID: 585883533}
   - component: {fileID: 585883534}
   m_Layer: 0
@@ -1166,18 +1165,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &585883532
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 585883524}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3ef755de11264f43b1a52d0e3a3adcb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &585883533
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1190,7 +1177,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adffc0adc27e429429e142f081901bab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_crawlGait: {fileID: 0}
   m_trotGait: {fileID: 585883534}
   m_forwardTrotStrideDistance: 0.04
   m_forwardTrotStrideTime: 0.22
@@ -2463,6 +2449,40 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8437468995056635138, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
   m_PrefabInstance: {fileID: 8437468993470256817}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1653857208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 886027982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adffc0adc27e429429e142f081901bab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_trotGait: {fileID: 1653857209}
+  m_forwardTrotStrideDistance: 0.04
+  m_forwardTrotStrideTime: 0.22
+  m_forwardTrotStrideCoolDownTime: 0.2
+  m_idleTrotStrideDistance: 0.0001
+  m_idleTrotStrideTime: 0.1
+  m_idleTrotStrideCoolDownTime: 0.01
+  m_rotatingTrotStrideDistance: 0.04
+  m_rotatingTrotStrideTime: 0.22
+  m_rotatingTrotStrideCoolDownTime: 0.2
+--- !u!114 &1653857209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 886027982}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e3091daecc1ec1449209a4cd91dfa51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1692758105
 GameObject:
   m_ObjectHideFlags: 0
@@ -3514,7 +3534,8 @@ PrefabInstance:
       propertyPath: _limbPositionerPrefab
       value: 
       objectReference: {fileID: 1692758106}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8437468995056635142, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 8437468995056635138, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
       insertIndex: -1
