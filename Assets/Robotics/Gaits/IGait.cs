@@ -39,8 +39,12 @@ namespace RoboticsToolkit.Robotics.Gaits
             StrafeLeft,
             StrafeRight,
         }
+        public void SetStrideDistance(float distance);
+        public void SetStrideHeight(float height);
+        public void SetStrideValues(float strideDistance, float strideHeight);
         public void Initialize();
         public void Begin();
+        public bool RequestBeginCMD(IGaitController requestingController, ILimbPositioner[] limbPositioners);
         public void ReturnHome();
         public void Stop();
         public void RunGait();

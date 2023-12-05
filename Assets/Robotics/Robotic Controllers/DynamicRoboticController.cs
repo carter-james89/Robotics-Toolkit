@@ -46,7 +46,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
 
     private IRoboticLimb[] MirrorLimbs;
     private IRoboticLimb[] IKLimbs;
-    private AdvancedLimbPositioner[] IKLimbPositioner;
+    private AdvancedLimbPositioner[] IKLimbPositioners;
 
     public class LegBundle
     {
@@ -160,14 +160,14 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
 
         MirrorLimbs = new IRoboticLimb[4] { m_flMirrorLeg, m_frMirrorLeg, m_brMirrorLeg, m_blMirrorLeg };
         IKLimbs = new IRoboticLimb[4] { m_flIKLeg, m_frIKLeg, m_brIKLeg, m_blIKLeg };
-        IKLimbPositioner = new AdvancedLimbPositioner[4];
+        IKLimbPositioners = new AdvancedLimbPositioner[4];
         for (int i = 0; i < 4; i++)
         {
-            IKLimbPositioner[i] = Instantiate(_limbPositionerPrefab).GetComponent<AdvancedLimbPositioner>();
-            IKLimbPositioner[i].gameObject.SetActive(true);
-            IKLimbPositioner[i].transform.SetParent(m_ikTargets, false);
-            IKLimbPositioner[i].transform.position = MirrorLimbs[i].GetEndPoint().position;
-            _robotHeight = -transform.InverseTransformPoint(IKLimbPositioner[i].transform.position).y;
+            IKLimbPositioners[i] = Instantiate(_limbPositionerPrefab).GetComponent<AdvancedLimbPositioner>();
+            IKLimbPositioners[i].gameObject.SetActive(true);
+            IKLimbPositioners[i].transform.SetParent(m_ikTargets, false);
+            IKLimbPositioners[i].transform.position = MirrorLimbs[i].GetEndPoint().position;
+            _robotHeight = -transform.InverseTransformPoint(IKLimbPositioners[i].transform.position).y;
         }
 
 
@@ -260,7 +260,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         }
 
         //_gaitController.Run(m_legBundles.Select(bundle => bundle.MirrorLeg).ToArray(), m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray());//have the gait controller position the ik targets
-       _gaitController.Run(MirrorLimbs, IKLimbPositioner);
+       _gaitController.Run(MirrorLimbs, IKLimbPositioners);
         // QuadrupedLimbData returnData = new QuadrupedLimbData();
 
         var returnData = new LimbValues[4];
@@ -268,7 +268,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         for (int i = 0; i < 4; i++)
         {
             var ikSegments = IKLimbs[i].GetSegments();
-            var positioner = IKLimbPositioner[i];
+            var positioner = IKLimbPositioners[i];
 
             positioner.transform.localPosition = new Vector3(positioner.transform.localPosition.x, -_robotHeight, positioner.transform.localPosition.z);
             positioner.Run();//have the positioner move its target
@@ -339,9 +339,10 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
                 //{
                 //    item.IKLimbPositioner.RotateToPosition(item.IKLimbPositioner.transform.position, .1f, 1);
                 //}
-                AdvancedLimbPositioner[] positioners = m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray();
+                //AdvancedLimbPositioner[] positioners = m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray();
 
-               // _gaitController.BeginMovement(positioners, IGaitController.GaitPattern.STATIONARYSTEP, Vector3.zero, false);
+                // _gaitController.BeginMovement(positioners, IGaitController.GaitPattern.STATIONARYSTEP, Vector3.zero, false);
+                _gaitController.PerformHighStep(IKLimbPositioners, .015f, .01f);
                 break;
             case IRobotEventListener.EventType.OnLimbsPositioned:
                 break;

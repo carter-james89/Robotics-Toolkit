@@ -31,6 +31,9 @@ namespace RoboticsToolkit.Robotics.Gaits
         public void Initialize(IRoboticLimb[] limbs);
         public void Run(IRoboticLimb[] mirrorLimbs, ILimbPositioner[] limbs);
 
+
+        public void PerformHighStep(ILimbPositioner[] limbs, float height, float speed);
+
         public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern patern, Vector3 direction, bool rotate);
 
         public void SetGaitPattern(GaitPattern type);

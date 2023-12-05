@@ -10,8 +10,6 @@ namespace RoboticsToolkit.Robotics.Gaits
     {
         private int m_stridePosition = 0;
 
-        private ILimbPositioner[] m_rotatingLimbs = new ILimbPositioner[2];
-        private ILimbPositioner[] m_translatingLimbs = new ILimbPositioner[2];
     
    
 

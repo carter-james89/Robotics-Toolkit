@@ -21,12 +21,21 @@ namespace RoboticsToolkit.Robotics.Gaits
        // private QuadrupedCrawlGait m_crawlGait;
         [SerializeField]
         private TrotGait m_trotGait;
+        [SerializeField]
+        private CrawlGait m_crawlGait;
 
         private bool m_beginReturnHome = false;
 
         private IGait m_activeGait;
 
         private IGaitController.GaitPattern m_currentPattern = IGaitController.GaitPattern.NONE;
+
+        private enum GaitType
+        {
+            Crawl,
+            Trot,       
+        }
+        private GaitType _gaitType = GaitType.Crawl;
 
         public void Initialize(IRoboticLimb[] limbs)
         {
@@ -65,6 +74,34 @@ namespace RoboticsToolkit.Robotics.Gaits
         {
 
         }
+
+        public void PerformHighStep(ILimbPositioner[] limbs, float height, float speed)
+        {
+            m_activeGait = m_crawlGait;
+            bool approved = m_activeGait.RequestBeginCMD(this, limbs);
+
+            if (approved)
+            {
+                m_activeGait.SetStrideValues(0, height);
+                m_activeGait.SetNextCycle(transform.forward, limbs, false);
+
+                m_currentPattern = IGaitController.GaitPattern.STATIONARYSTEP;
+            }
+
+
+            //switch (_gaitType)
+            //{
+            //    case GaitType.Crawl:
+            //        (limbs[0] as AdvancedLimbPositioner).RotateToPosition(limbs[0].GetGameObject().transform.position, speed, height);
+            //        break;
+            //    case GaitType.Trot:
+            //        break;
+            //    default:
+            //        break;
+            //}
+        }
+
+
 
         public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern pattern, Vector3 direction, bool rotate)
         {
@@ -169,6 +206,7 @@ namespace RoboticsToolkit.Robotics.Gaits
         }
         public void Run(IRoboticLimb[] mirrorLimbs, ILimbPositioner[] limbPositioners)
         {
+           // return;
             //  ProcessUserInput(limbPositioners);
             if (m_currentPattern == IGaitController.GaitPattern.NONE)
             {
@@ -190,7 +228,7 @@ namespace RoboticsToolkit.Robotics.Gaits
                 }
             }
             //Debug.Log(m_limbsAtTarget.Count);
-            if (ikTargetsAtTarget.Count >= 3)
+            if (ikTargetsAtTarget.Count > 3)
             {
                 m_postStrideCooldown = true;
             }
@@ -204,7 +242,7 @@ namespace RoboticsToolkit.Robotics.Gaits
                     m_postStrideCooldown = false;
                     m_postStrideCooldownTime = 0;
 
-                    m_trotGait.SetNextCycle(_currentWalkDirection, limbPositioners, _rotating);
+                    m_activeGait.SetNextCycle(_currentWalkDirection, limbPositioners, _rotating);
                   
 
                     //NotifyListeners(IGaitEventListener.EventType.OnGaitCycleComplete);
@@ -268,47 +306,49 @@ namespace RoboticsToolkit.Robotics.Gaits
             throw new System.NotImplementedException();
         }
 
-    //    public void OnGaitEventOccured(IGaitEventListener.GaitEventData eventData)
-    //    {
-    //        switch (eventData.EventType)
-    //        {
-    //            case IGaitEventListener.EventType.OnGaitCycleBegin:
-    //                break;
-    //            case IGaitEventListener.EventType.OnGaitCycleComplete:
-    //                if (m_currentPattern != IGaitController.GaitPattern.NONE)
-    //                {
-    //                    if (m_beginReturnHome)
-    //                    {
-    //                        m_activeGait.ReturnHome();
-    //                        m_activeGait.SetNextCycle();
-    //                        m_currentPattern = IGaitController.GaitPattern.RETURNING_HOME;
-    //                        m_beginReturnHome = false;
-    //                    }
-    //                    else if (m_currentPattern == IGaitController.GaitPattern.RETURNING_HOME)
-    //                    {
-    //                        Debug.Log("gait at home");
-    //                        m_activeGait.UnubscribeFromEvents(this);
-    //                        m_activeGait.Stop();
-    //                        m_activeGait = null;
-    //                        m_currentPattern = IGaitController.GaitPattern.NONE;
-    //                    }
-    //                    else
-    //                    {
-    //                        m_activeGait.SetNextCycle();
-    //                    }
-    //                }
-    //                break;
-    //            case IGaitEventListener.EventType.OnGaitReturnedHome:
+     
 
-    //                break;
-    //            default:
-    //                break;
-    //        }
+        //    public void OnGaitEventOccured(IGaitEventListener.GaitEventData eventData)
+        //    {
+        //        switch (eventData.EventType)
+        //        {
+        //            case IGaitEventListener.EventType.OnGaitCycleBegin:
+        //                break;
+        //            case IGaitEventListener.EventType.OnGaitCycleComplete:
+        //                if (m_currentPattern != IGaitController.GaitPattern.NONE)
+        //                {
+        //                    if (m_beginReturnHome)
+        //                    {
+        //                        m_activeGait.ReturnHome();
+        //                        m_activeGait.SetNextCycle();
+        //                        m_currentPattern = IGaitController.GaitPattern.RETURNING_HOME;
+        //                        m_beginReturnHome = false;
+        //                    }
+        //                    else if (m_currentPattern == IGaitController.GaitPattern.RETURNING_HOME)
+        //                    {
+        //                        Debug.Log("gait at home");
+        //                        m_activeGait.UnubscribeFromEvents(this);
+        //                        m_activeGait.Stop();
+        //                        m_activeGait = null;
+        //                        m_currentPattern = IGaitController.GaitPattern.NONE;
+        //                    }
+        //                    else
+        //                    {
+        //                        m_activeGait.SetNextCycle();
+        //                    }
+        //                }
+        //                break;
+        //            case IGaitEventListener.EventType.OnGaitReturnedHome:
 
-    //        //   SetGaitPattern(IGaitController.GaitPattern.NONE);
+        //                break;
+        //            default:
+        //                break;
+        //        }
+
+        //        //   SetGaitPattern(IGaitController.GaitPattern.NONE);
 
 
-    //    }
+        //    }
     }
 }
 

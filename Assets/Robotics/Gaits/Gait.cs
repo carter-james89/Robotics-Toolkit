@@ -9,10 +9,17 @@ namespace RoboticsToolkit.Robotics.Gaits
 {
     public abstract class Gait : MonoBehaviour, IGait
     {
-     //   private bool m_halfStride = false;
+
+        protected List<ILimbPositioner> m_rotatingLimbs = new List<ILimbPositioner>();
+        protected List<ILimbPositioner> m_translatingLimbs = new List<ILimbPositioner>();
+
+
+        //   private bool m_halfStride = false;
         private bool m_running = false;
 
         protected int _currentStrideCount = 0;
+
+
 
         protected IGait.Direction m_direction = IGait.Direction.NONE;
 
@@ -39,11 +46,7 @@ namespace RoboticsToolkit.Robotics.Gaits
         public void Begin()
         {
             Debug.Log("Begin " + Time.frameCount);
-            m_running = true;
-            //   m_halfStride = true;
-            _currentStrideCount = 0;
-          //  SetNextCycle(limbPositioners);
-            NotifyListeners(IGaitEventListener.EventType.OnGaitCycleBegin);
+          
         }
 
         public void RunGait()
@@ -83,6 +86,29 @@ namespace RoboticsToolkit.Robotics.Gaits
             {
                 item.OnGaitEventOccured(new IGaitEventListener.GaitEventData(eventType, this));
             }
+        }
+
+        public void SetStrideValues(float strideDistance, float strideHeight)
+        {
+            SetStrideDistance(strideDistance);
+            SetStrideHeight(strideHeight);
+        }
+
+        public bool RequestBeginCMD(IGaitController requestingController, ILimbPositioner[] limbPositioners)
+        {
+            if (m_running)
+            {
+                return false;
+            }
+            m_running = true;
+            _currentStrideCount = 0;
+         //   NotifyListeners(IGaitEventListener.EventType.OnGaitCycleBegin);
+            OnCMDRequestGranted();
+            return true;
+        }
+        protected void OnCMDRequestGranted()
+        {
+
         }
     } 
 }
