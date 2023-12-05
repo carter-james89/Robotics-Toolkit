@@ -180,7 +180,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                     bool allServosReady = true;
                     foreach (var limb in m_limbs)
                     {
-                        if(!(limb as QuadrupedLeg).SegmentsAtTarget(1f))
+                        if(!(limb as QuadrupedLeg).SegmentsAtTarget(.3f))
                         {
                             allServosReady = false;
                         }
@@ -196,7 +196,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                     }
                     break;
                 case Status.WaitingForPhysics:
-                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 1)
+                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 3)
                     {
                         Bootup();
                     }

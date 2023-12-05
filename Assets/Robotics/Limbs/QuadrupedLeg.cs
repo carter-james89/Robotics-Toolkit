@@ -116,10 +116,10 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
 
      
 
-        float hipDifference = Math.Abs(m_hipRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetThighAngle);
+        float hipDifference = Math.Abs(Math.Abs(m_hipRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetThighAngle));
         bool isHipAtTarget = hipDifference <= tolerance;
 
-        float kneeDifference = Math.Abs(m_kneeRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetCalfAngle);
+        float kneeDifference = Math.Abs(Math.Abs(m_kneeRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetCalfAngle));
         bool isKneeAtTarget = kneeDifference <= tolerance;
 
         var limbReady = isBaseAtTarget && isHipAtTarget && isKneeAtTarget;
