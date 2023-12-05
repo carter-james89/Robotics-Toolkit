@@ -18,6 +18,9 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
     private GameObject m_kneeRoboticLimbSegmentObject;
     private IRoboticLimbSegment m_kneeRoboticLimbSegment;
 
+    [SerializeField]
+    private bool _debug;
+
     Matrix4x4 m_anchorMatrix = new Matrix4x4();
     [SerializeField]
     public bool m_invert;
@@ -36,8 +39,8 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
 
     private void Awake()
     {
-        if(m_baseRoboticLimbSegmentObject)
-        m_baseRoboticLimbSegment = m_baseRoboticLimbSegmentObject.GetComponent<IRoboticLimbSegment>();
+        if (m_baseRoboticLimbSegmentObject)
+            m_baseRoboticLimbSegment = m_baseRoboticLimbSegmentObject.GetComponent<IRoboticLimbSegment>();
         m_hipRoboticLimbSegment = m_hipRoboticLimbSegmentObject.GetComponent<IRoboticLimbSegment>();
         m_kneeRoboticLimbSegment = m_kneeRoboticLimbSegmentObject.GetComponent<IRoboticLimbSegment>();
 
@@ -46,7 +49,7 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
 
     private static float RadToDegree(double radian)
     {
-        return (float)(radian *Mathf.Rad2Deg);
+        return (float)(radian * Mathf.Rad2Deg);
     }
 
 
@@ -78,9 +81,16 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
         //return m_anchorMatrix.inverse.MultiplyPoint(targetPoint);
     }
 
+    private float _targetBaseAngle = 0;
+    private float _targetThighAngle = 0;
+    private float _targetCalfAngle = 0;
+
     public void SetLimbValues(float baseAngle, float hipAngle, float kneeAngle)
     {
-        if(m_baseRoboticLimbSegment != null)
+        _targetBaseAngle = baseAngle;
+        _targetThighAngle = hipAngle;
+        _targetCalfAngle = kneeAngle;
+        if (m_baseRoboticLimbSegment != null)
         {
             m_baseRoboticLimbSegment.SetServoAngle(baseAngle);
         }
@@ -94,7 +104,28 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
         }
     }
 
-  
+    public bool SegmentsAtTarget(float tolerance)
+    {
+        bool isBaseAtTarget = true;
+        if (m_baseRoboticLimbSegment != null)
+            isBaseAtTarget = Math.Abs(m_baseRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetBaseAngle) <= tolerance;
+
+        bool isHipAtTarget = Math.Abs(m_hipRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetThighAngle) <= tolerance;
+        bool isKneeAtTarget = Math.Abs(m_kneeRoboticLimbSegment.GetServoAngle()) - Math.Abs(_targetCalfAngle) <= tolerance;
+
+        var limbReady = isBaseAtTarget && isHipAtTarget && isKneeAtTarget;
+
+        if (_debug)
+        {
+            Debug.Log($"Base Angle: {m_baseRoboticLimbSegment?.GetServoAngle()} | Target: {_targetBaseAngle} | At Target: {isBaseAtTarget}");
+            Debug.Log($"Hip Angle: {m_hipRoboticLimbSegment.GetServoAngle()} | Target: {_targetThighAngle} | At Target: {isHipAtTarget}");
+            Debug.Log($"Knee Angle: {m_kneeRoboticLimbSegment.GetServoAngle()} | Target: {_targetCalfAngle} | At Target: {isKneeAtTarget}");
+        }
+
+        return limbReady;
+    }
+
+
     private float m_xOffset = .03f;
     private float m_yOffset = .03f;
     public void CalculateIK(bool adjustHeight = false)
@@ -109,9 +140,9 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
             var targetOffset = CalculateTargetOffset(GetHipSegment(), IKTarget.position);
             x = targetOffset.z;
             y = targetOffset.y;
-        }    
-       
-        CalculateIK(x,y);
+        }
+
+        CalculateIK(x, y);
     }
     public void CalculateIK(float targetX, float targetY)
     {
@@ -192,11 +223,11 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
     }
     public IRoboticLimbSegment[] GetLimbSegments()
     {
-        if(m_baseRoboticLimbSegment != null)
+        if (m_baseRoboticLimbSegment != null)
         {
             return new IRoboticLimbSegment[3] { m_baseRoboticLimbSegment, m_hipRoboticLimbSegment, m_kneeRoboticLimbSegment };
         }
-        return new IRoboticLimbSegment[3] {null,m_hipRoboticLimbSegment, m_kneeRoboticLimbSegment };
+        return new IRoboticLimbSegment[3] { null, m_hipRoboticLimbSegment, m_kneeRoboticLimbSegment };
     }
     public IRoboticLimbSegment GetHipSegment()
     {
@@ -239,7 +270,7 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
 
     public void ResetLimb()
     {
-       // m_baseRoboticLimbSegment.GetServo(0).ResetServo(0);
+        // m_baseRoboticLimbSegment.GetServo(0).ResetServo(0);
         m_hipRoboticLimbSegment.GetServo(0).ResetServo(80);
         m_kneeRoboticLimbSegment.GetServo(0).ResetServo(-140);
     }

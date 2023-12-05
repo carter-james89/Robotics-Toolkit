@@ -78,7 +78,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
     {
         [SerializeField]
         private bool _simulationMode = false;
-        [SerializeField]
+   
         private IRoboticLimb[] m_limbs;
 
         [SerializeField]
@@ -96,6 +96,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         protected enum Status
         {
             NotReady,
+            WaitingForInitialLimbPlacement,
             MovingToReadyHeight,
             Ready,
             WaitingForPhysics
@@ -116,17 +117,17 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         protected virtual void Awake()
         {
-           
+            m_limbs = new QuadrupedLeg[4] { m_flLimb, m_frLimb, m_brLimb, m_blLimb };
         }
         protected virtual void Start()
         {
             if (SimulationMode())
             {
-                var hipAngle = 80;
-                var kneeAngle = -160;
+                var hipAngle = 70;
+                var kneeAngle = -130;
                 SetLimbs(new QuadrupedLimbData(0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle));
-                _status = Status.WaitingForPhysics;
-                _physicsInitializedTime = Time.timeSinceLevelLoad;
+                _status = Status.WaitingForInitialLimbPlacement;
+              
                 ToggleColliders(false);
             }
         }
@@ -157,15 +158,8 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             _controller = _controllerObject.GetComponent<IRoboticController>();
             _controller.SubscribeToControllerEvents(this);
             _controller.Initialize(this);
-            _isRunning = true;
-
-            var height = transform.position.y - GetLowestFoot().y;
-
-           GetComponent<ArticulationBody>().TeleportRoot(new Vector3(transform.position.x, height + .05f, transform.position.z), transform.rotation);
-
-
-            ToggleColliders(true);
-          GetComponent<ArticulationBody>().immovable = false;
+            _isRunning = true;    
+        //  
 
 
             _controller.SetRobotHeight(_readyHeight, .01f);
@@ -174,7 +168,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         protected virtual void Update()
         {
-          //  Debug.Log("Update" + _status);
+            Debug.Log("Update" + _status);
             switch (_status)
             {
                 case Status.NotReady:
@@ -182,8 +176,27 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                 case Status.Ready:
                     Run();
                     break;
+                case Status.WaitingForInitialLimbPlacement:
+                    bool allServosReady = true;
+                    foreach (var limb in m_limbs)
+                    {
+                        if(!(limb as QuadrupedLeg).SegmentsAtTarget(1f))
+                        {
+                            allServosReady = false;
+                        }
+                    }
+                    if (allServosReady)
+                    {
+                        var height = transform.position.y - GetLowestFoot().y;
+                        GetComponent<ArticulationBody>().TeleportRoot(new Vector3(transform.position.x, height + .05f, transform.position.z), transform.rotation);
+                        ToggleColliders(true);
+                        GetComponent<ArticulationBody>().immovable = false;
+                        _physicsInitializedTime = Time.timeSinceLevelLoad;
+                        _status = Status.WaitingForPhysics;
+                    }
+                    break;
                 case Status.WaitingForPhysics:
-                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 2)
+                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 10)
                     {
                         Bootup();
                     }
