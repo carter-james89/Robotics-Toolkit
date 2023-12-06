@@ -62,12 +62,11 @@ namespace RoboticsToolkit.Robotics.Gaits
             arcHeight = height;
             this.speed = speed;
 
-            // Calculate the effective distance considering both horizontal and vertical components
+            // Calculate only the horizontal distance
             float horizontalDistance = Vector3.Distance(new Vector3(startPosition.x, 0, startPosition.z), new Vector3(endPosition.x, 0, endPosition.z));
-            float verticalDistance = Mathf.Abs(endPosition.y - startPosition.y) + arcHeight; // Adding arcHeight to account for the vertical movement
-            float effectiveDistance = horizontalDistance + verticalDistance;
 
-            trajectoryDuration = effectiveDistance / speed;
+            // Calculate trajectory duration based on horizontal distance only
+            trajectoryDuration = horizontalDistance / speed;
             elapsedTime = 0;
             isMoving = true;
             CurrentStatus = Status.Rotating;

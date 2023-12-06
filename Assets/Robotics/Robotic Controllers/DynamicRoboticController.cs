@@ -336,15 +336,10 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
             case IRobotEventListener.EventType.OnRobotInitialized:
                 break;
             case IRobotEventListener.EventType.OnRobotInPosition:
-                //foreach (var item in m_legBundles)
-                //{
-                //    item.IKLimbPositioner.RotateToPosition(item.IKLimbPositioner.transform.position, .1f, 1);
-                //}
-                //AdvancedLimbPositioner[] positioners = m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray();
-
-                // _gaitController.BeginMovement(positioners, IGaitController.GaitPattern.STATIONARYSTEP, Vector3.zero, false);
+                //_gaitController.s
                 // _gaitController.PerformHighStep(.05f, .01f);
-                (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .03f, .01f, .04f);
+                  (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .03f, .01f, .04f);
+                //(_gaitController as GaitController).TrotForward(IKLimbPositioners, .015f, .05f, .02f);
                 break;
             case IRobotEventListener.EventType.OnLimbsPositioned:
                 break;

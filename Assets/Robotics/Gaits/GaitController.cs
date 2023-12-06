@@ -1,5 +1,6 @@
 using RoboticsToolkit.Robotics;
 using RoboticsToolkit.Robotics.Limbs;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -96,7 +97,21 @@ namespace RoboticsToolkit.Robotics.Gaits
                 m_currentPattern = IGaitController.GaitPattern.CRAWL;
             }
         }
+        public void TrotForward(ILimbPositioner[] limbs, float height, float speed, float stride)
+        {
+            _speed = speed;
+            m_activeGait = m_trotGait;
+            bool approved = m_activeGait.RequestBeginCMD(this, limbs);
 
+            if (approved)
+            {
+                m_activeGait.SubscribeToEvents(this);
+                m_activeGait.SetStrideValues(stride, height);
+                m_activeGait.SetNextCycle(transform.forward, limbs, speed, false);
+
+                m_currentPattern = IGaitController.GaitPattern.TROT;
+            }
+        }
 
 
         public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern pattern, Vector3 direction, bool rotate)
@@ -325,6 +340,8 @@ namespace RoboticsToolkit.Robotics.Gaits
 
 
         }
+
+      
     }
 }
 

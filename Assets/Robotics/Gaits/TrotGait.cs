@@ -12,63 +12,57 @@ namespace RoboticsToolkit.Robotics.Gaits
 
         public override void CheckLimbPositions(ILimbPositioner[] limbPositioners)
         {
+            foreach (ILimbPositioner limb in limbPositioners)
+            {
+                if (!limb.LimbAtTarget())
+                {
+                    return;
+                }
+            }
+            NotifyListeners(EventType.OnGaitPointHit);
 
+            if (_currentStrideCount == 3)
+            {
+                NotifyListeners(EventType.OnGaitCycleComplete);
+            }
         }
-
 
 
         public override void SetNextCycle(Vector3 direction, ILimbPositioner[] m_limbs, float speed, bool rotate)
         {
-            float distance = m_strideDistance;
-            if (_currentStrideCount == 0)
-            {
-                distance /= 2;
-            }
-            switch (m_stridePosition)
+            Debug.Log("Set next crawl cycle : " + m_strideDistance);
+            m_rotatingLimbs.Clear();
+            m_translatingLimbs.Clear();
+            var distance = m_strideDistance / 2;
+            switch (_currentStrideCount)
             {
                 case 0:
-                    m_rotatingLimbs[0] = m_limbs[0];
-                    m_rotatingLimbs[1] = m_limbs[2];
-                    m_translatingLimbs[0] = m_limbs[1];
-                    m_translatingLimbs[1] = m_limbs[3];
+                    m_rotatingLimbs.Add(m_limbs[2]);//br
+                    m_rotatingLimbs.Add(m_limbs[0]);
+                    m_translatingLimbs.Add(m_limbs[1]);
+                    m_translatingLimbs.Add(m_limbs[3]);
                     break;
                 case 1:
-                    m_rotatingLimbs[0] = m_limbs[1];
-                    m_rotatingLimbs[1] = m_limbs[3];
-                    m_translatingLimbs[0] = m_limbs[0];
-                    m_translatingLimbs[1] = m_limbs[2];
-                    break;
-                default:
+                    m_rotatingLimbs.Add(m_limbs[1]);//fr
+                    m_translatingLimbs.Add(m_limbs[0]);
+                    m_translatingLimbs.Add(m_limbs[2]);
+                    m_rotatingLimbs.Add(m_limbs[3]);
                     break;
             }
-
-            if (!rotate)
+            foreach (var limb in m_rotatingLimbs)
             {
-                foreach (var limb in m_rotatingLimbs)
-                {
-                    (limb as AdvancedLimbPositioner).RotateToPosition(limb.GetGameObject().transform.position + direction * distance, .1f, m_strideHeight);
-                }
-                foreach (var limb in m_translatingLimbs)
-                {
-                    (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - direction * distance, .1f);
-                }
+                (limb as AdvancedLimbPositioner).RotateToPosition(limb.GetGameObject().transform.position + direction * distance, speed, m_strideHeight);
             }
-            else
+            foreach (var limb in m_translatingLimbs)
             {
-                (m_rotatingLimbs[0] as AdvancedLimbPositioner).RotateToPosition(m_rotatingLimbs[0].GetGameObject().transform.position - direction * distance, .1f, m_strideHeight);
-                (m_rotatingLimbs[1] as AdvancedLimbPositioner).RotateToPosition(m_rotatingLimbs[1].GetGameObject().transform.position + direction * distance, .1f, m_strideHeight);
-
-                (m_translatingLimbs[0] as AdvancedLimbPositioner).TranslateToPosition(m_rotatingLimbs[0].GetGameObject().transform.position + direction * distance, .1f);
-                (m_translatingLimbs[1] as AdvancedLimbPositioner).TranslateToPosition(m_rotatingLimbs[1].GetGameObject().transform.position - direction * distance, .1f);
-            }
-
-            m_stridePosition++;
-            if (m_stridePosition == 2)
-            {
-                m_stridePosition = 0;
+                (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - direction * distance, speed);
             }
 
             _currentStrideCount++;
+            if (_currentStrideCount > 2)
+            {
+                _currentStrideCount = 0;
+            }
         }
     }
 }

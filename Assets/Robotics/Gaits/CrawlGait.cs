@@ -61,7 +61,7 @@ namespace RoboticsToolkit.Robotics.Gaits
 
             }
             Debug.Log("Rotating Limb : " + m_rotatingLimbs[0].GetGameObject().name);
-            (m_rotatingLimbs[0] as AdvancedLimbPositioner).RotateToPosition(m_rotatingLimbs[0].GetGameObject().transform.position + direction.normalized * distance, speed*10, m_strideHeight);
+            (m_rotatingLimbs[0] as AdvancedLimbPositioner).RotateToPosition(m_rotatingLimbs[0].GetGameObject().transform.position + direction.normalized * distance, speed*4, m_strideHeight);
 
             foreach (var limb in m_translatingLimbs)
             {
