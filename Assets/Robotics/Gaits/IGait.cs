@@ -5,26 +5,27 @@ using UnityEngine;
 
 namespace RoboticsToolkit.Robotics.Gaits
 {
+    public enum EventType
+    {
+        OnGaitCycleBegin,
+        OnGaitPointHit,
+        OnGaitCycleComplete,
+        OnGaitReturnedHome
+    }
+    public struct GaitEventData
+    {
+        public EventType EventType;
+
+        public IGait Gait;
+        public GaitEventData(EventType eventType, IGait gait)
+        {
+            EventType = eventType;
+
+            Gait = gait;
+        }
+    }
     public interface IGaitEventListener
     {
-        public enum EventType
-        {
-            OnGaitCycleBegin,
-            OnGaitCycleComplete,
-            OnGaitReturnedHome
-        }
-        public struct GaitEventData
-        {
-            public EventType EventType;
-           
-            public IGait Gait;
-            public GaitEventData(EventType eventType,  IGait gait)
-            {
-                EventType = eventType;
-          
-                Gait = gait;
-            }
-        }
         public void OnGaitEventOccured(GaitEventData eventData);
     }
     public interface IGait
@@ -47,8 +48,8 @@ namespace RoboticsToolkit.Robotics.Gaits
         public bool RequestBeginCMD(IGaitController requestingController, ILimbPositioner[] limbPositioners);
         public void ReturnHome();
         public void Stop();
-        public void RunGait();
-        public void SetNextCycle(Vector3 direction, ILimbPositioner[] limbPositioners, bool rotate);
+        public void CheckLimbPositions(ILimbPositioner[] limbPositioners);
+        public void SetNextCycle(Vector3 direction, ILimbPositioner[] limbPositioners, float speed, bool rotate);
         public bool IsRunning();
         public void SubscribeToEvents(IGaitEventListener listener);
         public void UnubscribeFromEvents(IGaitEventListener listener);

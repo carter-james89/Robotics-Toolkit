@@ -686,9 +686,9 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 46
+  m_Constraints: 126
   m_CollisionDetection: 1
 --- !u!65 &431365434
 BoxCollider:
@@ -3554,18 +3554,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 585883530}
     m_Modifications:
-    - target: {fileID: 3854508090139561226, guid: 03bcae0b2d866234688ab33c9607bcab, type: 3}
-      propertyPath: m_XDrive.damping
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 3854508090139561226, guid: 03bcae0b2d866234688ab33c9607bcab, type: 3}
-      propertyPath: m_XDrive.stiffness
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3854508090139561226, guid: 03bcae0b2d866234688ab33c9607bcab, type: 3}
-      propertyPath: m_XDrive.forceLimit
-      value: 0.3
-      objectReference: {fileID: 0}
     - target: {fileID: 3854508090139561229, guid: 03bcae0b2d866234688ab33c9607bcab, type: 3}
       propertyPath: m_Name
       value: FL Bittle Leg (Hip Servo)
@@ -3642,6 +3630,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 471254779}
     m_Modifications:
+    - target: {fileID: 8437468994046911833, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[0].value
+      value: 0.005601883
+      objectReference: {fileID: 0}
+    - target: {fileID: 8437468994679275550, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
+      propertyPath: m_Parameters.widthCurve.m_Curve.Array.data[0].value
+      value: 0.005601883
+      objectReference: {fileID: 0}
     - target: {fileID: 8437468995056635138, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
       propertyPath: m_RootOrder
       value: -1

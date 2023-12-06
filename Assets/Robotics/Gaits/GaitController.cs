@@ -5,20 +5,19 @@ using UnityEngine;
 
 namespace RoboticsToolkit.Robotics.Gaits
 {
-    public class GaitController : MonoBehaviour, IGaitController//,/ IGaitEventListener
+    public class GaitController : MonoBehaviour, IGaitController, IGaitEventListener
     {
-        private IRoboticLimb[] m_limbs;
-       // private IRobot m_robot;
+        private IRoboticLimb[] _puppetLimbs;
+        private ILimbPositioner[] _limbPositioners;
+        // private IRobot m_robot;
 
         private bool m_postStrideCooldown = false;
         private float m_postStrideCooldownTime = 0;
-        private float m_postStrideCooldownTargetTime = .2f;
+        private float m_postStrideCooldownTargetTime = .5f;
 
         private Vector3 _currentWalkDirection;
         private bool _rotating = false;
 
-      //  [SerializeField]
-       // private QuadrupedCrawlGait m_crawlGait;
         [SerializeField]
         private TrotGait m_trotGait;
         [SerializeField]
@@ -33,24 +32,14 @@ namespace RoboticsToolkit.Robotics.Gaits
         private enum GaitType
         {
             Crawl,
-            Trot,       
+            Trot,
         }
         private GaitType _gaitType = GaitType.Crawl;
 
-        public void Initialize(IRoboticLimb[] limbs)
+        public void Initialize(ILimbPositioner[] limbPositioners, IRoboticLimb[] puppetLimbs)
         {
-            // m_robot = robot;
-            m_limbs = limbs;// robot.GetLimbs();
-
-            // m_activeGait = GetComponent<IGait>();
-
-            foreach (var item in m_limbs)
-            {
-
-            }
-
-            //  m_trotGait.Initialize(m_robot);
-            // m_crawlGait.Initialize(m_robot);
+            _puppetLimbs = puppetLimbs;
+            _limbPositioners = limbPositioners;
         }
         [SerializeField]
         private float m_forwardTrotStrideDistance = .04f;
@@ -74,31 +63,38 @@ namespace RoboticsToolkit.Robotics.Gaits
         {
 
         }
+        private float _speed;
 
-        public void PerformHighStep(ILimbPositioner[] limbs, float height, float speed)
+        public void PerformHighStep(float height, float speed)
         {
+            _speed = speed;
+            m_activeGait = m_crawlGait;
+            bool approved = m_activeGait.RequestBeginCMD(this, _limbPositioners);
+           
+            if (approved)
+            {
+                m_activeGait.SubscribeToEvents(this);
+                m_activeGait.SetStrideValues(0, height);
+                m_activeGait.SetNextCycle(transform.forward, _limbPositioners, speed, false);
+
+                m_currentPattern = IGaitController.GaitPattern.STATIONARYSTEP;
+            }
+        }
+
+        public void CrawlForward(ILimbPositioner[] limbs, float height, float speed, float stride)
+        {
+            _speed = speed;
             m_activeGait = m_crawlGait;
             bool approved = m_activeGait.RequestBeginCMD(this, limbs);
 
             if (approved)
             {
-                m_activeGait.SetStrideValues(0, height);
-                m_activeGait.SetNextCycle(transform.forward, limbs, false);
+                m_activeGait.SubscribeToEvents(this);
+                m_activeGait.SetStrideValues(stride, height);
+                m_activeGait.SetNextCycle(transform.forward, limbs, speed, false);
 
-                m_currentPattern = IGaitController.GaitPattern.STATIONARYSTEP;
+                m_currentPattern = IGaitController.GaitPattern.CRAWL;
             }
-
-
-            //switch (_gaitType)
-            //{
-            //    case GaitType.Crawl:
-            //        (limbs[0] as AdvancedLimbPositioner).RotateToPosition(limbs[0].GetGameObject().transform.position, speed, height);
-            //        break;
-            //    case GaitType.Trot:
-            //        break;
-            //    default:
-            //        break;
-            //}
         }
 
 
@@ -116,7 +112,7 @@ namespace RoboticsToolkit.Robotics.Gaits
                     m_trotGait.SetStrideDistance(0);
                     break;
                 case IGaitController.GaitPattern.CRAWL:
-                   // m_activeGait = m_crawlGait;
+                    // m_activeGait = m_crawlGait;
                     break;
                 case IGaitController.GaitPattern.TROT:
                     m_activeGait = m_trotGait;
@@ -131,7 +127,7 @@ namespace RoboticsToolkit.Robotics.Gaits
             {
                 // m_activeGait.SubscribeToEvents(this);
                 m_activeGait.Begin();
-                m_activeGait.SetNextCycle(direction, limbs, _rotating);
+                //  m_activeGait.SetNextCycle(direction, limbs, _rotating);
             }
         }
 
@@ -143,17 +139,17 @@ namespace RoboticsToolkit.Robotics.Gaits
                 {
                     if (Input.GetKey(KeyCode.LeftShift))
                     {
-                       // m_trotGait.SetStrideValues(m_idleTrotStrideDistance, m_idleTrotStrideTime, m_idleTrotStrideCoolDownTime);
+                        // m_trotGait.SetStrideValues(m_idleTrotStrideDistance, m_idleTrotStrideTime, m_idleTrotStrideCoolDownTime);
                     }
                     else
                     {
-                       // m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
+                        // m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
                     }
-                //    BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.forward,false);
+                    //    BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.forward,false);
                 }
                 else if (Input.GetKey(KeyCode.RightArrow))
                 {
-                    foreach (var limb in m_limbs)
+                    foreach (var limb in _puppetLimbs)
                     {
                         // if(limb.is)
                     }
@@ -163,8 +159,8 @@ namespace RoboticsToolkit.Robotics.Gaits
             {
                 if (m_currentPattern == IGaitController.GaitPattern.NONE)
                 {
-                  //  m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
-                  //  BeginMovement(limbs, IGaitController.GaitPattern.TROT, -m_robot.GetGimbal().GetGameObject().transform.forward,false);
+                    //  m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
+                    //  BeginMovement(limbs, IGaitController.GaitPattern.TROT, -m_robot.GetGimbal().GetGameObject().transform.forward,false);
                 }
             }
             else if (Input.GetKey(KeyCode.RightArrow))
@@ -173,13 +169,13 @@ namespace RoboticsToolkit.Robotics.Gaits
                 {
                     if (Input.GetKey(KeyCode.LeftShift))
                     {
-                      //  m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
-                     //   BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right,true);
+                        //  m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
+                        //   BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right,true);
                     }
                     else
                     {
-                      //  m_trotGait.SetStrideValues(m_rotatingTrotStrideDistance, m_rotatingTrotStrideTime, m_rotatingTrotStrideCoolDownTime);
-                     //   BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right, true);
+                        //  m_trotGait.SetStrideValues(m_rotatingTrotStrideDistance, m_rotatingTrotStrideTime, m_rotatingTrotStrideCoolDownTime);
+                        //   BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right, true);
                     }
                 }
             }
@@ -189,13 +185,13 @@ namespace RoboticsToolkit.Robotics.Gaits
                 {
                     if (Input.GetKey(KeyCode.LeftShift))
                     {
-                     //   m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
-                    //    BeginMovement(limbs, IGaitController.GaitPattern.TROT, -m_robot.GetGimbal().GetGameObject().transform.right, false);
+                        //   m_trotGait.SetStrideValues(m_forwardTrotStrideDistance, m_forwardTrotStrideTime, m_forwardTrotStrideCoolDownTime);
+                        //    BeginMovement(limbs, IGaitController.GaitPattern.TROT, -m_robot.GetGimbal().GetGameObject().transform.right, false);
                     }
                     else
                     {
-                     //   m_trotGait.SetStrideValues(m_rotatingTrotStrideDistance, m_rotatingTrotStrideTime, m_rotatingTrotStrideCoolDownTime);
-                      //  BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right, false);
+                        //   m_trotGait.SetStrideValues(m_rotatingTrotStrideDistance, m_rotatingTrotStrideTime, m_rotatingTrotStrideCoolDownTime);
+                        //  BeginMovement(limbs, IGaitController.GaitPattern.TROT, m_robot.GetGimbal().GetGameObject().transform.right, false);
                     }
                 }
             }
@@ -204,63 +200,29 @@ namespace RoboticsToolkit.Robotics.Gaits
                 m_beginReturnHome = true;
             }
         }
-        public void Run(IRoboticLimb[] mirrorLimbs, ILimbPositioner[] limbPositioners)
+        public void Run()
         {
-           // return;
-            //  ProcessUserInput(limbPositioners);
             if (m_currentPattern == IGaitController.GaitPattern.NONE)
             {
                 return;
             }
-            //  if (m_running)
-            //  {
-            List<ILimbPositioner> ikTargetsAtTarget = new List<ILimbPositioner>();
-
-            foreach (var limb in limbPositioners)
+            if (!m_postStrideCooldown)
             {
-                if (limb.StrideComplete() == true)
+                if(m_activeGait != null)
                 {
-                    ikTargetsAtTarget.Add(limb);
-                }
-                else
-                {
-                    // Debug.Log("Waiting for : " + limb.GetGameObject().name);
+                    m_activeGait.CheckLimbPositions(_limbPositioners);
                 }
             }
-            //Debug.Log(m_limbsAtTarget.Count);
-            if (ikTargetsAtTarget.Count > 3)
-            {
-                m_postStrideCooldown = true;
-            }
-
-
-            if (m_postStrideCooldown)
+            else
             {
                 m_postStrideCooldownTime += Time.deltaTime;
                 if (m_postStrideCooldownTime >= m_postStrideCooldownTargetTime)
                 {
                     m_postStrideCooldown = false;
-                    m_postStrideCooldownTime = 0;
-
-                    m_activeGait.SetNextCycle(_currentWalkDirection, limbPositioners, _rotating);
-                  
-
-                    //NotifyListeners(IGaitEventListener.EventType.OnGaitCycleComplete);
-                    bool atHome = true;
-                    foreach (var item in limbPositioners)
-                    {
-                        //  if (item.GetIKTargetPos() != item.GetPositioner().GetGameObject().transform.position)
-                        // {
-                        //      atHome = false;
-                        //  }
-                    }
-                    if (atHome)
-                    {
-                        //  NotifyListeners(IGaitEventListener.EventType.OnGaitReturnedHome);
-                    }
+                    m_activeGait.SetNextCycle(transform.forward, _limbPositioners, _speed, _rotating);
                 }
             }
-          //  return false;
+            //  return false;
         }
 
         public bool IsRunning()
@@ -278,10 +240,10 @@ namespace RoboticsToolkit.Robotics.Gaits
                 case IGaitController.GaitPattern.STATIONARYSTEP:
                     m_activeGait = m_trotGait;
                     m_trotGait.SetStrideDistance(0);
-                    
+
                     break;
                 case IGaitController.GaitPattern.CRAWL:
-                   // m_activeGait = m_crawlGait;
+                    // m_activeGait = m_crawlGait;
                     break;
                 case IGaitController.GaitPattern.TROT:
                     m_activeGait = m_trotGait;
@@ -306,49 +268,63 @@ namespace RoboticsToolkit.Robotics.Gaits
             throw new System.NotImplementedException();
         }
 
-     
+        public void OnGaitEventOccured(GaitEventData eventData)
+        {
+            switch (eventData.EventType)
+            {
+                case EventType.OnGaitCycleBegin:
+                    break;
+                case EventType.OnGaitPointHit:
+                    m_postStrideCooldownTime = 0;
+                    m_postStrideCooldown = true;
+                //    m_activeGait.SetNextCycle(_currentWalkDirection, _limbPositioners, _speed, _rotating);
+                    break;
+                case EventType.OnGaitCycleComplete:
+                    break;
+                case EventType.OnGaitReturnedHome:
+                    break;
+                default:
+                    break;
+            }
+            //switch (eventData.EventType)
+            //{
+            //    case IGaitEventListener.EventType.OnGaitCycleBegin:
+            //        break;
+            //    case IGaitEventListener.EventType.OnGaitCycleComplete:
+            //        if (m_currentPattern != IGaitController.GaitPattern.NONE)
+            //        {
+            //            if (m_beginReturnHome)
+            //            {
+            //                m_activeGait.ReturnHome();
+            //                m_activeGait.SetNextCycle();
+            //                m_currentPattern = IGaitController.GaitPattern.RETURNING_HOME;
+            //                m_beginReturnHome = false;
+            //            }
+            //            else if (m_currentPattern == IGaitController.GaitPattern.RETURNING_HOME)
+            //            {
+            //                Debug.Log("gait at home");
+            //                m_activeGait.UnubscribeFromEvents(this);
+            //                m_activeGait.Stop();
+            //                m_activeGait = null;
+            //                m_currentPattern = IGaitController.GaitPattern.NONE;
+            //            }
+            //            else
+            //            {
+            //                m_activeGait.SetNextCycle();
+            //            }
+            //        }
+            //        break;
+            //    case IGaitEventListener.EventType.OnGaitReturnedHome:
 
-        //    public void OnGaitEventOccured(IGaitEventListener.GaitEventData eventData)
-        //    {
-        //        switch (eventData.EventType)
-        //        {
-        //            case IGaitEventListener.EventType.OnGaitCycleBegin:
-        //                break;
-        //            case IGaitEventListener.EventType.OnGaitCycleComplete:
-        //                if (m_currentPattern != IGaitController.GaitPattern.NONE)
-        //                {
-        //                    if (m_beginReturnHome)
-        //                    {
-        //                        m_activeGait.ReturnHome();
-        //                        m_activeGait.SetNextCycle();
-        //                        m_currentPattern = IGaitController.GaitPattern.RETURNING_HOME;
-        //                        m_beginReturnHome = false;
-        //                    }
-        //                    else if (m_currentPattern == IGaitController.GaitPattern.RETURNING_HOME)
-        //                    {
-        //                        Debug.Log("gait at home");
-        //                        m_activeGait.UnubscribeFromEvents(this);
-        //                        m_activeGait.Stop();
-        //                        m_activeGait = null;
-        //                        m_currentPattern = IGaitController.GaitPattern.NONE;
-        //                    }
-        //                    else
-        //                    {
-        //                        m_activeGait.SetNextCycle();
-        //                    }
-        //                }
-        //                break;
-        //            case IGaitEventListener.EventType.OnGaitReturnedHome:
+            //        break;
+            //    default:
+            //        break;
+            //}
 
-        //                break;
-        //            default:
-        //                break;
-        //        }
-
-        //        //   SetGaitPattern(IGaitController.GaitPattern.NONE);
+            //   SetGaitPattern(IGaitController.GaitPattern.NONE);
 
 
-        //    }
+        }
     }
 }
 

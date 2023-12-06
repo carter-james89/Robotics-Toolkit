@@ -290,7 +290,7 @@ ArticulationBody:
     upperLimit: 270
     stiffness: 10000
     damping: 0.01
-    forceLimit: 0.3
+    forceLimit: 2
     target: 0
     targetVelocity: 0
     driveType: 2
@@ -312,9 +312,9 @@ ArticulationBody:
     target: 0
     targetVelocity: 0
     driveType: 0
-  m_LinearDamping: 0.01
-  m_AngularDamping: 0.5
-  m_JointFriction: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 4
+  m_JointFriction: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -633,7 +633,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3854508090582863137}
-  m_Material: {fileID: 13400000, guid: b40b29c5510b24d40b5213dcc1fcb403, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -725,7 +725,7 @@ ArticulationBody:
     upperLimit: 150
     stiffness: 10000
     damping: 0.01
-    forceLimit: 0.3
+    forceLimit: 2
     target: 0
     targetVelocity: 0
     driveType: 2
@@ -747,9 +747,9 @@ ArticulationBody:
     target: 0
     targetVelocity: 0
     driveType: 0
-  m_LinearDamping: 0.01
-  m_AngularDamping: 0.5
-  m_JointFriction: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 4
+  m_JointFriction: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}

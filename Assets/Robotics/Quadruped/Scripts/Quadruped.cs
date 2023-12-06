@@ -168,7 +168,6 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         protected virtual void Update()
         {
-            Debug.Log("Update" + _status);
             switch (_status)
             {
                 case Status.NotReady:
@@ -196,7 +195,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                     }
                     break;
                 case Status.WaitingForPhysics:
-                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 3)
+                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 2)
                     {
                         Bootup();
                     }

@@ -5,6 +5,8 @@ namespace RoboticsToolkit.Robotics.Gaits
 {
     public class AdvancedLimbPositioner : MonoBehaviour, ILimbPositioner
     {
+        [SerializeField]
+        private Transform _targetEndPoint;
         public Transform _ikTarget;
         public float speed = 1.0f;
         public float arcHeight = 1.0f;
@@ -53,8 +55,10 @@ namespace RoboticsToolkit.Robotics.Gaits
                 return;
             }
 
-            startPosition = _ikTarget.transform.position;
-            endPosition = position;
+            _targetEndPoint.position = position;
+
+            startPosition = _ikTarget.transform.localPosition;
+            endPosition = transform.InverseTransformPoint(position);
             arcHeight = height;
             this.speed = speed;
 
@@ -70,6 +74,49 @@ namespace RoboticsToolkit.Robotics.Gaits
         }
 
 
+        //private void MoveAlongArc()
+        //{
+        //    if (_ikTarget == null)
+        //    {
+        //        return;
+        //    }
+
+        //    elapsedTime += Time.deltaTime;
+        //    if (elapsedTime < trajectoryDuration)
+        //    {
+        //        float linearT = elapsedTime / trajectoryDuration;
+        //        float heightT;
+
+        //        if (startPosition == endPosition)
+        //        {
+        //            // Vertical lift and descent
+        //            if (linearT <= 0.5f)
+        //            {
+        //                // First half of the trajectory (going up)
+        //                heightT = Mathf.Lerp(0, arcHeight, linearT * 2);
+        //            }
+        //            else
+        //            {
+        //                // Second half of the trajectory (going down)
+        //                heightT = Mathf.Lerp(arcHeight, 0, (linearT - 0.5f) * 2);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            // Normal arc
+        //            heightT = Mathf.Sin(Mathf.PI * linearT) * arcHeight;
+        //        }
+
+        //        Vector3 basePosition = Vector3.Lerp(startPosition, endPosition, linearT);
+        //        Vector3 arcPosition = basePosition + Vector3.up * heightT;
+
+        //        _ikTarget.transform.localPosition = arcPosition;
+        //    }
+        //    else
+        //    {
+        //        AtTarget();
+        //    }
+        //}
         private void MoveAlongArc()
         {
             if (_ikTarget == null)
@@ -81,19 +128,18 @@ namespace RoboticsToolkit.Robotics.Gaits
             if (elapsedTime < trajectoryDuration)
             {
                 float linearT = elapsedTime / trajectoryDuration;
-                float heightT;
+                float easedT = 1 - (1 - linearT) * (1 - linearT); // Quadratic ease-out
 
+                float heightT;
                 if (startPosition == endPosition)
                 {
                     // Vertical lift and descent
                     if (linearT <= 0.5f)
                     {
-                        // First half of the trajectory (going up)
                         heightT = Mathf.Lerp(0, arcHeight, linearT * 2);
                     }
                     else
                     {
-                        // Second half of the trajectory (going down)
                         heightT = Mathf.Lerp(arcHeight, 0, (linearT - 0.5f) * 2);
                     }
                 }
@@ -103,17 +149,22 @@ namespace RoboticsToolkit.Robotics.Gaits
                     heightT = Mathf.Sin(Mathf.PI * linearT) * arcHeight;
                 }
 
-                Vector3 basePosition = Vector3.Lerp(startPosition, endPosition, linearT);
+                Vector3 basePosition = Vector3.Lerp(startPosition, endPosition, easedT);
                 Vector3 arcPosition = basePosition + Vector3.up * heightT;
 
-                _ikTarget.transform.position = arcPosition;
+                if (elapsedTime > 0)
+                {
+                    Vector3 previousPosition = Vector3.Lerp(startPosition, endPosition, easedT - Time.deltaTime / trajectoryDuration) + Vector3.up * heightT;
+                    Debug.DrawLine(previousPosition, arcPosition, Color.red);
+                }
+
+                _ikTarget.transform.localPosition = arcPosition;
             }
             else
             {
                 AtTarget();
             }
         }
-
 
         public void TranslateToPosition(Vector3 position, float speed)
         {
@@ -123,8 +174,9 @@ namespace RoboticsToolkit.Robotics.Gaits
                 return;
             }
 
-            startPosition = _ikTarget.transform.position;
-            endPosition = position;
+            _targetEndPoint.position = position;
+            startPosition = _ikTarget.transform.localPosition;
+            endPosition = transform.InverseTransformPoint(position);
             this.speed = speed;
 
             // Calculate the duration based on the distance to the new position and the speed
@@ -143,13 +195,14 @@ namespace RoboticsToolkit.Robotics.Gaits
             {
                 return;
             }
+            Debug.DrawLine(startPosition, endPosition, Color.green);
 
             elapsedTime += Time.deltaTime;
             if (elapsedTime < trajectoryDuration)
             {
                 float linearT = elapsedTime / trajectoryDuration;
                 Vector3 newPosition = Vector3.Lerp(startPosition, endPosition, linearT);
-                _ikTarget.transform.position = newPosition;
+                _ikTarget.transform.localPosition = newPosition;
             }
             else
             {
@@ -160,7 +213,7 @@ namespace RoboticsToolkit.Robotics.Gaits
 
         private void AtTarget()
         {
-            _ikTarget.transform.position = endPosition;
+            _ikTarget.transform.localPosition = endPosition;
             isMoving = false;
             CurrentStatus = Status.None;
         }
@@ -190,7 +243,7 @@ namespace RoboticsToolkit.Robotics.Gaits
             throw new System.NotImplementedException();
         }
 
-        public bool StrideComplete()
+        public bool LimbAtTarget()
         {
             return !isMoving;
         }

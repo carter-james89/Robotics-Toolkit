@@ -49,10 +49,7 @@ namespace RoboticsToolkit.Robotics.Gaits
           
         }
 
-        public void RunGait()
-        {
-          
-        }
+        public abstract void CheckLimbPositions(ILimbPositioner[] limbPositioners);
 
         public bool IsRunning()
         {
@@ -64,7 +61,7 @@ namespace RoboticsToolkit.Robotics.Gaits
             throw new System.NotImplementedException();
         }
 
-        public abstract void SetNextCycle(Vector3 direction, ILimbPositioner[] limbPositioners, bool rotate);
+        public abstract void SetNextCycle(Vector3 direction, ILimbPositioner[] limbPositioners, float speed, bool rotate);
 
         public void Stop()
         {
@@ -80,11 +77,12 @@ namespace RoboticsToolkit.Robotics.Gaits
         {
            _eventManager.RemoveListener(listener);
         }
-        private void NotifyListeners(IGaitEventListener.EventType eventType)
+        protected void NotifyListeners(EventType eventType)
         {
+            Debug.Log("Fire Gait Event : " + eventType.ToString());
             foreach (var item in _eventManager.GetListeners())
             {
-                item.OnGaitEventOccured(new IGaitEventListener.GaitEventData(eventType, this));
+                item.OnGaitEventOccured(new GaitEventData(eventType, this));
             }
         }
 

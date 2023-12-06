@@ -126,7 +126,7 @@ namespace RoboticsToolkit.Robotics.Limbs
         {
             if (CurrentStatus == Status.None)
             {
-                return StrideComplete();
+                return LimbAtTarget();
             }
 
             float velocity = m_gaitVelocity;
@@ -155,7 +155,7 @@ namespace RoboticsToolkit.Robotics.Limbs
                 {
                     //Debug.Log("Limb at Target : " + name + " : " + transform.InverseTransformPoint(m_limb.GetIKTargetPos()).z);
                 }
-                return StrideComplete();
+                return LimbAtTarget();
             }
             else
             {
@@ -170,9 +170,9 @@ namespace RoboticsToolkit.Robotics.Limbs
 
             m_limb.SetIKTargetPos(m_stride.TransformPoint(desiredPos));
 
-            return StrideComplete();
+            return LimbAtTarget();
         }
-        public bool StrideComplete()
+        public bool LimbAtTarget()
         {
             //  Debug.Log(transform.parent.name + " " + CurrentStatus);
             if (CurrentStatus == Status.None) // && m_limb.LimbAtTarget() && m_limb.BaseAtTarget())

@@ -92,5 +92,15 @@ namespace RoboticsToolkit.Robotics.Gaits
         {
             throw new System.NotImplementedException();
         }
+
+        public void Initialize(ILimbPositioner[] limbPositioners, IRoboticLimb[] puppetLimbs)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void PerformHighStep(float height, float speed)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

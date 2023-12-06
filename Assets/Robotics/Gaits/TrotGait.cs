@@ -10,10 +10,14 @@ namespace RoboticsToolkit.Robotics.Gaits
     {
         private int m_stridePosition = 0;
 
-    
-   
+        public override void CheckLimbPositions(ILimbPositioner[] limbPositioners)
+        {
 
-        public override void SetNextCycle(Vector3 direction, ILimbPositioner[] m_limbs, bool rotate)
+        }
+
+
+
+        public override void SetNextCycle(Vector3 direction, ILimbPositioner[] m_limbs, float speed, bool rotate)
         {
             float distance = m_strideDistance;
             if (_currentStrideCount == 0)

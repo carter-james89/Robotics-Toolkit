@@ -14,7 +14,7 @@ public interface ILimbPositioner
 
     public void TranslateToPosition(Vector3 direction, Vector3 upDir, float distance, float time);
 
-    public bool StrideComplete();
+    public bool LimbAtTarget();
 
     public void SetLimbPosition(Vector3 globalPosition, bool localSpace);
 

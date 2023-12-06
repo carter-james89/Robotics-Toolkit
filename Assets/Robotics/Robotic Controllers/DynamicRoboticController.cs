@@ -93,7 +93,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
     
 
         _gaitController = GetComponent<GaitController>();
-        _gaitController.Initialize(quadToControl.GetLimbs());
+        _gaitController.Initialize(IKLimbPositioners, quadToControl.GetLimbs());
 
         CalculateLimbData(_robot);
 
@@ -164,6 +164,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         for (int i = 0; i < 4; i++)
         {
             IKLimbPositioners[i] = Instantiate(_limbPositionerPrefab).GetComponent<AdvancedLimbPositioner>();
+            IKLimbPositioners[i].name += MirrorLimbs[i].GetGameObject().name;
             IKLimbPositioners[i].gameObject.SetActive(true);
             IKLimbPositioners[i].transform.SetParent(m_ikTargets, false);
             IKLimbPositioners[i].transform.position = MirrorLimbs[i].GetEndPoint().position;
@@ -260,7 +261,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         }
 
         //_gaitController.Run(m_legBundles.Select(bundle => bundle.MirrorLeg).ToArray(), m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray());//have the gait controller position the ik targets
-       _gaitController.Run(MirrorLimbs, IKLimbPositioners);
+       _gaitController.Run();
         // QuadrupedLimbData returnData = new QuadrupedLimbData();
 
         var returnData = new LimbValues[4];
@@ -342,7 +343,8 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
                 //AdvancedLimbPositioner[] positioners = m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray();
 
                 // _gaitController.BeginMovement(positioners, IGaitController.GaitPattern.STATIONARYSTEP, Vector3.zero, false);
-                _gaitController.PerformHighStep(IKLimbPositioners, .015f, .01f);
+                // _gaitController.PerformHighStep(.05f, .01f);
+                (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .03f, .01f, .04f);
                 break;
             case IRobotEventListener.EventType.OnLimbsPositioned:
                 break;

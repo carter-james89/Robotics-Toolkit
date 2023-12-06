@@ -28,13 +28,13 @@ namespace RoboticsToolkit.Robotics.Gaits
             CRAWL,
             TROT
         }
-        public void Initialize(IRoboticLimb[] limbs);
-        public void Run(IRoboticLimb[] mirrorLimbs, ILimbPositioner[] limbs);
+        public void Initialize(ILimbPositioner[] limbPositioners, IRoboticLimb[] puppetLimbs);
+        public void Run();
 
 
-        public void PerformHighStep(ILimbPositioner[] limbs, float height, float speed);
+        public void PerformHighStep(float height, float speed);
 
-        public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern patern, Vector3 direction, bool rotate);
+       // public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern patern, Vector3 direction, bool rotate);
 
         public void SetGaitPattern(GaitPattern type);
         public GaitPattern GetGaitPattern();
