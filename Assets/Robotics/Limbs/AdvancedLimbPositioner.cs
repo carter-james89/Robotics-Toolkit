@@ -31,6 +31,7 @@ namespace RoboticsToolkit.Robotics.Gaits
         public Status CurrentStatus { get; private set; } = Status.None;
 
         private InterfaceEventManager<ILimbPositionerEventListener> _eventManager = new InterfaceEventManager<ILimbPositionerEventListener>("Advanced Limb Positioner");
+        private bool _useEasing = false;
 
         public void SubscribeToEvents(ILimbPositionerEventListener listener)
         {
@@ -45,6 +46,25 @@ namespace RoboticsToolkit.Robotics.Gaits
         void Update()
         {
       
+        }
+        public void RotateToPositionViaTime(Vector3 position, float height, float seconds)
+        {
+            if (_ikTarget == null)
+            {
+                Debug.LogError("IK Target is not assigned!");
+                return;
+            }
+
+            // Calculate the horizontal distance
+            Vector3 startPositionLocal = _ikTarget.transform.localPosition;
+            Vector3 endPositionLocal = transform.InverseTransformPoint(position);
+            float horizontalDistance = Vector3.Distance(new Vector3(startPositionLocal.x, 0, startPositionLocal.z), new Vector3(endPositionLocal.x, 0, endPositionLocal.z));
+
+            // Calculate the speed (distance per second)
+            float calculatedSpeed = horizontalDistance / seconds;
+
+            // Call the existing RotateToPosition with the calculated speed
+            RotateToPosition(position, calculatedSpeed, height);
         }
 
         public void RotateToPosition(Vector3 position, float speed, float height)
@@ -73,49 +93,6 @@ namespace RoboticsToolkit.Robotics.Gaits
         }
 
 
-        //private void MoveAlongArc()
-        //{
-        //    if (_ikTarget == null)
-        //    {
-        //        return;
-        //    }
-
-        //    elapsedTime += Time.deltaTime;
-        //    if (elapsedTime < trajectoryDuration)
-        //    {
-        //        float linearT = elapsedTime / trajectoryDuration;
-        //        float heightT;
-
-        //        if (startPosition == endPosition)
-        //        {
-        //            // Vertical lift and descent
-        //            if (linearT <= 0.5f)
-        //            {
-        //                // First half of the trajectory (going up)
-        //                heightT = Mathf.Lerp(0, arcHeight, linearT * 2);
-        //            }
-        //            else
-        //            {
-        //                // Second half of the trajectory (going down)
-        //                heightT = Mathf.Lerp(arcHeight, 0, (linearT - 0.5f) * 2);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            // Normal arc
-        //            heightT = Mathf.Sin(Mathf.PI * linearT) * arcHeight;
-        //        }
-
-        //        Vector3 basePosition = Vector3.Lerp(startPosition, endPosition, linearT);
-        //        Vector3 arcPosition = basePosition + Vector3.up * heightT;
-
-        //        _ikTarget.transform.localPosition = arcPosition;
-        //    }
-        //    else
-        //    {
-        //        AtTarget();
-        //    }
-        //}
         private void MoveAlongArc()
         {
             if (_ikTarget == null)
@@ -127,7 +104,7 @@ namespace RoboticsToolkit.Robotics.Gaits
             if (elapsedTime < trajectoryDuration)
             {
                 float linearT = elapsedTime / trajectoryDuration;
-                float easedT = 1 - (1 - linearT) * (1 - linearT); // Quadratic ease-out
+                float t = _useEasing ? 1 - (1 - linearT) * (1 - linearT) : linearT; // Apply easing if useEasing is true
 
                 float heightT;
                 if (startPosition == endPosition)
@@ -148,12 +125,12 @@ namespace RoboticsToolkit.Robotics.Gaits
                     heightT = Mathf.Sin(Mathf.PI * linearT) * arcHeight;
                 }
 
-                Vector3 basePosition = Vector3.Lerp(startPosition, endPosition, easedT);
+                Vector3 basePosition = Vector3.Lerp(startPosition, endPosition, t);
                 Vector3 arcPosition = basePosition + Vector3.up * heightT;
 
                 if (elapsedTime > 0)
                 {
-                    Vector3 previousPosition = Vector3.Lerp(startPosition, endPosition, easedT - Time.deltaTime / trajectoryDuration) + Vector3.up * heightT;
+                    Vector3 previousPosition = Vector3.Lerp(startPosition, endPosition, t - Time.deltaTime / trajectoryDuration) + Vector3.up * heightT;
                     Debug.DrawLine(previousPosition, arcPosition, Color.red);
                 }
 
@@ -164,6 +141,7 @@ namespace RoboticsToolkit.Robotics.Gaits
                 AtTarget();
             }
         }
+
 
         public void TranslateToPosition(Vector3 position, float speed)
         {

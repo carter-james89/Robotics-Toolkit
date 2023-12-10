@@ -94,7 +94,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
     
 
         _gaitController = GetComponent<GaitController>();
-        _gaitController.Initialize(IKLimbPositioners, quadToControl.GetLimbs());
+        _gaitController.Initialize(IKLimbPositioners, quadToControl.GetLimbs(),quadToControl.GetGimbal());
 
         CalculateLimbData(_robot);
 
@@ -212,10 +212,6 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
     [SerializeField]
     private float _activeBalanceSpeed = 1;
 
-
-
-
-
     public LimbValues[] CalculateLimbData(IRobot quadToControl)
     {
         if (_robot == null)
@@ -248,7 +244,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         if (_adjustingHeight)
         {
             _robotHeight = Mathf.MoveTowards(_robotHeight, _targetHeight, _heightAdjustmentSpeed * Time.deltaTime);
-            Debug.Log("adjusting height : " + _robotHeight);
+            //Debug.Log("adjusting height : " + _robotHeight);
         }
 
         for (int i = 0; i < 4; i++)//set the mirror legs to match the real robot
@@ -340,9 +336,9 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
                 break;
             case IRobotEventListener.EventType.OnRobotInPosition:
                 //_gaitController.s
-                // _gaitController.PerformHighStep(.05f, .01f);
+                // _gaitController.PerformHighStep(GaitType.Crawl,  .05f, .01f);
                 //  (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .03f, .01f, .04f);
-                (_gaitController as GaitController).TrotForward(IKLimbPositioners, .015f, .05f, .01f);
+                //(_gaitController as GaitController).TrotForward(IKLimbPositioners, .015f, .05f, .01f);
                 break;
             case IRobotEventListener.EventType.OnLimbsPositioned:
                 break;

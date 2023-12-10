@@ -290,7 +290,7 @@ ArticulationBody:
     upperLimit: 270
     stiffness: 10000
     damping: 0.01
-    forceLimit: 2
+    forceLimit: 3
     target: 0
     targetVelocity: 0
     driveType: 2
@@ -725,7 +725,7 @@ ArticulationBody:
     upperLimit: 150
     stiffness: 10000
     damping: 0.01
-    forceLimit: 2
+    forceLimit: 3
     target: 0
     targetVelocity: 0
     driveType: 2

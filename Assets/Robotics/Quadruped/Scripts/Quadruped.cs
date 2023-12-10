@@ -121,15 +121,17 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         }
         protected virtual void Start()
         {
+            ToggleColliders(false);
             if (SimulationMode())
             {
                 var hipAngle = 70;
                 var kneeAngle = -130;
                 SetLimbs(new QuadrupedLimbData(0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle));
+
                 _status = Status.WaitingForInitialLimbPlacement;
-              
-                ToggleColliders(false);
+
             }
+         
         }
         private void ToggleColliders(bool toggle)
         {
@@ -188,8 +190,12 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                     {
                         var height = transform.position.y - GetLowestFoot().y;
                         GetComponent<ArticulationBody>().TeleportRoot(new Vector3(transform.position.x, height + .05f, transform.position.z), transform.rotation);
-                        ToggleColliders(true);
-                        GetComponent<ArticulationBody>().immovable = false;
+                        if (SimulationMode())
+                        {
+                            ToggleColliders(true);
+                            GetComponent<ArticulationBody>().immovable = false;
+                        }
+                      
                         _physicsInitializedTime = Time.timeSinceLevelLoad;
                         _status = Status.WaitingForPhysics;
                     }
@@ -371,7 +377,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         IGimbal IRobot.GetGimbal()
         {
-            throw new NotImplementedException();
+            return GetComponentInChildren<IGimbal>();
         }
     }
 

@@ -1,3 +1,4 @@
+using RoboticsToolkit.Gimbal;
 using RoboticsToolkit.Robotics;
 using RoboticsToolkit.Robotics.Limbs;
 using System.Collections;
@@ -28,11 +29,11 @@ namespace RoboticsToolkit.Robotics.Gaits
             CRAWL,
             TROT
         }
-        public void Initialize(ILimbPositioner[] limbPositioners, IRoboticLimb[] puppetLimbs);
+        public void Initialize(ILimbPositioner[] limbPositioners, IRoboticLimb[] puppetLimbs, IGimbal gimbal);
         public void Run();
 
 
-        public void PerformHighStep(float height, float speed);
+        public void PerformHighStep(GaitType type, float height, float speed);
 
        // public void BeginMovement(ILimbPositioner[] limbs, IGaitController.GaitPattern patern, Vector3 direction, bool rotate);
 

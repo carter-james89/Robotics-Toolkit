@@ -688,7 +688,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 126
+  m_Constraints: 116
   m_CollisionDetection: 1
 --- !u!65 &431365434
 BoxCollider:
@@ -1153,8 +1153,6 @@ GameObject:
   - component: {fileID: 585883527}
   - component: {fileID: 585883526}
   - component: {fileID: 585883525}
-  - component: {fileID: 585883533}
-  - component: {fileID: 585883534}
   m_Layer: 0
   m_Name: ESP32 Bittle
   m_TagString: Untagged
@@ -1174,7 +1172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd6e484f00c3aca4c8bb82b6fa025880, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _simulationMode: 1
+  _simulationMode: 0
   m_frLimb: {fileID: 1959053589}
   m_flLimb: {fileID: 8265781004712646825}
   m_brLimb: {fileID: 1795980754}
@@ -1348,41 +1346,6 @@ Transform:
   - {fileID: 1795980752}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &585883533
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 585883524}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adffc0adc27e429429e142f081901bab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_trotGait: {fileID: 585883534}
-  m_crawlGait: {fileID: 0}
-  m_forwardTrotStrideDistance: 0.04
-  m_forwardTrotStrideTime: 0.22
-  m_forwardTrotStrideCoolDownTime: 0.2
-  m_idleTrotStrideDistance: 0.0001
-  m_idleTrotStrideTime: 0.1
-  m_idleTrotStrideCoolDownTime: 0.01
-  m_rotatingTrotStrideDistance: 0.04
-  m_rotatingTrotStrideTime: 0.22
-  m_rotatingTrotStrideCoolDownTime: 0.2
---- !u!114 &585883534
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 585883524}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e3091daecc1ec1449209a4cd91dfa51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &603321988
 GameObject:
   m_ObjectHideFlags: 0
@@ -2685,8 +2648,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adffc0adc27e429429e142f081901bab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_trotGait: {fileID: 1653857209}
-  m_crawlGait: {fileID: 1653857213}
   m_forwardTrotStrideDistance: 0.04
   m_forwardTrotStrideTime: 0.22
   m_forwardTrotStrideCoolDownTime: 0.2
@@ -2696,30 +2657,6 @@ MonoBehaviour:
   m_rotatingTrotStrideDistance: 0.04
   m_rotatingTrotStrideTime: 0.22
   m_rotatingTrotStrideCoolDownTime: 0.2
---- !u!114 &1653857209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 886027982}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e3091daecc1ec1449209a4cd91dfa51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1653857213
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 886027982}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32d0e9e5081dba048bcfcba18039ff22, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1692758105
 GameObject:
   m_ObjectHideFlags: 0
@@ -3820,12 +3757,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8437468995056635139, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1653857208}
-    - targetCorrespondingSourceObject: {fileID: 8437468995056635139, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1653857213}
-    - targetCorrespondingSourceObject: {fileID: 8437468995056635139, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1653857209}
   m_SourcePrefab: {fileID: 100100000, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

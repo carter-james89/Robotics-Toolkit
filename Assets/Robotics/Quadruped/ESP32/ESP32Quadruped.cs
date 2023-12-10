@@ -7,9 +7,13 @@ using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace RoboticsToolkit.Robotics.QuadrupedRobot
-{ 
+{
     public class QuadrupedData
     {
         public short VelocityX;
@@ -69,7 +73,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         private QuadrupedData _receivedData;
 
-   
+
         [SerializeField]
         private string _name = "bittle";
         protected override void Start()
@@ -77,11 +81,15 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             base.Start();
             if (SimulationMode())
             {
-              
+
                 return;
             }
             UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
         }
+        /// <summary>
+        /// the udp listener got a broadcast so connect to ti
+        /// </summary>
+        /// <param name="eventData"></param>
         public void OnConnectionEventOccured(IUDPConnectionEventListener.EventData eventData)
         {
             Debug.Log("Check broadcast for correct esp32 info");
@@ -110,16 +118,23 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             remoteEndPoint = new IPEndPoint(_ipAddress, eventData.ConnectionData.Port);
             SendUDPMessageAndWaitForResponse(0, new byte[0]);
             connectionStopwatch.Start();
+
+
             _connected = true;
             Debug.Log("CONNECTED");
             UDPConnectionListener.Instance.UnsubscribeFromConnectionEvents(this);
             // _connectionFrame = Time.frameCount;
             //SetLimbs(new QuadrupedLimbData(WaitForQuadHeartbeat()));
-           // _status = Status.WaitingForPhysics;
-            _connectionTime = Time.timeSinceLevelLoad;
+            // _status = Status.WaitingForPhysics;
+            // _connectionTime = Time.timeSinceLevelLoad;
+
+
+            Task.Run(async () => await WaitForQuadHeartbeatAsync(10));
+
+            // _lastHeartbeatReceived = Time.time;
         }
 
-        float _connectionTime = -1;
+        // float _connectionTime = -1;
 
         protected override void Update()
         {
@@ -129,62 +144,60 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             {
                 return;
             }
-
-
-        
-
-            if (_connected && !_isRunning)
-            {
-             
-
-            //    Bootup();//needs to be done on this thread pretty sure
-            }
-        
-
-            //if(_status != Status.NotConnected)
-            //{
-            //    SetLimbs(new QuadrupedLimbData(WaitForQuadHeartbeat()));
-            //}
-
-     
-
-        }
-
-        private QuadrupedData WaitForQuadHeartbeat()
-        {
             if (_connected)
             {
+                //  WaitForQuadHeartbeat();
+
+                if (_status == Status.NotReady && _receivedData != null)
+                {
+                    SetLimbs(new QuadrupedLimbData(0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle));
+
+                    _status = Status.WaitingForInitialLimbPlacement;
+                }
+            }
+        }
+
+        private async Task WaitForQuadHeartbeatAsync(int secondTimeout)
+        {
+            Debug.Log("start heartbeat");
+            var heartbeatStopwatch = new System.Diagnostics.Stopwatch();
+            heartbeatStopwatch.Start();
+            while (_connected)
+            {
+                Debug.Log("Listen for heartbeat");
+                if (heartbeatStopwatch.Elapsed.TotalSeconds > secondTimeout)
+                {
+                    Debug.Log("TimeOut");
+                    OnTimeOut();
+                    return;
+                }
                 try
                 {
-                    // This will block the thread until a message is received or timeout occurs
                     IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                    byte[] bytes = udpClient.Receive(ref remoteIpEndPoint);
+                    UdpReceiveResult result = await udpClient.ReceiveAsync();
+                    byte[] bytes = result.Buffer;
 
                     // Check if the received bytes array is long enough to contain a header
                     if (bytes.Length >= sizeof(int))
                     {
+                        //  Debug.Log("Got heartbeat");
                         // Extract the header from the received bytes
                         int receivedHeader = BitConverter.ToInt32(bytes, 0);
-
                         // Assuming the time information is right after the header
                         long esp32TimeSinceConnection = BitConverter.ToInt32(bytes, sizeof(int));
-
                         // Get the time since connection in milliseconds from the Stopwatch
                         long unityTimeSinceConnection = connectionStopwatch.ElapsedMilliseconds;
-
                         // Compare the two times
                         long timeDifference = unityTimeSinceConnection - esp32TimeSinceConnection;
-
-                        Debug.Log($"Time difference: {timeDifference} ms");
+                        Debug.Log($"HeartBeat Time difference: {timeDifference} ms");
 
                         // Create a new array to hold the remaining bytes after the header and time
                         int remainingBytesLength = bytes.Length - sizeof(int) - sizeof(int);
                         byte[] remainingBytes = new byte[remainingBytesLength];
                         Buffer.BlockCopy(bytes, sizeof(int) + sizeof(int), remainingBytes, 0, remainingBytes.Length);
-                        // Return the remaining bytes
-
-                        _receivedData = ParsePhysicalRobotData(remainingBytes);
-                        return _receivedData;
+                        _receivedData = ParsePhysicalRobotData(remainingBytes);  // Update the shared data
+                                                                                 
+                        heartbeatStopwatch.Restart();
                     }
                     else
                     {
@@ -195,17 +208,17 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                 {
                     if (ex.SocketErrorCode == SocketError.TimedOut)
                     {
-                        // OnTimeOut();
+                        OnTimeOut();
                     }
                     else
                     {
-                        // OnConnectionError("SocketException occurred: " + ex.Message);
+                        OnConnectionError("SocketException occurred: " + ex.Message);
                     }
                 }
-                //return null; // Return null if no response was received or if headers do not match
             }
-            return null;
         }
+
+
 
         private byte[] SendUDPMessageAndWaitForResponse(int header, byte[] message, int timeout = 10000)
         {
@@ -224,6 +237,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
             try
             {
+
                 // This will block the thread until a message is received or timeout occurs
                 IPEndPoint remoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
                 byte[] bytes = udpClient.Receive(ref remoteIpEndPoint);
@@ -290,35 +304,14 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         }
         private void OnConnectionShutdown()
         {
+#if UNITY_EDITOR
+            EditorApplication.isPlaying = false;
+            return;
+#endif
             UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
+            _status = Status.NotReady;
         }
 
-        public void RunSpeedTest()
-        {
-            int header = 1; // Example header
-            byte[] message = new byte[0]; // No additional message content
-            byte[] response = SendUDPMessageAndWaitForResponse(header, message);
-
-            if (response != null)// && response.Length >= sizeof(long))
-            {
-                // Deserialize the response to get the milliseconds since connection from the ESP32
-                long esp32TimeSinceConnection = BitConverter.ToInt32(response, 0);
-
-                // Get the time since connection in milliseconds from the Stopwatch
-                long unityTimeSinceConnection = connectionStopwatch.ElapsedMilliseconds;
-
-                // Compare the two times
-                long timeDifference = unityTimeSinceConnection - esp32TimeSinceConnection;
-
-                // Debug.Log($"ESP32 time since connection: {esp32TimeSinceConnection} ms");
-                // Debug.Log($"Unity time since connection: {unityTimeSinceConnection} ms");
-                Debug.Log($"Time difference: {timeDifference} ms");
-            }
-            else
-            {
-                Debug.LogWarning("Invalid or no response received.");
-            }
-        }
 
         protected override void PositionTransform()
         {
@@ -330,22 +323,14 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             {
                 return;
             }
+            // Debug.Log("Receiving Quad Heartbeat");
             SetLimbs(new QuadrupedLimbData(_receivedData));
-
-
-          
-
-            //int header = 2;
-            //byte[] message = new byte[0];
-            //byte[] headerBytes = BitConverter.GetBytes(header);
-            //byte[] packet = new byte[headerBytes.Length + message.Length];
-            //Buffer.BlockCopy(headerBytes, 0, packet, 0, headerBytes.Length);
-            //Buffer.BlockCopy(message, 0, packet, headerBytes.Length, message.Length);
-            //udpClient.Send(packet, packet.Length, remoteEndPoint);
         }
 
-   
-
+        /// <summary>
+        /// Send the data to esp32
+        /// </summary>
+        /// <param name="limbData"></param>
         protected override void OnLimbsPositioned(QuadrupedLimbData limbData)
         {
             base.OnLimbsPositioned(limbData);
@@ -356,37 +341,50 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             List<byte> byteList = new List<byte>();
 
             // Serialize each float field to bytes
-            byteList.AddRange(BitConverter.GetBytes(limbData.FLBaseAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.FLHipAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.FLKneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FLBaseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FLHipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FLKneeAngle));
 
-            byteList.AddRange(BitConverter.GetBytes(limbData.FRBaseAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.FRHipAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.FRKneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FRBaseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FRHipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FRKneeAngle));
 
-            byteList.AddRange(BitConverter.GetBytes(limbData.BRBaseAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.BRHipAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.BRKneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BRBaseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BRHipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BRKneeAngle));
 
-            byteList.AddRange(BitConverter.GetBytes(limbData.BLBaseAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.BLHipAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.BLKneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BLBaseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BLHipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BLKneeAngle));
+
+            // Serial.println(limbData.BLHipAngle);
+            // Serialize each float field to bytes
+            var baseAngle = 0f;
+            var hipAngle = 36f;
+            var kneeAngle = 47f;
+            byteList.AddRange(BitConverter.GetBytes(baseAngle));
+            byteList.AddRange(BitConverter.GetBytes(hipAngle));
+            byteList.AddRange(BitConverter.GetBytes(kneeAngle));
+
+            byteList.AddRange(BitConverter.GetBytes(baseAngle));
+            byteList.AddRange(BitConverter.GetBytes(hipAngle));
+            byteList.AddRange(BitConverter.GetBytes(kneeAngle));
+
+            byteList.AddRange(BitConverter.GetBytes(baseAngle));
+            byteList.AddRange(BitConverter.GetBytes(hipAngle));
+            byteList.AddRange(BitConverter.GetBytes(kneeAngle));
+
+            byteList.AddRange(BitConverter.GetBytes(baseAngle));
+            byteList.AddRange(BitConverter.GetBytes(hipAngle));
+            byteList.AddRange(BitConverter.GetBytes(kneeAngle));
 
             byte[] serializedData = byteList.ToArray();
 
-            //BinaryFormatter formatter = new BinaryFormatter();
-            //MemoryStream memoryStream = new MemoryStream();
-            //formatter.Serialize(memoryStream, limbData);
-            //byte[] serializedData = memoryStream.ToArray();
-
-            //// Prepare the packet with header and serialized data
             int header = 2;
             byte[] headerBytes = BitConverter.GetBytes(header);
             byte[] packet = new byte[headerBytes.Length + serializedData.Length];
             Buffer.BlockCopy(headerBytes, 0, packet, 0, headerBytes.Length);
             Buffer.BlockCopy(serializedData, 0, packet, headerBytes.Length, serializedData.Length);
-
-            //// Send the packet over UDP
             udpClient.Send(packet, packet.Length, remoteEndPoint);
         }
 
@@ -454,6 +452,10 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         void OnDestroy()
         {
+            if (SimulationMode())
+            {
+                return;
+            }
             udpClient?.Close();
             UDPConnectionListener.Instance.Shutdown();
         }

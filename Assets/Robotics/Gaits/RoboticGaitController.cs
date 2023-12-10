@@ -1,3 +1,4 @@
+using RoboticsToolkit.Gimbal;
 using RoboticsToolkit.Robotics;
 using RoboticsToolkit.Robotics.Limbs;
 using System.Collections;
@@ -99,6 +100,16 @@ namespace RoboticsToolkit.Robotics.Gaits
         }
 
         public void PerformHighStep(float height, float speed)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Initialize(ILimbPositioner[] limbPositioners, IRoboticLimb[] puppetLimbs, IGimbal gimbal)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void PerformHighStep(GaitType type, float height, float speed)
         {
             throw new System.NotImplementedException();
         }
