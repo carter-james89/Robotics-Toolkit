@@ -341,42 +341,42 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             List<byte> byteList = new List<byte>();
 
             // Serialize each float field to bytes
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FLBaseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FLHipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FLKneeAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FLBaseAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FLHipAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FLKneeAngle));
 
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FRBaseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FRHipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FRKneeAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FRBaseAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FRHipAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.FRKneeAngle));
 
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BRBaseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BRHipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BRKneeAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BRBaseAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BRHipAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BRKneeAngle));
 
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BLBaseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BLHipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BLKneeAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BLBaseAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BLHipAngle));
+            byteList.AddRange(BitConverter.GetBytes(limbData.BLKneeAngle));
 
             // Serial.println(limbData.BLHipAngle);
             // Serialize each float field to bytes
-            var baseAngle = 0f;
-            var hipAngle = 36f;
-            var kneeAngle = 47f;
-            byteList.AddRange(BitConverter.GetBytes(baseAngle));
-            byteList.AddRange(BitConverter.GetBytes(hipAngle));
-            byteList.AddRange(BitConverter.GetBytes(kneeAngle));
+           // var baseAngle = 0f;
+            //var hipAngle = 36f;
+            //var kneeAngle = 47f;
+            //byteList.AddRange(BitConverter.GetBytes(baseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(hipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(kneeAngle));
 
-            byteList.AddRange(BitConverter.GetBytes(baseAngle));
-            byteList.AddRange(BitConverter.GetBytes(hipAngle));
-            byteList.AddRange(BitConverter.GetBytes(kneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(baseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(hipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(kneeAngle));
 
-            byteList.AddRange(BitConverter.GetBytes(baseAngle));
-            byteList.AddRange(BitConverter.GetBytes(hipAngle));
-            byteList.AddRange(BitConverter.GetBytes(kneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(baseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(hipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(kneeAngle));
 
-            byteList.AddRange(BitConverter.GetBytes(baseAngle));
-            byteList.AddRange(BitConverter.GetBytes(hipAngle));
-            byteList.AddRange(BitConverter.GetBytes(kneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(baseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(hipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(kneeAngle));
 
             byte[] serializedData = byteList.ToArray();
 
