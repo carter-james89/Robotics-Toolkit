@@ -8,6 +8,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using RoboticsToolkit.Robotics.Limbs;
+using RoboticsToolkit.Robotics.RoboticControllers;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -73,18 +75,20 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         private QuadrupedData _receivedData;
 
-
         [SerializeField]
         private string _name = "bittle";
         protected override void Start()
         {
             base.Start();
-            if (SimulationMode())
-            {
+ 
+            
+        }
 
-                return;
-            }
+        protected override void OnBootup()
+        {
+            base.OnBootup();
             UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
+           UpdateStatus(IRobot.Status.Initialized);
         }
         /// <summary>
         /// the udp listener got a broadcast so connect to ti
@@ -117,44 +121,37 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             udpClient = new UdpClient(eventData.ConnectionData.Port);
             remoteEndPoint = new IPEndPoint(_ipAddress, eventData.ConnectionData.Port);
             SendUDPMessageAndWaitForResponse(0, new byte[0]);
-            connectionStopwatch.Start();
 
+            Debug.Log("Connection response received");
+            connectionStopwatch.Start();
 
             _connected = true;
             Debug.Log("CONNECTED");
             UDPConnectionListener.Instance.UnsubscribeFromConnectionEvents(this);
-            // _connectionFrame = Time.frameCount;
-            //SetLimbs(new QuadrupedLimbData(WaitForQuadHeartbeat()));
-            // _status = Status.WaitingForPhysics;
-            // _connectionTime = Time.timeSinceLevelLoad;
-
-
+       
             Task.Run(async () => await WaitForQuadHeartbeatAsync(10));
-
-            // _lastHeartbeatReceived = Time.time;
+        }
+        protected void Update()
+        {
+            if (_status == IRobot.Status.Initialized && _receivedData != null)
+            {
+                SetLimbs(new QuadrupedLimbData(0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle));
+            
+                CompleteBootup();
+            }
+       
         }
 
-        // float _connectionTime = -1;
-
-        protected override void Update()
+        protected override void PositionTransform()
         {
-            base.Update();
-
-            if (SimulationMode())
+  
+            if (_receivedData == null)
             {
                 return;
             }
-            if (_connected)
-            {
-                //  WaitForQuadHeartbeat();
-
-                if (_status == Status.NotReady && _receivedData != null)
-                {
-                    SetLimbs(new QuadrupedLimbData(0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle));
-
-                    _status = Status.WaitingForInitialLimbPlacement;
-                }
-            }
+            // Debug.Log("Receiving Quad Heartbeat");
+            var limbData = new QuadrupedLimbData(_receivedData);
+            SetLimbs(limbData);
         }
 
         private async Task WaitForQuadHeartbeatAsync(int secondTimeout)
@@ -198,6 +195,8 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                         _receivedData = ParsePhysicalRobotData(remainingBytes);  // Update the shared data
                                                                                  
                         heartbeatStopwatch.Restart();
+
+                     
                     }
                     else
                     {
@@ -218,11 +217,9 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             }
         }
 
-
-
         private byte[] SendUDPMessageAndWaitForResponse(int header, byte[] message, int timeout = 10000)
         {
-            if (SimulationMode())
+            if (IsSimulation())
             {
                 Debug.LogWarning("Should not be sending udp messages in simulation mode");
                 return null;
@@ -309,53 +306,48 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             return;
 #endif
             UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
-            _status = Status.NotReady;
-        }
-
-
-        protected override void PositionTransform()
-        {
-            if (SimulationMode())
-            {
-                return;
-            }
-            if (!_connected || _receivedData == null)
-            {
-                return;
-            }
-            // Debug.Log("Receiving Quad Heartbeat");
-            SetLimbs(new QuadrupedLimbData(_receivedData));
+            UpdateStatus(IRobot.Status.Ready); 
         }
 
         /// <summary>
         /// Send the data to esp32
         /// </summary>
-        /// <param name="limbData"></param>
-        protected override void OnLimbsPositioned(QuadrupedLimbData limbData)
+        /// <param name="limbValues"></param>
+        protected override void OnLimbsPositioned(LimbValues[] limbValues)
         {
-            base.OnLimbsPositioned(limbData);
-            if (SimulationMode())
-            {
-                return;
-            }
+            base.OnLimbsPositioned(limbValues);
+
             List<byte> byteList = new List<byte>();
+            for (int i = 0; i < m_limbs.Length; i++)
+            {
+
+
+
+             
+                byteList.AddRange(BitConverter.GetBytes(limbValues[i].ServoAngles[0]));
+                byteList.AddRange(BitConverter.GetBytes(limbValues[i].ServoAngles[1]));
+                byteList.AddRange(BitConverter.GetBytes(limbValues[i].ServoAngles[2]));
+
+            }
+
+               // List<byte> byteList = new List<byte>();
 
             // Serialize each float field to bytes
-            byteList.AddRange(BitConverter.GetBytes(limbData.FLBaseAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.FLHipAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.FLKneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FLBaseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FLHipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FLKneeAngle));
 
-            byteList.AddRange(BitConverter.GetBytes(limbData.FRBaseAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.FRHipAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.FRKneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FRBaseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FRHipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.FRKneeAngle));
 
-            byteList.AddRange(BitConverter.GetBytes(limbData.BRBaseAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.BRHipAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.BRKneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BRBaseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BRHipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BRKneeAngle));
 
-            byteList.AddRange(BitConverter.GetBytes(limbData.BLBaseAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.BLHipAngle));
-            byteList.AddRange(BitConverter.GetBytes(limbData.BLKneeAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BLBaseAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BLHipAngle));
+            //byteList.AddRange(BitConverter.GetBytes(limbData.BLKneeAngle));
 
             // Serial.println(limbData.BLHipAngle);
             // Serialize each float field to bytes
@@ -449,10 +441,13 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
             return null;
         }
-
+        public override bool IsSimulation()
+        {
+            return false;
+        }
         void OnDestroy()
         {
-            if (SimulationMode())
+            if (IsSimulation())
             {
                 return;
             }

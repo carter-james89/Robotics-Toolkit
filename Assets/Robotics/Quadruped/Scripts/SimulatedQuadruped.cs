@@ -1,0 +1,98 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+
+namespace RoboticsToolkit.Robotics.QuadrupedRobot
+{
+    public class SimulatedQuadruped : Quadruped
+    {
+        float hipAngle = 70;
+        float kneeAngle = -130;
+
+        protected enum SubStatus
+        {
+            NotReady,
+            WaitingForInitialLimbPlacement,
+            WaitingForPhysics,
+            Ready,
+        }
+        protected SubStatus _subStatus = SubStatus.NotReady;
+
+        private float _physicsInitializedTime = -1;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            ToggleColliders(false);
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+
+         
+
+        }
+
+        protected override void OnBootup()
+        {
+            base.OnBootup();
+           
+            SetLimbs(new QuadrupedLimbData(0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle));
+            _subStatus = SubStatus.WaitingForInitialLimbPlacement;
+        //    UpdateStatus(IRobot.Status.Initialized);
+            //Debug.Log("")
+        }
+
+        void Update()
+        {
+            switch (_subStatus)
+            {
+                case SubStatus.NotReady:
+                    break;
+                case SubStatus.WaitingForInitialLimbPlacement:
+                    bool allServosReady = true;
+                    foreach (var limb in m_limbs)
+                    {
+                        if (!(limb as QuadrupedLeg).SegmentsAtTarget(.3f))
+                        {
+                            allServosReady = false;
+                        }
+                    }
+                    if (allServosReady)
+                    {
+                        var height = transform.position.y - GetLowestFoot().y;
+
+                      //  var localPos = transform.parent.InverseTransformPoint
+                        GetComponent<ArticulationBody>().TeleportRoot(new Vector3(transform.position.x, transform.parent.position.y + height + .05f, transform.position.z), transform.rotation);
+                        ToggleColliders(true);
+                        GetComponent<ArticulationBody>().immovable = false;
+
+                        _physicsInitializedTime = Time.timeSinceLevelLoad;
+                        _subStatus = SubStatus.WaitingForPhysics;
+
+                    }
+                    break;
+                case SubStatus.WaitingForPhysics:
+                    if (Time.timeSinceLevelLoad > _physicsInitializedTime + 2)
+                    {
+                        CompleteBootup();
+                        _subStatus = SubStatus.Ready;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+
+           // base.Update();
+        }
+
+
+        public override bool IsSimulation()
+        {
+            return true;
+        }
+    }
+}

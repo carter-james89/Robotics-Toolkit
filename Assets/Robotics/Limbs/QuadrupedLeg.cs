@@ -4,7 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.Assertions;
 
 public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
 {
@@ -43,6 +43,9 @@ public class QuadrupedLeg : MonoBehaviour, IRoboticLimb
             m_baseRoboticLimbSegment = m_baseRoboticLimbSegmentObject.GetComponent<IRoboticLimbSegment>();
         m_hipRoboticLimbSegment = m_hipRoboticLimbSegmentObject.GetComponent<IRoboticLimbSegment>();
         m_kneeRoboticLimbSegment = m_kneeRoboticLimbSegmentObject.GetComponent<IRoboticLimbSegment>();
+
+        Assert.IsNotNull(m_hipRoboticLimbSegment);
+        Assert.IsNotNull(m_kneeRoboticLimbSegment);
 
         //   GetPositioner();
     }

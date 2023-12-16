@@ -1,11 +1,23 @@
 using RoboticsToolkit.Gimbal;
 using RoboticsToolkit.Robotics.Limbs;
+using RoboticsToolkit.Robotics.RoboticControllers;
 using UnityEngine;
 
-namespace RoboticsToolkit.Robotics.RoboticControllers
+namespace RoboticsToolkit.Robotics
 {
+    public class LimbData { }
     public interface IRobot 
     {
+        public enum Status
+        {
+            NotReady,
+            Initialized,
+            AdjustingHeight,
+            Ready,
+        }
+
+        public Status GetStatus();
+
         public struct RobotData
         {
             public Vector3 Velocity;
@@ -20,10 +32,11 @@ namespace RoboticsToolkit.Robotics.RoboticControllers
 
         public void Bootup();
 
-        public bool SimulationMode();
+        public bool IsSimulation();
 
         public void Run();
 
+        public void SetLimbs(LimbValues[] limbData);
 
         public GameObject GetGameObject();
         public IRoboticLimb[] GetLimbs();
@@ -45,6 +58,7 @@ namespace RoboticsToolkit.Robotics.RoboticControllers
         {
             OnRobotInitialized,
             OnRobotInPosition,
+            OnRobotReady,
             OnLimbsPositioned,
             OnEmergencyStop,
             OnReset

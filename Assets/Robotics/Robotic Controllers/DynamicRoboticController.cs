@@ -68,6 +68,13 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
 
     private IRobot _robot;
 
+    [SerializeField]
+    private float _hipHeight = .085f;
+    //public void SetHipHeight(float hipHeight)
+    //{
+    //    _hipHeight = hipHeight;
+    //}
+
     private enum Status
     {
         NotRunning,
@@ -102,6 +109,10 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
 
 
         NotifyEventListeners(IRoboticControllerEventListener.EventType.OnControllerInitialized);
+
+        SetRobotHeight(_hipHeight, .09f);
+
+
         return true;
     }
 
@@ -182,6 +193,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
 
     private QuadrupedLeg ConstructDynamicLeg(IRoboticLimb leg, string name, Color color, bool left = false)
     {
+        Debug.Log("Build leg " + leg.GetGameObject().name); 
         var newLeg = Instantiate(m_dynamicLimbPrefab).GetComponent<QuadrupedLeg>();
         newLeg.name = name;
         newLeg.transform.SetParent(transform);
@@ -192,6 +204,14 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         newLeg.m_invert = left;
 
         var ogSegments = leg.GetSegments();
+        if(ogSegments == null)
+        {
+            Debug.Log("null segments");
+        }
+        if (ogSegments[1] == null)
+        {
+            Debug.Log("null robot");
+        }
         var hipOffset = _robot.GetGameObject().transform.InverseTransformPoint(ogSegments[1].GetGameObject().transform.position);
         newLeg.GetHipSegment().GetGameObject().transform.parent.position = transform.TransformPoint(hipOffset);
         newLeg.GetKneeSegment().GetGameObject().transform.parent.localPosition = new Vector3(0, 0, ogSegments[1].GetLength());
@@ -219,7 +239,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
             return null;
         }
 
-        transform.parent.position = _robot.GetGameObject().transform.position + new Vector3(0, .07f,0);
+       // transform.parent.position = _robot.GetGameObject().transform.position + new Vector3(0, .14f,0);
         var tempPos = transform.localPosition;
         tempPos.y = _robot.GetGameObject().transform.localPosition.y;
         transform.localPosition = tempPos;
@@ -335,10 +355,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
             case IRobotEventListener.EventType.OnRobotInitialized:
                 break;
             case IRobotEventListener.EventType.OnRobotInPosition:
-                //_gaitController.s
-                // _gaitController.PerformHighStep(GaitType.Crawl,  .05f, .01f);
-                //  (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .03f, .01f, .04f);
-                //(_gaitController as GaitController).TrotForward(IKLimbPositioners, .015f, .05f, .01f);
+        
                 break;
             case IRobotEventListener.EventType.OnLimbsPositioned:
                 break;
