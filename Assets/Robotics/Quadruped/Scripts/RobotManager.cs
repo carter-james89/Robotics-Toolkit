@@ -201,7 +201,10 @@ namespace RoboticsToolkit.Robotics
                         if (!_bootupComplete)
                         {
                             _bootupComplete = true;
-                           // ManagerReady();
+                            // _gaitController.PerformHighStep(GaitType.Crawl,  .05f, .01f);
+                            //  (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .03f, .01f, .04f);
+                            //(_gaitController as GaitController).TrotForward(IKLimbPositioners, .015f, .05f, .01f);
+                            // ManagerReady();
                         }
                         break;
                     default:
