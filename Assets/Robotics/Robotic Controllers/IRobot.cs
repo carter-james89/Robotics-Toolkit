@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace RoboticsToolkit.Robotics
 {
-    public class LimbData { }
+
     public interface IRobot 
     {
         public enum Status

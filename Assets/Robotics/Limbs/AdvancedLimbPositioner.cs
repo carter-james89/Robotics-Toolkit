@@ -47,6 +47,38 @@ namespace RoboticsToolkit.Robotics.Gaits
         {
       
         }
+
+        private float CalculateArcDistance(float horizontalDistance, float height)
+        {
+            Debug.Log("Calculate arc with horizontal distance : " + horizontalDistance + " - height " + height);
+
+            // If horizontal distance is zero, return double the height (up and down)
+            if (horizontalDistance < .01f)
+            {
+                Debug.Log("CalculatedArcDistance " + 2 * height);
+                return 2 * height;
+            }
+
+            // Check if height is negligible
+            if (Mathf.Approximately(height, 0f))
+            {
+                Debug.Log("CalculatedArcDistance " + horizontalDistance);
+                return horizontalDistance;
+            }
+
+            // Calculate the arc distance using an approximation
+            // This is a simplified formula and works well for small heights relative to the horizontal distance
+            float h = height; // Maximum height of the arc
+            float l = horizontalDistance; // Base length of the arc
+
+            // The formula for arc length in a parabolic trajectory
+            float arcDistance = l * (1 + (2 * h / l) * (2 * h / l));
+
+            Debug.Log("CalculatedArcDistance " + arcDistance);
+            return arcDistance;
+        }
+
+
         public void RotateToPositionViaTime(Vector3 position, float height, float seconds)
         {
             if (_ikTarget == null)
@@ -54,15 +86,15 @@ namespace RoboticsToolkit.Robotics.Gaits
                 Debug.LogError("IK Target is not assigned!");
                 return;
             }
-
+            Debug.Log("rotate to position in seconds : " + seconds);
             // Calculate the horizontal distance
             Vector3 startPositionLocal = _ikTarget.transform.localPosition;
             Vector3 endPositionLocal = transform.InverseTransformPoint(position);
             float horizontalDistance = Vector3.Distance(new Vector3(startPositionLocal.x, 0, startPositionLocal.z), new Vector3(endPositionLocal.x, 0, endPositionLocal.z));
-
+            float effectiveDistance = CalculateArcDistance(horizontalDistance,height);
             // Calculate the speed (distance per second)
-            float calculatedSpeed = horizontalDistance / seconds;
-
+            float calculatedSpeed = effectiveDistance / seconds;
+            Debug.Log("Calculated speed to acheive time " + calculatedSpeed);
             // Call the existing RotateToPosition with the calculated speed
             RotateToPosition(position, calculatedSpeed, height);
         }
@@ -85,12 +117,19 @@ namespace RoboticsToolkit.Robotics.Gaits
             // Calculate only the horizontal distance
             float horizontalDistance = Vector3.Distance(new Vector3(startPosition.x, 0, startPosition.z), new Vector3(endPosition.x, 0, endPosition.z));
 
-            // Calculate trajectory duration based on horizontal distance only
-            trajectoryDuration = horizontalDistance / speed;
+            // Include a portion of the arc height in the distance calculation
+            // This is a simplification. For more accuracy, especially for large arc heights, a more complex calculation would be needed.
+            float effectiveDistance = CalculateArcDistance(horizontalDistance, arcHeight);
+            Debug.Log("effectiveDistance " + effectiveDistance);
+            Debug.Log("speed " + this.speed);
+            // Calculate trajectory duration based on the effective distance
+            trajectoryDuration = effectiveDistance / speed;
+            Debug.Log("set trajecotry duration " + trajectoryDuration);
             elapsedTime = 0;
             isMoving = true;
             CurrentStatus = Status.Rotating;
         }
+
 
 
         private void MoveAlongArc()
@@ -101,6 +140,8 @@ namespace RoboticsToolkit.Robotics.Gaits
             }
 
             elapsedTime += Time.deltaTime;
+           // Debug.Log("ElipsedTime " + elapsedTime);
+           // Debug.Log("trajecotryDuration " + trajectoryDuration);
             if (elapsedTime < trajectoryDuration)
             {
                 float linearT = elapsedTime / trajectoryDuration;

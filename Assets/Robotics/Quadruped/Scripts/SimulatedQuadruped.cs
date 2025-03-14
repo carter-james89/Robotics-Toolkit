@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+using RoboticsToolkit.Robotics.RoboticControllers;
 using UnityEngine;
-
 
 namespace RoboticsToolkit.Robotics.QuadrupedRobot
 {
@@ -30,19 +28,15 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         protected override void Start()
         {
             base.Start();
-
-         
-
         }
 
         protected override void OnBootup()
         {
             base.OnBootup();
-           
-            SetLimbs(new QuadrupedLimbData(0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle, 0, hipAngle, kneeAngle));
+
+            var limbValues = new LimbValues(Vector3.zero, new float[3] { 0, hipAngle, kneeAngle });
+            SetLimbs(new LimbValues[4] { limbValues, limbValues, limbValues, limbValues });
             _subStatus = SubStatus.WaitingForInitialLimbPlacement;
-        //    UpdateStatus(IRobot.Status.Initialized);
-            //Debug.Log("")
         }
 
         void Update()
@@ -64,14 +58,12 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                     {
                         var height = transform.position.y - GetLowestFoot().y;
 
-                      //  var localPos = transform.parent.InverseTransformPoint
                         GetComponent<ArticulationBody>().TeleportRoot(new Vector3(transform.position.x, transform.parent.position.y + height + .05f, transform.position.z), transform.rotation);
                         ToggleColliders(true);
                         GetComponent<ArticulationBody>().immovable = false;
 
                         _physicsInitializedTime = Time.timeSinceLevelLoad;
                         _subStatus = SubStatus.WaitingForPhysics;
-
                     }
                     break;
                 case SubStatus.WaitingForPhysics:
@@ -84,11 +76,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                 default:
                     break;
             }
-
-
-           // base.Update();
         }
-
 
         public override bool IsSimulation()
         {

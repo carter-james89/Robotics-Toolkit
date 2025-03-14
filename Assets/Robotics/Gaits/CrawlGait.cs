@@ -1,7 +1,3 @@
-using RoboticsToolkit.Gimbal;
-using RoboticsToolkit.Robotics;
-using RoboticsToolkit.Robotics.Limbs;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,6 +11,9 @@ namespace RoboticsToolkit.Robotics.Gaits
     public class CrawlGait : Gait
     {
         private int _rotatingLimb = 0;
+
+        int[] _strideOrder = new int[4] { 0, 2, 1, 3 };
+        int _currentStride;
 
         private GaitCycleInfo BuildCycleInfo(int rotatingLimb)
         {
@@ -71,6 +70,7 @@ namespace RoboticsToolkit.Robotics.Gaits
 
         public override bool CheckLimbPositions(ILimbPositioner[] limbPositioners)
         {
+        
             foreach (var positioner in limbPositioners)
             {
                 if(positioner != limbPositioners[_rotatingLimb] && positioner.LimbAtTarget())
@@ -78,8 +78,10 @@ namespace RoboticsToolkit.Robotics.Gaits
                     Debug.LogWarning("Translating limb is waiting to rotate");
                 }
             }
-            if (limbPositioners[_rotatingLimb].LimbAtTarget())
+            var rotatingLimb = limbPositioners[_strideOrder[_currentStride]] as AdvancedLimbPositioner;
+            if (rotatingLimb.LimbAtTarget())
             {
+                Debug.Log("rotating limb at target");
                 NotifyListeners(EventType.OnGaitPointHit);
                 _rotatingLimb++;
                 _currentStride++;
@@ -111,10 +113,18 @@ namespace RoboticsToolkit.Robotics.Gaits
         {
             return 1;
         }
-        int[] _strideOrder = new int[4] { 0, 1, 2, 3 };
-        int _currentStride;
+ 
         public override void Translate(ILimbPositioner[] limbPositioners, float speed, float strideLength, float strideHeight)
         {
+
+            if(strideLength == 0)
+            {
+                var stationaryRotatingLimb = limbPositioners[_strideOrder[_currentStride]] as AdvancedLimbPositioner;
+                stationaryRotatingLimb.RotateToPosition(stationaryRotatingLimb.GetGameObject().transform.position, speed, strideHeight);
+                return;
+            }
+
+
             var rotatingLimb = limbPositioners[_strideOrder[_currentStride]] as AdvancedLimbPositioner;
             List<ILimbPositioner> translatingLimbs = new List<ILimbPositioner>();    
             for (int i = 0; i < limbPositioners.Length; i++)
@@ -159,46 +169,55 @@ namespace RoboticsToolkit.Robotics.Gaits
 
           //  var strideSegment = strideLength / 2 / 3;
 
-            float timeToCompleteStride = (strideLength/2/3) / speed;
+          
+
+            //  timeToCompleteStride /= 8;
+
+            var translateTarget = strideLength / 2;
+            var rotateTarget = strideLength / 2 ;
+
+            float timeToCompleteStride = (rotateTarget/3) / speed;
 
             if (_currentStrideCount < 4)
             {
                 switch (_currentStrideCount)
                 {
                     case 0:
-                        rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * strideLength / 2 / 3, strideHeight,timeToCompleteStride);
+                        rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * rotateTarget, strideHeight,timeToCompleteStride);
+                        //rotatingLimb.RotateToPosition(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * rotateTarget, speed,strideHeight);
+                        
                         break;
                     case 1:
-                        rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * strideLength / 2 / 3, strideHeight, timeToCompleteStride);
+                        rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * rotateTarget, strideHeight, timeToCompleteStride);
                         //nextInLine.TranslateToPosition(nextInLine.GetGameObject().transform.position - nextInLine.GetGameObject().transform.forward * strideLength / 2 / 3,speed);
                         //nextAfterThat.TranslateToPosition(nextAfterThat.GetGameObject().transform.position - nextAfterThat.GetGameObject().transform.forward * strideLength / 2 / 3, speed);
                         //lastStride.TranslateToPosition(lastStride.GetGameObject().transform.position - lastStride.GetGameObject().transform.forward * strideLength / 2 / 3, speed);
 
                         foreach (var limb in translatingLimbs)
                         {
-                            (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - limb.GetGameObject().transform.forward * strideLength / 2, speed);
+                            (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - limb.GetGameObject().transform.forward * translateTarget, speed);
                         }
                         break;
                     case 2:
-                        rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * strideLength / 2 / 3, strideHeight, timeToCompleteStride);
+                        rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * rotateTarget, strideHeight, timeToCompleteStride);
                         //nextInLine.TranslateToPosition(nextInLine.GetGameObject().transform.position - nextInLine.GetGameObject().transform.forward * strideLength / 2 / 3,speed);
                         //nextAfterThat.TranslateToPosition(nextAfterThat.GetGameObject().transform.position - nextAfterThat.GetGameObject().transform.forward * strideLength / 2 / 3, speed);
                         //lastStride.TranslateToPosition(lastStride.GetGameObject().transform.position - lastStride.GetGameObject().transform.forward * strideLength / 2 / 3, speed);
 
                         foreach (var limb in translatingLimbs)
                         {
-                            (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - limb.GetGameObject().transform.forward * strideLength / 2, speed);
+                            (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - limb.GetGameObject().transform.forward * translateTarget, speed);
                         }
                         break;
                     case 3:
-                        rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * strideLength / 2 / 3, strideHeight, timeToCompleteStride);
+                        rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * rotateTarget, strideHeight, timeToCompleteStride);
                         //nextInLine.TranslateToPosition(nextInLine.GetGameObject().transform.position - nextInLine.GetGameObject().transform.forward * strideLength / 2 / 3,speed);
                         //nextAfterThat.TranslateToPosition(nextAfterThat.GetGameObject().transform.position - nextAfterThat.GetGameObject().transform.forward * strideLength / 2 / 3, speed);
                         //lastStride.TranslateToPosition(lastStride.GetGameObject().transform.position - lastStride.GetGameObject().transform.forward * strideLength / 2 / 3, speed);
 
                         foreach (var limb in translatingLimbs)
                         {
-                            (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - limb.GetGameObject().transform.forward * strideLength / 2, speed);
+                            (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - limb.GetGameObject().transform.forward * translateTarget, speed);
                         }
                         break;
 
@@ -206,14 +225,14 @@ namespace RoboticsToolkit.Robotics.Gaits
             }
             else
             {
-                rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * strideLength / 2 / 3, strideHeight, timeToCompleteStride);
+                rotatingLimb.RotateToPositionViaTime(rotatingLimb.GetGameObject().transform.position + rotatingLimb.GetGameObject().transform.forward * rotateTarget, strideHeight, timeToCompleteStride);
                 //nextInLine.TranslateToPosition(nextInLine.GetGameObject().transform.position - nextInLine.GetGameObject().transform.forward * strideLength / 2 / 3,speed);
                 //nextAfterThat.TranslateToPosition(nextAfterThat.GetGameObject().transform.position - nextAfterThat.GetGameObject().transform.forward * strideLength / 2 / 3, speed);
                 //lastStride.TranslateToPosition(lastStride.GetGameObject().transform.position - lastStride.GetGameObject().transform.forward * strideLength / 2 / 3, speed);
 
                 foreach (var limb in translatingLimbs)
                 {
-                    (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - limb.GetGameObject().transform.forward * strideLength / 2, speed);
+                    (limb as AdvancedLimbPositioner).TranslateToPosition(limb.GetGameObject().transform.position - limb.GetGameObject().transform.forward * translateTarget, speed);
                 }
             }
 

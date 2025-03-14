@@ -20,7 +20,7 @@ namespace RoboticsToolkit.Robotics.Gaits
 
         private bool m_postStrideCooldown = false;
         private float m_postStrideCooldownTime = 0;
-        private float m_postStrideCooldownTargetTime = .5f;
+        private float m_postStrideCooldownTargetTime = 1f;
 
 
 

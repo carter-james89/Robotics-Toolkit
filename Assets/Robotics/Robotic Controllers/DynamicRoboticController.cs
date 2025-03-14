@@ -75,6 +75,12 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
     //    _hipHeight = hipHeight;
     //}
 
+    public void BeginCrawl()
+    {
+        (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .04f, .5f, 0);// .06f);
+       // (_gaitController as GaitController).PerformHighStep(GaitType.Crawl, .03f, .005f);
+    }
+
     private enum Status
     {
         NotRunning,
@@ -98,10 +104,10 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
 
         GetComponent<MeshFilter>().mesh = quadToControl.GetGameObject().GetComponent<MeshFilter>().mesh;
         ConstructQuadrupedTwin(_robot.GetLimbs());
-    
+
 
         _gaitController = GetComponent<GaitController>();
-        _gaitController.Initialize(IKLimbPositioners, quadToControl.GetLimbs(),quadToControl.GetGimbal());
+        _gaitController.Initialize(IKLimbPositioners, quadToControl.GetLimbs(), quadToControl.GetGimbal());
 
         CalculateLimbData(_robot);
 
@@ -166,8 +172,8 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
 
         foreach (var limbBundle in m_legBundles)
         {
-          
-        
+
+
         }
 
         MirrorLimbs = new IRoboticLimb[4] { m_flMirrorLeg, m_frMirrorLeg, m_brMirrorLeg, m_blMirrorLeg };
@@ -193,7 +199,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
 
     private QuadrupedLeg ConstructDynamicLeg(IRoboticLimb leg, string name, Color color, bool left = false)
     {
-        Debug.Log("Build leg " + leg.GetGameObject().name); 
+        Debug.Log("Build leg " + leg.GetGameObject().name);
         var newLeg = Instantiate(m_dynamicLimbPrefab).GetComponent<QuadrupedLeg>();
         newLeg.name = name;
         newLeg.transform.SetParent(transform);
@@ -204,7 +210,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         newLeg.m_invert = left;
 
         var ogSegments = leg.GetSegments();
-        if(ogSegments == null)
+        if (ogSegments == null)
         {
             Debug.Log("null segments");
         }
@@ -227,6 +233,11 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         newLeg.SetLimbValues(0, leg.GetSegments()[1].GetServoAngle(0), leg.GetSegments()[2].GetServoAngle(0));
         return newLeg;
     }
+
+    public void BeginTrot()
+    {
+        (_gaitController as GaitController).TrotForward(IKLimbPositioners, .015f, .05f, .01f);
+    }
     #endregion
 
     [SerializeField]
@@ -239,7 +250,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
             return null;
         }
 
-       // transform.parent.position = _robot.GetGameObject().transform.position + new Vector3(0, .14f,0);
+        // transform.parent.position = _robot.GetGameObject().transform.position + new Vector3(0, .14f,0);
         var tempPos = transform.localPosition;
         tempPos.y = _robot.GetGameObject().transform.localPosition.y;
         transform.localPosition = tempPos;
@@ -280,11 +291,11 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         }
 
         //_gaitController.Run(m_legBundles.Select(bundle => bundle.MirrorLeg).ToArray(), m_legBundles.Select(bundle => bundle.IKLimbPositioner).ToArray());//have the gait controller position the ik targets
-       _gaitController.Run();
+        _gaitController.Run();
         // QuadrupedLimbData returnData = new QuadrupedLimbData();
 
         var returnData = new LimbValues[4];
-     
+
         for (int i = 0; i < 4; i++)
         {
             var ikSegments = IKLimbs[i].GetSegments();
@@ -313,7 +324,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
                 NotifyEventListeners(IRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd);
             }
         }
-      //  return null;
+        //  return null;
         return returnData;
     }
     public Vector3 GetRobotGimbalOffset(Vector3 globalPos)
@@ -328,8 +339,10 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
     private float _robotHeight;
     void Update()
     {
-
-
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+          //  (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .02f, .05f, .06f);
+        }
     }
 
     public void SubscribeToControllerEvents(IRoboticControllerEventListener listener)
@@ -355,7 +368,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
             case IRobotEventListener.EventType.OnRobotInitialized:
                 break;
             case IRobotEventListener.EventType.OnRobotInPosition:
-        
+
                 break;
             case IRobotEventListener.EventType.OnLimbsPositioned:
                 break;
@@ -373,7 +386,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         throw new NotImplementedException();
     }
 
-  
+
 
     public bool SetTransformValues()
     {

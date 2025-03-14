@@ -189,7 +189,7 @@ namespace RoboticsToolkit.Robotics
         private bool _bootupComplete = false;
         public void OnControllerEventOccured(IRoboticControllerEventListener.QuadrupedRoboticControllerEvendData eventData)
         {
-            if (_instanceType == InstanceType.Simulation)
+          //  if (_instanceType == InstanceType.Simulation)
             {
                 switch (eventData.EventType)
                 {
@@ -205,6 +205,8 @@ namespace RoboticsToolkit.Robotics
                             //  (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .03f, .01f, .04f);
                             //(_gaitController as GaitController).TrotForward(IKLimbPositioners, .015f, .05f, .01f);
                             // ManagerReady();
+                             (_roboticController as DynamicRoboticController).BeginCrawl();
+                            //(_roboticController as DynamicRoboticController).BeginTrot();
                         }
                         break;
                     default:

@@ -80,15 +80,13 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         protected override void Start()
         {
             base.Start();
- 
-            
         }
 
         protected override void OnBootup()
         {
             base.OnBootup();
             UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
-           UpdateStatus(IRobot.Status.Initialized);
+            UpdateStatus(IRobot.Status.Initialized);
         }
         /// <summary>
         /// the udp listener got a broadcast so connect to ti
@@ -128,30 +126,63 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             _connected = true;
             Debug.Log("CONNECTED");
             UDPConnectionListener.Instance.UnsubscribeFromConnectionEvents(this);
-       
+
             Task.Run(async () => await WaitForQuadHeartbeatAsync(10));
         }
         protected void Update()
         {
             if (_status == IRobot.Status.Initialized && _receivedData != null)
             {
-                SetLimbs(new QuadrupedLimbData(0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle));
-            
+                //   SetLimbs(new QuadrupedLimbData(0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle, 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle));
+                SetLimbsFromReceivedData();
                 CompleteBootup();
             }
+        }
+
        
+
+        private void SetLimbsFromReceivedData()
+        {
+            var limbData = new LimbValues[4] {
+                    new LimbValues(Vector3.zero, new float[3] { 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle }),
+                     new LimbValues(Vector3.zero, new float[3] { 0, _receivedData.FRHipAngle, _receivedData.FRKneeAngle }),
+                      new LimbValues(Vector3.zero, new float[3] { 0, _receivedData.BRHipAngle, _receivedData.BRKneeAngle }),
+                       new LimbValues(Vector3.zero, new float[3] { 0, _receivedData.BLHipAngle, _receivedData.BLKneeAngle })
+                };
+            // SetLimbs(limbData);
+            for (int i = 0; i < m_limbs.Length; i++)
+            {
+
+                switch (i)
+                {
+
+                    case 0:
+                        m_flLimb.SetLimbValues(limbData[i].ServoAngles[0], limbData[i].ServoAngles[1], limbData[i].ServoAngles[2]);
+                        break;
+                    case 1:
+                        m_frLimb.SetLimbValues(limbData[i].ServoAngles[0], limbData[i].ServoAngles[1], limbData[i].ServoAngles[2]);
+                        break;
+                    case 2:
+                        m_brLimb.SetLimbValues(limbData[i].ServoAngles[0], limbData[i].ServoAngles[1], limbData[i].ServoAngles[2]);
+                        break;
+                    case 3:
+                        m_blLimb.SetLimbValues(limbData[i].ServoAngles[0], limbData[i].ServoAngles[1], limbData[i].ServoAngles[2]);
+                        break;
+                    default:
+                        break;
+                }
+
+            }
         }
 
         protected override void PositionTransform()
         {
-  
             if (_receivedData == null)
             {
                 return;
             }
-            // Debug.Log("Receiving Quad Heartbeat");
-            var limbData = new QuadrupedLimbData(_receivedData);
-            SetLimbs(limbData);
+           //ebug.Log("position limbs from physical bittle");
+            SetLimbsFromReceivedData();
         }
 
         private async Task WaitForQuadHeartbeatAsync(int secondTimeout)
@@ -161,7 +192,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             heartbeatStopwatch.Start();
             while (_connected)
             {
-                Debug.Log("Listen for heartbeat");
+                // Debug.Log("Listen for heartbeat");
                 if (heartbeatStopwatch.Elapsed.TotalSeconds > secondTimeout)
                 {
                     Debug.Log("TimeOut");
@@ -193,10 +224,10 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                         byte[] remainingBytes = new byte[remainingBytesLength];
                         Buffer.BlockCopy(bytes, sizeof(int) + sizeof(int), remainingBytes, 0, remainingBytes.Length);
                         _receivedData = ParsePhysicalRobotData(remainingBytes);  // Update the shared data
-                                                                                 
+
                         heartbeatStopwatch.Restart();
 
-                     
+
                     }
                     else
                     {
@@ -306,7 +337,13 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             return;
 #endif
             UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
-            UpdateStatus(IRobot.Status.Ready); 
+            UpdateStatus(IRobot.Status.Ready);
+        }
+
+        public override void SetLimbs(LimbValues[] limbData)
+        {
+            //  base.SetLimbs(limbData);
+            OnLimbsPositioned(limbData);
         }
 
         /// <summary>
@@ -315,60 +352,15 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         /// <param name="limbValues"></param>
         protected override void OnLimbsPositioned(LimbValues[] limbValues)
         {
-            base.OnLimbsPositioned(limbValues);
+           // base.OnLimbsPositioned(limbValues);
 
             List<byte> byteList = new List<byte>();
             for (int i = 0; i < m_limbs.Length; i++)
             {
-
-
-
-             
                 byteList.AddRange(BitConverter.GetBytes(limbValues[i].ServoAngles[0]));
                 byteList.AddRange(BitConverter.GetBytes(limbValues[i].ServoAngles[1]));
                 byteList.AddRange(BitConverter.GetBytes(limbValues[i].ServoAngles[2]));
-
             }
-
-               // List<byte> byteList = new List<byte>();
-
-            // Serialize each float field to bytes
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FLBaseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FLHipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FLKneeAngle));
-
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FRBaseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FRHipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.FRKneeAngle));
-
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BRBaseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BRHipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BRKneeAngle));
-
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BLBaseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BLHipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(limbData.BLKneeAngle));
-
-            // Serial.println(limbData.BLHipAngle);
-            // Serialize each float field to bytes
-           // var baseAngle = 0f;
-            //var hipAngle = 36f;
-            //var kneeAngle = 47f;
-            //byteList.AddRange(BitConverter.GetBytes(baseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(hipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(kneeAngle));
-
-            //byteList.AddRange(BitConverter.GetBytes(baseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(hipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(kneeAngle));
-
-            //byteList.AddRange(BitConverter.GetBytes(baseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(hipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(kneeAngle));
-
-            //byteList.AddRange(BitConverter.GetBytes(baseAngle));
-            //byteList.AddRange(BitConverter.GetBytes(hipAngle));
-            //byteList.AddRange(BitConverter.GetBytes(kneeAngle));
 
             byte[] serializedData = byteList.ToArray();
 
@@ -408,13 +400,9 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                                      brBaseAngle, brHipAngle, brKneeAngle,
                                      blBaseAngle, blHipAngle, blKneeAngle);
 
-
-
             PhysicalRobotData data = new PhysicalRobotData();
             try
             {
-
-
                 offset = 0;
 
                 data.GyroVelocityX = BitConverter.ToInt64(bytes, offset);
@@ -437,8 +425,6 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             {
                 Debug.LogWarning(e.Message);
             }
-
-
             return null;
         }
         public override bool IsSimulation()
@@ -460,22 +446,17 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         public long GyroVelocityX { get; set; }
         public long GyroVelocityY { get; set; }
         public long GyroVelocityZ { get; set; }
-
         public int FlBaseServoAngle { get; set; }
         public int FlHipServoAngle { get; set; }
         public int FlKneeServoAngle { get; set; }
-
         public int FrBaseServoAngle { get; set; }
         public int FrHipServoAngle { get; set; }
         public int FrKneeServoAngle { get; set; }
-
         public int BrBaseServoAngle { get; set; }
         public int BrHipServoAngle { get; set; }
         public int BrKneeServoAngle { get; set; }
-
         public int BlBaseServoAngle { get; set; }
         public int BlHipServoAngle { get; set; }
         public int BlKneeServoAngle { get; set; }
     }
-
 }

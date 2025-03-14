@@ -9,98 +9,94 @@ using RoboticsToolkit.Robotics;
 
 namespace RoboticsToolkit.Robotics.QuadrupedRobot
 {
-    [Serializable]
-    public class QuadrupedLimbData:LimbData
-    {
-        public float FLBaseAngle;
-        public float FLHipAngle;
-        public float FLKneeAngle;
-        public Vector3 FLTargetPos;
+    //[Serializable]
+    //public class QuadrupedLimbData:LimbData
+    //{
+    //    public float FLBaseAngle;
+    //    public float FLHipAngle;
+    //    public float FLKneeAngle;
+    //    public Vector3 FLTargetPos;
 
-        public float FRBaseAngle;
-        public float FRHipAngle;
-        public float FRKneeAngle;
-        public Vector3 FRTargetPos;
+    //    public float FRBaseAngle;
+    //    public float FRHipAngle;
+    //    public float FRKneeAngle;
+    //    public Vector3 FRTargetPos;
 
-        public float BRBaseAngle;
-        public float BRHipAngle;
-        public float BRKneeAngle;
-        public Vector3 BRTargetPos;
+    //    public float BRBaseAngle;
+    //    public float BRHipAngle;
+    //    public float BRKneeAngle;
+    //    public Vector3 BRTargetPos;
 
-        public float BLBaseAngle;
-        public float BLHipAngle;
-        public float BLKneeAngle;
-        public Vector3 BLTargetPos;
+    //    public float BLBaseAngle;
+    //    public float BLHipAngle;
+    //    public float BLKneeAngle;
+    //    public Vector3 BLTargetPos;
 
-        public QuadrupedLimbData() { }
+    //    public QuadrupedLimbData() { }
 
-        public QuadrupedLimbData(QuadrupedData data)
-        {
-            FLBaseAngle = data.FLBaseAngle;
-            FLHipAngle = data.FLHipAngle;
-            FLKneeAngle = data.FLKneeAngle;
+    //    public QuadrupedLimbData(QuadrupedData data)
+    //    {
+    //        FLBaseAngle = data.FLBaseAngle;
+    //        FLHipAngle = data.FLHipAngle;
+    //        FLKneeAngle = data.FLKneeAngle;
 
-            FRBaseAngle = data.FRBaseAngle;
-            FRHipAngle = data.FRHipAngle;
-            FRKneeAngle = data.FRKneeAngle;
+    //        FRBaseAngle = data.FRBaseAngle;
+    //        FRHipAngle = data.FRHipAngle;
+    //        FRKneeAngle = data.FRKneeAngle;
 
-            BRBaseAngle = data.BRBaseAngle;
-            BRHipAngle = data.BRHipAngle;
-            BRKneeAngle = data.BRKneeAngle;
+    //        BRBaseAngle = data.BRBaseAngle;
+    //        BRHipAngle = data.BRHipAngle;
+    //        BRKneeAngle = data.BRKneeAngle;
 
-            BLBaseAngle = data.BLBaseAngle;
-            BLHipAngle = data.BLHipAngle;
-            BLKneeAngle = data.BLKneeAngle;
-        }
+    //        BLBaseAngle = data.BLBaseAngle;
+    //        BLHipAngle = data.BLHipAngle;
+    //        BLKneeAngle = data.BLKneeAngle;
+    //    }
 
-        public QuadrupedLimbData(float flBaseAngle, float flHipAngle, float flKneeAngle,
-                              float frBaseAngle, float frHipAngle, float frKneeAngle,
-                              float brBaseAngle, float brHipAngle, float brKneeAngle,
-                              float blBaseAngle, float blHipAngle, float blKneeAngle)
-        {
-            FLBaseAngle = flBaseAngle;
-            FLHipAngle = flHipAngle;
-            FLKneeAngle = flKneeAngle;
+    //    public QuadrupedLimbData(float flBaseAngle, float flHipAngle, float flKneeAngle,
+    //                          float frBaseAngle, float frHipAngle, float frKneeAngle,
+    //                          float brBaseAngle, float brHipAngle, float brKneeAngle,
+    //                          float blBaseAngle, float blHipAngle, float blKneeAngle)
+    //    {
+    //        FLBaseAngle = flBaseAngle;
+    //        FLHipAngle = flHipAngle;
+    //        FLKneeAngle = flKneeAngle;
 
-            FRBaseAngle = frBaseAngle;
-            FRHipAngle = frHipAngle;
-            FRKneeAngle = frKneeAngle;
+    //        FRBaseAngle = frBaseAngle;
+    //        FRHipAngle = frHipAngle;
+    //        FRKneeAngle = frKneeAngle;
 
-            BRBaseAngle = brBaseAngle;
-            BRHipAngle = brHipAngle;
-            BRKneeAngle = brKneeAngle;
+    //        BRBaseAngle = brBaseAngle;
+    //        BRHipAngle = brHipAngle;
+    //        BRKneeAngle = brKneeAngle;
 
-            BLBaseAngle = blBaseAngle;
-            BLHipAngle = blHipAngle;
-            BLKneeAngle = blKneeAngle;
-        }
-    }
+    //        BLBaseAngle = blBaseAngle;
+    //        BLHipAngle = blHipAngle;
+    //        BLKneeAngle = blKneeAngle;
+    //    }
+    //}
 
     public abstract class Quadruped : MonoBehaviour, IRobot, IRoboticControllerEventListener
     {
         protected IRoboticLimb[] m_limbs;
 
         [SerializeField]
-        private QuadrupedLeg m_frLimb;
+        protected QuadrupedLeg m_frLimb;
         [SerializeField]
-        private QuadrupedLeg m_flLimb;
+        protected QuadrupedLeg m_flLimb;
         [SerializeField]
-        private QuadrupedLeg m_brLimb;
+        protected QuadrupedLeg m_brLimb;
         [SerializeField]
-        private QuadrupedLeg m_blLimb;
+        protected QuadrupedLeg m_blLimb;
 
         [SerializeField]
         private int _startupDelay = 10;
 
-      
         protected IRobot.Status _status = IRobot.Status.NotReady;
-
         protected bool _isRunning = false;
 
         [SerializeField]
         private QuadrupedLeg m_dynamicLimbPrefab;
-
-   
         [SerializeField]
         private float _readyHeight = 1f;
 
@@ -111,20 +107,16 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         }
         protected virtual void Start()
         {
-           // ToggleColliders(false);
-
+            // ToggleColliders(false);
             if (IsSimulation())
             {
                 //UpdateStatus(Status.Initialized);
             }
-
-
         }
         public void Bootup()
         {
             Debug.Log("Quadruped Bootup");
             OnBootup();
-      
         }
         protected virtual void OnBootup()
         {
@@ -141,7 +133,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         }
         protected void UpdateStatus(IRobot.Status newStatus)
         {
-            if(_status != newStatus)
+            if (_status != newStatus)
             {
                 _status = newStatus;
                 switch (newStatus)
@@ -150,17 +142,16 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                         break;
                     case IRobot.Status.Initialized:
                         NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotInitialized);
-                        break;               
+                        break;
                     case IRobot.Status.AdjustingHeight:
                         NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotInPosition);
                         break;
                     case IRobot.Status.Ready:
-                        NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotReady);                      
+                        NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotReady);
                         break;
                     default:
                         break;
                 }
-       
             }
         }
         protected void ToggleColliders(bool toggle)
@@ -183,14 +174,12 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             }
             return returnPoint;
         }
-     
+
         protected virtual void AtReadyHeight()
         {
             UpdateStatus(IRobot.Status.Ready);
             NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotInPosition);
         }
-
-     
 
         public QuadrupedLeg ConstructDynamicLeg(Transform parentTransform, IRoboticLimb leg, string name, Color color, bool left = false)
         {
@@ -237,32 +226,29 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         public virtual void Run()
         {
             PositionTransform();
-           // PositionLimbs();
+            // PositionLimbs();
         }
         protected virtual void PositionTransform()
         {
-          
             //  m_frLimb.SetLimbValues(limbData.FRBaseAngle, limbData.FRHipAngle, limbData.FRKneeAngle);
-         
+
             //  m_brLimb.SetLimbValues(limbData.BRBaseAngle, limbData.BRHipAngle, limbData.BRKneeAngle);
             //  m_blLimb.SetLimbValues(limbData.BLBaseAngle, limbData.BLHipAngle, limbData.BLKneeAngle);
         }
 
-        public void SetLimbs(QuadrupedLimbData limbData)
-        {
-            m_frLimb.SetLimbValues(limbData.FRBaseAngle, limbData.FRHipAngle, limbData.FRKneeAngle);
-              m_flLimb.SetLimbValues(limbData.FLBaseAngle, limbData.FLHipAngle, limbData.FLKneeAngle);
-            m_brLimb.SetLimbValues(limbData.BRBaseAngle, limbData.BRHipAngle, limbData.BRKneeAngle);
-            m_blLimb.SetLimbValues(limbData.BLBaseAngle, limbData.BLHipAngle, limbData.BLKneeAngle);
-        }
-        public void SetLimbs(LimbValues[] limbData)
+        //public void SetLimbs(QuadrupedLimbData limbData)
+        //{
+        //    m_frLimb.SetLimbValues(limbData.FRBaseAngle, limbData.FRHipAngle, limbData.FRKneeAngle);
+        //      m_flLimb.SetLimbValues(limbData.FLBaseAngle, limbData.FLHipAngle, limbData.FLKneeAngle);
+        //    m_brLimb.SetLimbValues(limbData.BRBaseAngle, limbData.BRHipAngle, limbData.BRKneeAngle);
+        //    m_blLimb.SetLimbValues(limbData.BLBaseAngle, limbData.BLHipAngle, limbData.BLKneeAngle);
+        //}
+        public virtual void SetLimbs(LimbValues[] limbData)
         {
             for (int i = 0; i < m_limbs.Length; i++)
             {
-              
                 switch (i)
                 {
-             
                     case 0:
                         m_flLimb.SetLimbValues(limbData[i].ServoAngles[0], limbData[i].ServoAngles[1], limbData[i].ServoAngles[2]);
                         break;
@@ -278,59 +264,59 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                     default:
                         break;
                 }
-            
-        }
-            OnLimbsPositioned(limbData);
+
+            }
+            //   OnLimbsPositioned(limbData);
             //  OnLimbsPositioned(quadrupedLimbData);
         }
         protected virtual void PositionLimbs()
         {
-           //var limbData = _controller.CalculateLimbData(this);
-           //// limbData = limbData as QuadrupedLimbData;
+            //var limbData = _controller.CalculateLimbData(this);
+            //// limbData = limbData as QuadrupedLimbData;
 
-           // var quadrupedLimbData = new QuadrupedLimbData();
+            // var quadrupedLimbData = new QuadrupedLimbData();
 
-           // for (int i = 0; i < limbData.Length; i++)
-           // {
-           //     switch (i)
-           //     {
-           //         case 0:
-           //             quadrupedLimbData.FLTargetPos = limbData[i].LimbTarget;
-           //             quadrupedLimbData.FLBaseAngle = limbData[i].ServoAngles[0];
-           //             quadrupedLimbData.FLHipAngle = limbData[i].ServoAngles[1];
-           //             quadrupedLimbData.FLKneeAngle = limbData[i].ServoAngles[2];
-           //             break;
-           //         case 1:
-           //             quadrupedLimbData.FRTargetPos = limbData[i].LimbTarget;
-           //             quadrupedLimbData.FRBaseAngle = limbData[i].ServoAngles[0];
-           //             quadrupedLimbData.FRHipAngle = limbData[i].ServoAngles[1];
-           //             quadrupedLimbData.FRKneeAngle = limbData[i].ServoAngles[2];
-           //             break;
-           //         case 2:
-           //             quadrupedLimbData.BRTargetPos = limbData[i].LimbTarget;
-           //             quadrupedLimbData.BRBaseAngle = limbData[i].ServoAngles[0];
-           //             quadrupedLimbData.BRHipAngle = limbData[i].ServoAngles[1];
-           //             quadrupedLimbData.BRKneeAngle = limbData[i].ServoAngles[2];
-           //             break;
-           //         case 3:
-           //             quadrupedLimbData.BLTargetPos = limbData[i].LimbTarget;
-           //             quadrupedLimbData.BLBaseAngle = limbData[i].ServoAngles[0];
-           //             quadrupedLimbData.BLHipAngle = limbData[i].ServoAngles[1];
-           //             quadrupedLimbData.BLKneeAngle = limbData[i].ServoAngles[2];
-           //             break;
-           //         default:
-           //             break;
-           //     }
-           // }
+            // for (int i = 0; i < limbData.Length; i++)
+            // {
+            //     switch (i)
+            //     {
+            //         case 0:
+            //             quadrupedLimbData.FLTargetPos = limbData[i].LimbTarget;
+            //             quadrupedLimbData.FLBaseAngle = limbData[i].ServoAngles[0];
+            //             quadrupedLimbData.FLHipAngle = limbData[i].ServoAngles[1];
+            //             quadrupedLimbData.FLKneeAngle = limbData[i].ServoAngles[2];
+            //             break;
+            //         case 1:
+            //             quadrupedLimbData.FRTargetPos = limbData[i].LimbTarget;
+            //             quadrupedLimbData.FRBaseAngle = limbData[i].ServoAngles[0];
+            //             quadrupedLimbData.FRHipAngle = limbData[i].ServoAngles[1];
+            //             quadrupedLimbData.FRKneeAngle = limbData[i].ServoAngles[2];
+            //             break;
+            //         case 2:
+            //             quadrupedLimbData.BRTargetPos = limbData[i].LimbTarget;
+            //             quadrupedLimbData.BRBaseAngle = limbData[i].ServoAngles[0];
+            //             quadrupedLimbData.BRHipAngle = limbData[i].ServoAngles[1];
+            //             quadrupedLimbData.BRKneeAngle = limbData[i].ServoAngles[2];
+            //             break;
+            //         case 3:
+            //             quadrupedLimbData.BLTargetPos = limbData[i].LimbTarget;
+            //             quadrupedLimbData.BLBaseAngle = limbData[i].ServoAngles[0];
+            //             quadrupedLimbData.BLHipAngle = limbData[i].ServoAngles[1];
+            //             quadrupedLimbData.BLKneeAngle = limbData[i].ServoAngles[2];
+            //             break;
+            //         default:
+            //             break;
+            //     }
+            // }
 
 
 
-           // if (IsSimulation())
-           // {
-           //     SetLimbs(quadrupedLimbData);
-           // }
+            // if (IsSimulation())
+            // {
+            //     SetLimbs(quadrupedLimbData);
+            // }
 
-           // OnLimbsPositioned(quadrupedLimbData);
+            // OnLimbsPositioned(quadrupedLimbData);
         }
 
         protected virtual void OnLimbsPositioned(LimbValues[] limbValues)
@@ -353,22 +339,22 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         //}
         public void EmergencyStop()
         {
-           
+
         }
 
         public void ResetController()
         {
-           
+
         }
 
         public void SubscribeToEvents(IRobotEventListener listener)
         {
-           _robotEventManager.AddListener(listener);
+            _robotEventManager.AddListener(listener);
         }
         private InterfaceEventManager<IRobotEventListener> _robotEventManager = new InterfaceEventManager<IRobotEventListener>("Robot");
         public void UnsubscribeToEvents(IRobotEventListener listener)
         {
-           _robotEventManager.RemoveListener(listener);
+            _robotEventManager.RemoveListener(listener);
         }
         private void NotifyRobotEventListeners(IRobotEventListener.EventType eventType)
         {
@@ -388,8 +374,8 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                 case IRoboticControllerEventListener.EventType.OnHeightAdjustmentBegin:
                     break;
                 case IRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd:
-                    if(_status == IRobot.Status.AdjustingHeight)
-                    AtReadyHeight();
+                    if (_status == IRobot.Status.AdjustingHeight)
+                        AtReadyHeight();
                     break;
                 default:
                     break;
