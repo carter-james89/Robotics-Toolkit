@@ -120,7 +120,7 @@ namespace QuadcopterUtilities
         /// </summary>
         public virtual void Land()
         {
-          //  Debug.Log("Land");
+            //  Debug.Log("Land");
             _flightController.Land();
             _flightStatus = IQuadcopter.FlightStatus.PreLaunch;
         }
@@ -261,6 +261,10 @@ namespace QuadcopterUtilities
             {
                 RunQuadcopterUpdate();
             }
+            if (_flightController != null && _flightController.IsInitialized())
+            {
+                ProcessInputs();
+            }
         }
 
         public void FixedUpdate()
@@ -279,8 +283,8 @@ namespace QuadcopterUtilities
                 {
                     var quadData = _flightController.GetSensorData();
                     SetVirtualPosition(quadData);
-                    ProcessInputs();
-                     _flightController.Run(_flightStatus, currentInputs);
+                   // ProcessInputs();
+                    _flightController.Run(_flightStatus, currentInputs);
                     OnTransformUpdated();
                 }
                 else
@@ -318,10 +322,10 @@ namespace QuadcopterUtilities
             }
 
             currentInputs = overrideInputSource == null ? _headLessMode ? ConvertToHeadlessInputs(defaultInputs) : defaultInputs : overrideInputSource.Invoke();
-          //  Debug.Log("throttle from autopilot : " + currentInputs.throttle);
+            //  Debug.Log("throttle from autopilot : " + currentInputs.throttle);
             elvInput = currentInputs.throttle;
             yawInput = currentInputs.yaw;
-            
+
 
             if (currentInputs.takeOff && _flightStatus == IQuadcopter.FlightStatus.PreLaunch)
             {

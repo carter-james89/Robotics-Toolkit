@@ -77,6 +77,7 @@ namespace QuadcopterUtilities
         void Update()
         {
             var pilotInputs = _pilotInupts.GetInputValues();
+           // Debug.Log(pilotInputs)
             if (pilotInputs.toggleAutoPilot)
             {
                 _waypointPilot.ToggleAutoPilot();

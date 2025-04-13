@@ -99,6 +99,7 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
         if (_flightStatus != IQuadcopter.FlightStatus.PreLaunch)
         {
             rigidBody.AddForce(rigidBody.transform.up * 9.81f);
+     
             bool receivingInput = false;
             var pitchInput = _craftInputs.pitch;
             rigidBody.AddForce(rigidBody.transform.forward * pitchInput);
@@ -167,8 +168,8 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
 
     public void Takeoff()
     {
-       // Debug.Log("Simulator TakeOff");
-          rigidBody.transform.localPosition += new Vector3(0, .8f, 0);
+       Debug.Log("Simulator TakeOff");
+        rigidBody.Move(rigidBody.transform.position + new Vector3(0, .8f, 0), transform.rotation);
         //.localPosition = rigidBody.transform.localPosition;
         rigidBody.transform.position = _quadToControl.GetGameObject().transform.position;
         rigidBody.useGravity = true;

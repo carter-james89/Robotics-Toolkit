@@ -39,11 +39,11 @@ namespace  QuadcopterUtilities
                 frameValues.takeOff = Input.GetKeyDown(KeyCode.T);
                 frameValues.land = Input.GetKeyDown(KeyCode.L);
                 frameValues.toggleAutoPilot = Input.GetKeyDown(KeyCode.P);
-
-                 if (frameValues.toggleAutoPilot)
-                {
-                    toggleAutoPilot?.Invoke();
-                }
+               // if(Input.GetKeyDown(KeyCode.P))
+                // if (frameValues.toggleAutoPilot)
+                //{
+                //    toggleAutoPilot?.Invoke();
+                //}
 
                 switch (inputType)
                 {
