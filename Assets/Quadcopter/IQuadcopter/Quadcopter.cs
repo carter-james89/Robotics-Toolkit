@@ -104,7 +104,6 @@ namespace QuadcopterUtilities
         /// </summary>
         public virtual void Takeoff()
         {
-            Debug.Log("Takeoff");
             _flightController.Takeoff();
 
             //Update();
@@ -140,10 +139,10 @@ namespace QuadcopterUtilities
         /// <param name="autoPilot">The autopilot module used, activated via <see cref="ActivateAutoPilot"/></param>
         public virtual void Initialize(IFlightController flightController, Func<IInputs.FlightControlValues> defaultInputSource)
         {
-            Debug.Log("Initialize Quadcopter : " + name + " - Flight Controller : " + flightController.ToString());
+            //Debug.Log("Initialize Quadcopter : " + name + " - Flight Controller : " + flightController.ToString());
             if (flightController == null)
             {
-                Debug.Log("what the actual fuck");
+              //  Debug.Log("what the actual fuck");
                 Debug.Break();
             }
             _flightStatus = IQuadcopter.FlightStatus.PreLaunch;

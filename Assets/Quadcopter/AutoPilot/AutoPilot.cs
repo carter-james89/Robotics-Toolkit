@@ -82,10 +82,8 @@ namespace  QuadcopterUtilities
         /// </summary>
         public void ActivateAutoPilot()
         {
-            Debug.Log(" try Activate AutoPilot");
             if (!autoPilotActive)
             {
-                Debug.Log("AutoPilot Enabled");
                 autoPilotActive = true;
                 gameObject.SetActive(true);
                 MatchQuadTransform();

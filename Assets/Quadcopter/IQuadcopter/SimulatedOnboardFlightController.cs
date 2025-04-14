@@ -37,7 +37,7 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
 
     public void Initialize(IQuadcopter quadToControl, Action<IQuadcopter.FlightStatus> onFlightStatusChanged)
     {
-        Debug.Log("initialize flight controller");
+       // Debug.Log("initialize flight controller");
         _quadToControl = quadToControl;
         var physicsCalculator = new GameObject("Simulation Physics Simulation");
         physicsCalculator.transform.SetParent(_quadToControl.GetLocalTrackingSpace());
@@ -168,7 +168,6 @@ public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
 
     public void Takeoff()
     {
-       Debug.Log("Simulator TakeOff");
         rigidBody.Move(rigidBody.transform.position + new Vector3(0, .8f, 0), transform.rotation);
         //.localPosition = rigidBody.transform.localPosition;
         rigidBody.transform.position = _quadToControl.GetGameObject().transform.position;

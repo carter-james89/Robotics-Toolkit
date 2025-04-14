@@ -270,7 +270,7 @@ public class AutoPilotMLAgent : Agent
         //Debug.Log(forwardError);
         if (forwardError < 5)
         {
-            _groundRenderer.material.color = Color.green;
+           
             //  AddReward(.1f);
             m_inRange = true;
             _outOfYawRangeSeconds = 0;
@@ -278,13 +278,14 @@ public class AutoPilotMLAgent : Agent
         else
         {
             _outOfYawRangeSeconds += Time.fixedDeltaTime;
-            _groundRenderer.material.color = Color.red;
+      
             AddReward(-.1f);
             m_inRange = false;
         }
 
         if (dist < .2 && forwardError < 10)
         {
+            _groundRenderer.material.color = Color.green;
             // Debug.Log("Frame : " + Time.frameCount + " : " + _atTargetSeconds);
             _atTargetSeconds += Time.fixedDeltaTime;
             //  AddReward(1 - dist);
@@ -310,6 +311,7 @@ public class AutoPilotMLAgent : Agent
         }
         else
         {
+            _groundRenderer.material.color = Color.red;
             _atTargetSeconds = 0;
         }
 
