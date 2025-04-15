@@ -51,11 +51,11 @@ namespace FlightControllers.Quadcopters
         /// <summary>
         /// Command the quadcopter to take off.
         /// </summary>
-        void Takeoff();
+        bool AttemptTakeoff();
 
         /// <summary>
         /// Command the quadcopter to land.
         /// </summary>
-        void Land();
+        bool AttemptLand();
     }
 }

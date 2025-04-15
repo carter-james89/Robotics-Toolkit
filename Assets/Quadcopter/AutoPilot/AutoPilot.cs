@@ -88,7 +88,6 @@ namespace  FlightControllers.Quadcopters
                 gameObject.SetActive(true);
                 MatchQuadTransform();
                 quadToControl.OverrideInputSource(this);
-                quadToControl.SubscibeToAbort(DeactivateAutoPilot);
                 OnAutoPilotActivated();
             }
         }
@@ -107,7 +106,6 @@ namespace  FlightControllers.Quadcopters
                 //Debug.Log("AutoPilot Disabled");
                 autoPilotActive = false;
                 quadToControl.RemoveInputOverride(this);
-                quadToControl.UnsubscribeFromAbort(DeactivateAutoPilot);
                 OnAutoPilotDeactivated();
             }
             gameObject.SetActive(false);

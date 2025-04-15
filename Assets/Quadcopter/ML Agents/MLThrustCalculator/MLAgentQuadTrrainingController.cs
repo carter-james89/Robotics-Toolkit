@@ -51,7 +51,7 @@ namespace FlightControllers.Quadcopters
 
             //_waypointPilot.EndMission();
             _angleText.text = _motorThrustCalculator.GetCurrentAngle().ToString();
-            _quadcopter.Land();
+            _quadcopter.AttemptLand();
         }
 
         private void OnEpisodeBegin()
@@ -61,7 +61,7 @@ namespace FlightControllers.Quadcopters
             _quadcopter.GetGameObject().transform.localEulerAngles = Vector3.zero;
             _quadcopter.GetGameObject().GetComponent<Rigidbody>().velocity = Vector3.zero;
             _quadcopter.GetGameObject().GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-            _quadcopter.Takeoff();
+            _quadcopter.AttemptTakeoff();
 
             if (_motorThrustCalculator.UseTrainer())
             {

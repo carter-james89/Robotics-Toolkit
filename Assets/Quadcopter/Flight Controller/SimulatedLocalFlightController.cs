@@ -110,7 +110,7 @@ namespace FlightControllers.Quadcopters
             return true;
         }
 
-        public void Land()
+        public bool AttemptLand()
         {
             _groundStatationData = new GroundStationData();
             frMotor.SetThrottle(0);
@@ -118,6 +118,7 @@ namespace FlightControllers.Quadcopters
 
             brMotor.SetThrottle(0);
             blMotor.SetThrottle(0);
+            return true;
         }
 
 
@@ -155,7 +156,7 @@ namespace FlightControllers.Quadcopters
             }
         }
 
-        public void Takeoff()
+        public bool AttemptTakeoff()
         {
             // Debug.Log("Simulator TakeOff");
             //  _motorCalculator = new MotorThrustCalculator();
@@ -163,6 +164,7 @@ namespace FlightControllers.Quadcopters
             _motorCalculator.SetAltitudeHold(1);
             _onFlightStatusChanged.Invoke(FlightStatus.Launching);
             _rigidBody.useGravity = true;
+            return true;
         }
 
         public GameObject GetGameObject()

@@ -265,7 +265,7 @@ namespace FlightControllers.Quadcopters
         /// <summary>
         /// Launch the Tello via its auto liftoff feature
         /// </summary>
-        public void Takeoff()
+        public bool AttemptTakeoff()
         {
 
             if (connectionState == Tello.ConnectionState.Connected)
@@ -274,20 +274,23 @@ namespace FlightControllers.Quadcopters
                 Tello.takeOff();
                 _waitingForLaunchComplete = true;
                 _onFlightStatusChanged.Invoke(FlightStatus.Launching);
+                return true;
             }
             else
             {
                 Debug.LogWarning("Not connected to tello prior to takeoff command : " + connectionState);
+                return false;
             }
 
         }
         /// <summary>
-        /// Land the Tello via its auto land feature
+        /// AttemptLand the Tello via its auto land feature
         /// </summary>
-        public void Land()
+        public bool AttemptLand()
         {
             Tello.land();
             _onFlightStatusChanged.Invoke(FlightStatus.Landing);
+            return true;
         }
         /// <summary>
         /// Check to see if the Tello has finished its auto takeoff

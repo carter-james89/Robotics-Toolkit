@@ -22,6 +22,8 @@ namespace FlightControllers.Quadcopters
         /// </remarks>
         public Action<Vector3, Quaternion> onTransformChanged;
 
+        private InterfaceEventManager<QuadcopterEventData> _eventManager = new InterfaceEventManager<QuadcopterEventData>();
+
         #endregion
 
         #region Serialized Fields
@@ -158,21 +160,34 @@ namespace FlightControllers.Quadcopters
         }
 
         /// <inheritdoc/>
-        public virtual void Takeoff()
+        public virtual bool AttemptTakeoff()
         {
-            _flightController.Takeoff();
+            bool success = _flightController.AttemptTakeoff();
+            if(!success)
+            {
+                Debug.LogError("Takeoff failed");
+                return false;
+            }
+
             var quadData = _flightController.GetSensorData();
             SetVirtualPosition(quadData);
             ResetKnownOffset();
             SetHomePoint(transform.localPosition);
             _flightStatus = FlightStatus.Flying;
+            NotifyEventListeners(QuadcopterEventType.TakeOff);
+            return true;
         }
 
         /// <inheritdoc/>
-        public virtual void Land()
+        public virtual bool AttemptLand()
         {
-            _flightController.Land();
+           
+            if (!_flightController.AttemptLand())
+            {
+                return false;
+            }
             _flightStatus = FlightStatus.PreLaunch;
+            return true;
         }
 
         /// <inheritdoc/>
@@ -193,17 +208,17 @@ namespace FlightControllers.Quadcopters
             return this;
         }
         /// <inheritdoc/>
-        public void SubscribeToEvents(IEventListener<QuadcopterData> listenerToSubscribe) => throw new NotImplementedException();
+        public void SubscribeToEvents(IEventListener<QuadcopterEventData> listenerToSubscribe) {
+        _eventManager.AddListener(listenerToSubscribe);
+        }
 
         /// <inheritdoc/>
-        public void UnsubscribeFromEvents(IEventListener<QuadcopterData> listenerToUnsubscribe) => throw new NotImplementedException();
+        public void UnsubscribeFromEvents(IEventListener<QuadcopterEventData> listenerToUnsubscribe) { _eventManager.RemoveListener(listenerToUnsubscribe); }
 
-        /// <inheritdoc/>
-        public void SubscibeToAbort(Action actionToSubscribe) => throw new NotImplementedException();
-
-        /// <inheritdoc/>
-        public void UnsubscribeFromAbort(Action actionToUnsubscribe) => throw new NotImplementedException();
-
+        private void NotifyEventListeners(QuadcopterEventType eventType)
+        {
+            _eventManager.RaiseEvent(new QuadcopterEventData(eventType, this, GetSensorData()));
+        }
         #endregion
 
         #region Update Methods
@@ -242,9 +257,9 @@ namespace FlightControllers.Quadcopters
             yawInput = currentInputs.yaw;
 
             if (currentInputs.takeOff && _flightStatus == FlightStatus.PreLaunch)
-                Takeoff();
+                AttemptTakeoff();
             else if (currentInputs.land)
-                Land();
+                AttemptLand();
         }
 
         #endregion

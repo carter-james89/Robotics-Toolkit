@@ -102,7 +102,7 @@ namespace  FlightControllers.Quadcopters
 
             if(sceneType == SceneType.Simulation)
             {
-                //squadcopter.Takeoff();
+                //squadcopter.AttemptTakeoff();
                 //_waypointPilot.ActivateAutoPilot();
               //  _waypointMission.BeginMission(_waypointPilot);
             }

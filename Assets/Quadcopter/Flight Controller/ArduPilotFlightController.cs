@@ -41,7 +41,7 @@ namespace FlightControllers.Quadcopters
             throw new NotImplementedException();
         }
 
-        public void Land()
+        public bool AttemptLand()
         {
             throw new NotImplementedException();
         }
@@ -51,7 +51,7 @@ namespace FlightControllers.Quadcopters
 
         }
 
-        public void Takeoff()
+        public bool AttemptTakeoff()
         {
             throw new NotImplementedException();
         }

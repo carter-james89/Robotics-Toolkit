@@ -168,15 +168,16 @@ namespace FlightControllers.Quadcopters
             }
         }
 
-        public void Takeoff()
+        public bool AttemptTakeoff()
         {
 
             _motorThrustCalculator.Initialize(_quadToControl.GetGameObject().transform.eulerAngles.y);
             _motorThrustCalculator.SetAltitudeHold(1);
             _onFlightStatusChanged.Invoke(FlightStatus.Launching);
+            return true;
         }
 
-        public void Land()
+        public bool AttemptLand()
         {
             throw new System.NotImplementedException();
         }

@@ -91,7 +91,7 @@ namespace FlightControllers.Quadcopters
             if (!_firstFlight)
             {
                 _autoPilot.DeactivateAutoPilot();
-                _quadcopterToControl.Land();
+                _quadcopterToControl.AttemptLand();
 
                 _flightControlValues.throttle = 0;
                 _flightControlValues.pitch = 0;
@@ -129,7 +129,7 @@ namespace FlightControllers.Quadcopters
 
             _quadcopterToControl.transform.localPosition = new Vector3(0, .5f, 0);
 
-            _quadcopterToControl.Takeoff();
+            _quadcopterToControl.AttemptTakeoff();
             _autoPilot.ActivateAutoPilot();
 
             SetNewTarget(_autoPilot.GetGameObject().transform);
@@ -149,7 +149,7 @@ namespace FlightControllers.Quadcopters
             //  OnEpisodeEndEvent.Invoke();
             AddReward(reward);
             //_autoPilot.DeactivateAutoPilot();
-            //_quadcopterToControl.Land();
+            //_quadcopterToControl.AttemptLand();
 
             //_flightControlValues.throttle = 0;
             //_flightControlValues.pitch = 0;

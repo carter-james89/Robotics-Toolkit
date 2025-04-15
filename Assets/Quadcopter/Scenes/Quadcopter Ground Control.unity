@@ -633,17 +633,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f40e33bc063923b418434be1df54b465, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deltaHeight: 0
   heightOffset: 0
+  assumedHeightOffset: 0
   elvInput: 0
   yawInput: 0
-  assumedHeightOffset: 0
-  vertSpeed: 0
   groundSensorPoint: {fileID: 0}
   _trailVisualizer: {fileID: 0}
   _flightStatus: 0
   _headLessMode: 0
   _selfInitialize: 0
+  deltaHeight: 0
 --- !u!54 &270988228
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -652,9 +651,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 270988225}
   serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 4
-  m_AngularDrag: 3.6
+  m_Mass: 0.08
+  m_Drag: 2
+  m_AngularDrag: 3
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -668,9 +667,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 1
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &270988229
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2902,7 +2901,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 244b955d354231348971f559d72ce768, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _controlMode: 0
+  _controlMode: 1
   _tello: {fileID: 270988227}
   _picopter: {fileID: 1877514361}
   _ardupilot: {fileID: 1620409547}
@@ -3422,17 +3421,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f40e33bc063923b418434be1df54b465, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deltaHeight: 0
   heightOffset: 0
+  assumedHeightOffset: 0
   elvInput: 0
   yawInput: 0
-  assumedHeightOffset: 0
-  vertSpeed: 0
   groundSensorPoint: {fileID: 0}
   _trailVisualizer: {fileID: 0}
   _flightStatus: 0
   _headLessMode: 0
   _selfInitialize: 0
+  deltaHeight: 0
 --- !u!4 &1708934915 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5569858894476000523, guid: c4cde373a441a22428152f35879e6111, type: 3}

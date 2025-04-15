@@ -6,25 +6,29 @@ using Toolkit.Utilities;
 
 namespace FlightControllers.Quadcopters
 {
+    public enum QuadcopterEventType
+    {
+        None,
+        TakeOff,
+        Land,
+        BatteryLow,
+        EmergencyStop
+    }
     /// <summary>
     /// Event data class for quadcopter-related events.
     /// </summary>
     public class QuadcopterEventData : IEventData
     {
-        public enum QuadcopterEventType
-        {
-            None,
-            TakeOff,
-            Land,
-            BatteryLow,
-            EmergencyStop
-        }
-
+        public IQuadcopter Quadcopter { get; private set; }
         public QuadcopterEventType EventType { get; private set; }
 
-        public QuadcopterEventData(QuadcopterEventType eventType)
+        public QuadcopterData QuadcopterData { get; private set; }
+
+        public QuadcopterEventData(QuadcopterEventType eventType, IQuadcopter quadcopter, QuadcopterData quadcopterData)
         {
             EventType = eventType;
+            Quadcopter = quadcopter;
+            QuadcopterData = quadcopterData;
         }
     }
 
@@ -32,15 +36,13 @@ namespace FlightControllers.Quadcopters
     /// Real-time telemetry data for a quadcopter.
     /// Implements IUplinkData for communication.
     /// </summary>
-    public class QuadcopterData : IEventData, IUplinkData
+    public class QuadcopterData : IUplinkData
     {
         public double throttle, yaw, pitch, roll;
         public float gyroYaw, gyroRoll, gyroPitch;
         public float posX, posY, posZ;
         public float height;
         public Vector3 VelocityVector;
-
-        public Enum GetEventType() => null; // Placeholder if needed by event routing
     }
 
     /// <summary>
@@ -68,18 +70,8 @@ namespace FlightControllers.Quadcopters
     /// Interface for all quadcopters, real or simulated.
     /// Provides control, telemetry, and event handling functionality.
     /// </summary>
-    public interface IQuadcopter : IMonobehaviorInterface, IEventSource<QuadcopterData>
+    public interface IQuadcopter : IMonobehaviorInterface, IEventSource<QuadcopterEventData>
     {
-        /// <summary>
-        /// Subscribe a callback for when the quadcopter must abort mission.
-        /// </summary>
-        void SubscibeToAbort(Action actionToSubscribe);
-
-        /// <summary>
-        /// Unsubscribe an abort callback.
-        /// </summary>
-        void UnsubscribeFromAbort(Action actionToUnsubscribe);
-
         /// <summary>
         /// Initialize autopilot and set dependencies.
         /// </summary>
@@ -133,11 +125,11 @@ namespace FlightControllers.Quadcopters
         /// <summary>
         /// Initiate takeoff.
         /// </summary>
-        void Takeoff();
+        bool AttemptTakeoff();
 
         /// <summary>
         /// Initiate landing.
         /// </summary>
-        void Land();
+        bool AttemptLand();
     }
 }
