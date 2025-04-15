@@ -125,15 +125,15 @@ namespace FlightControllers.Quadcopters
                     receivingInput = true;
                 }
 
-                if (receivingInput & rigidBody.drag != inputDrag)
+                if (receivingInput & rigidBody.linearDamping != inputDrag)
                 {
-                    rigidBody.drag = inputDrag;
-                    rigidBody.angularDrag = inputDrag;
+                    rigidBody.linearDamping = inputDrag;
+                    rigidBody.angularDamping = inputDrag;
                 }
-                else if (!receivingInput & rigidBody.drag != drag)
+                else if (!receivingInput & rigidBody.linearDamping != drag)
                 {
-                    rigidBody.drag = drag;
-                    rigidBody.angularDrag = drag * .9f;
+                    rigidBody.linearDamping = drag;
+                    rigidBody.angularDamping = drag * .9f;
                 }
 
                 OnTransformUpdated();

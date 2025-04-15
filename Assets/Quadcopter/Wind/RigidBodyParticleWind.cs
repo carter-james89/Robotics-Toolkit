@@ -22,7 +22,7 @@ public class RigidBodyParticleWind : MonoBehaviour
 
        // myRigidbody.AddForce(particles[0].velocity);
 
-        myRigidbody.velocity += particles[0].velocity;
+        myRigidbody.linearVelocity += particles[0].velocity;
         myRigidbody.angularVelocity += particles[0].velocity;
        // myRigidbody.
         particles[0].position = myRigidbody.position;

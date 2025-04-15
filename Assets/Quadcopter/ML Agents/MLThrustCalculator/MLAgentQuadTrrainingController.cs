@@ -59,7 +59,7 @@ namespace FlightControllers.Quadcopters
             // Debug.Log("Episode Begin at Training Controller");
             _quadcopter.GetGameObject().transform.localPosition = Vector3.zero;
             _quadcopter.GetGameObject().transform.localEulerAngles = Vector3.zero;
-            _quadcopter.GetGameObject().GetComponent<Rigidbody>().velocity = Vector3.zero;
+            _quadcopter.GetGameObject().GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
             _quadcopter.GetGameObject().GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
             _quadcopter.AttemptTakeoff();
 

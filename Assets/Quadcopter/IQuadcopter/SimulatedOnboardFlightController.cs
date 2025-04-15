@@ -36,8 +36,8 @@ namespace FlightControllers.Quadcopters
             simulatedRB = physicsSimulator.AddComponent<Rigidbody>();
             var quadRB = quadToControl.GetGameObject().GetComponent<Rigidbody>();
             simulatedRB.mass = quadRB.mass;
-            simulatedRB.drag = quadRB.drag;
-            simulatedRB.angularDrag = quadRB.angularDrag;
+            simulatedRB.linearDamping = quadRB.linearDamping;
+            simulatedRB.angularDamping = quadRB.angularDamping;
             simulatedRB.useGravity = quadRB.useGravity;
             simulatedRB.interpolation = quadRB.interpolation;
             simulatedRB.collisionDetectionMode = quadRB.collisionDetectionMode;
@@ -92,7 +92,7 @@ namespace FlightControllers.Quadcopters
             simulatedRB.Move(simulatedRB.transform.position + new Vector3(0, 0.8f, 0), transform.rotation);
             simulatedRB.transform.position = quadToControl.GetGameObject().transform.position;
             simulatedRB.useGravity = true;
-            simulatedRB.velocity = Vector3.zero;
+            simulatedRB.linearVelocity = Vector3.zero;
             simulatedRB.angularVelocity = Vector3.zero;
 
             _onFlightStatusChanged?.Invoke(FlightStatus.Launching);
