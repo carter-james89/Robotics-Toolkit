@@ -1287,7 +1287,7 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 5022602860645237092, guid: 82dd4f94d7bcbad42b2f3f6540214200, type: 3}
+  m_Model: {fileID: 5022602860645237092, guid: 167b5ce5c2a4f1348837b163166fac2a, type: 3}
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: ML-Waypoint-Autopilot

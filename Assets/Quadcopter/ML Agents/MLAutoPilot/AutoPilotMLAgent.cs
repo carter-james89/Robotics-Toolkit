@@ -58,7 +58,7 @@ public class AutoPilotMLAgent : Agent
     private void OnQuadcopterPositioned(Vector3 pos, Quaternion rot)
     {
         float dist = 0;
-        CheckForErrors(out dist);
+       // CheckForErrors(out dist);
         CalculateRewards(dist);
     }
     public IInputs.FlightControlValues GetFlightControlValues(IAutoPilot autoPilot)
@@ -165,32 +165,26 @@ public class AutoPilotMLAgent : Agent
     private bool m_inRange;
     public override void CollectObservations(VectorSensor sensor)
     {
-        //Debug.Log("collect observations");
         base.CollectObservations(sensor);
-        //Debug.Log("Collect observations");
 
-        // sensor.AddObservation(StepCount);
-        //sensor.AddObservation(Vector3.Distance(_autoPilot.GetGameObject().transform.position, _quadcopterToControl.GetGameObject().transform.position));
-        //sensor.AddObservation(transform.localPosition);
-        //  sensor.AddObservation(_autoPilot.GetGameObject().transform.localPosition - _quadcopterToControl.GetGameObject().transform.localPosition);
-        sensor.AddObservation(_autoPilot.GetGameObject().transform.InverseTransformPoint(_quadcopterToControl.GetGameObject().transform.position));
-        sensor.AddObservation(_quadcopterToControl.GetSensorData().VelocityVector.y);
-        //  sensor.AddObservation(rigidbody.angularVelocity);
-        //sensor.AddObservation(_targetTransform.localEulerAngles - transform.localEulerAngles);
-        sensor.AddObservation(_autoPilot.GetGameObject().transform.localEulerAngles.y - _quadcopterToControl.GetGameObject().transform.localEulerAngles.y);
-        //  sensor.AddObservation(_atTargetSeconds);
+        // 1. Relative position: Clamp or normalize
+        Vector3 relativePos = _autoPilot.GetGameObject().transform.InverseTransformPoint(
+            _quadcopterToControl.GetGameObject().transform.position);
+        sensor.AddObservation(Vector3.ClampMagnitude(relativePos, 1f));  // safer than raw
 
+        // 2. Vertical velocity: Clamp to expected flight range (e.g., -10 to +10 m/s)
+        float clampedVerticalVelocity = Mathf.Clamp(_quadcopterToControl.GetSensorData().VelocityVector.y, -10f, 10f) / 10f;
+        sensor.AddObservation(clampedVerticalVelocity);
+
+        // 3. Relative yaw angle: Signed and normalized [-1, 1]
+        Vector3 forwardTarget = _autoPilot.GetGameObject().transform.forward;
+        Vector3 forwardAgent = _quadcopterToControl.GetGameObject().transform.forward;
+        float relativeYaw = Vector3.SignedAngle(forwardTarget, forwardAgent, Vector3.up); // -180 to 180
+        sensor.AddObservation(relativeYaw / 180f); // normalize to [-1, 1]
     }
     public override void OnActionReceived(ActionBuffers actions)
     {
-        // Debug.Log("on action recieved");
-        //_flightControlValues.pitch = ConvertInput(actions.DiscreteActions[0]) * .1f;
-        //_flightControlValues.yaw = ConvertInput(actions.DiscreteActions[1]) * .1f;
-        //_flightControlValues.roll = ConvertInput(actions.DiscreteActions[2]) * .1f;
-        //_flightControlValues.throttle = ConvertInput(actions.DiscreteActions[3]) * .1f;
-
         _flightControlValues.yaw = Mathf.Clamp(actions.ContinuousActions[0], -1, 1);
-
         if (m_inRange)
         {
             //_flightControlValues.yaw = 0;
@@ -204,7 +198,6 @@ public class AutoPilotMLAgent : Agent
         }
         else
         {
-
             _flightControlValues.throttle = 0;
 
             //_flightControlValues.yaw = Mathf.Clamp(actions.ContinuousActions[1], -1, 1);
@@ -213,174 +206,123 @@ public class AutoPilotMLAgent : Agent
 
             _flightControlValues.roll = 0;
         }
-
-
-
-        //Debug.Log(actions.DiscreteActions[1]);
-
-        //CalculateRewards1();
-
-    }
-    private float ConvertInput(float input)
-    {
-        //if(input >= 10)
-        //{
-        return input - 10;
-        //}
-        //else
-        //{
-        //    return -(input-10);
-        //}
     }
 
+    private bool m_atTarget = false;
     private void CalculateRewards(float dist)
     {
-        if (_quadcopterToControl.GetGameObject().transform.localPosition.y < .1f)
+        float stepReward = 0f;
+
+        dist = (_autoPilot.transform.position - _quadcopterToControl.transform.position).magnitude;
+        // Normalize distance into a reward (closer = higher)
+        float maxDistance = _bounds.magnitude; // You can also set this manually
+       float proximityReward = Mathf.Clamp01(1f - (dist / maxDistance)); // 1 = close, 0 = far
+        float proximityPenalty = Mathf.Clamp01(dist / maxDistance);
+    
+   
+
+        // 1. Compute heading alignment (yaw)
+        Vector3 targetForward = _autoPilot.GetGameObject().transform.forward;
+        Vector3 agentForward = _quadcopterToControl.GetGameObject().transform.forward;
+        float forwardError = Mathf.Abs(Vector3.SignedAngle(targetForward, agentForward, Vector3.up));
+
+       // Debug.Log("Dist : " + dist);
+        //Debug.Log("Forward Error : " + forwardError);
+        // 2. Check out-of-bounds
+        Vector3 quadPosition = _quadcopterToControl.GetGameObject().transform.localPosition;
+        if (Mathf.Abs(quadPosition.x) > _bounds.x ||
+            Mathf.Abs(quadPosition.y) > _bounds.y ||
+            Mathf.Abs(quadPosition.z) > _bounds.z)
         {
-            _flying = true;
-            // AddReward(-.1f);
+            _groundRenderer.material.color = Color.red;
+            EndTheEpisode(-5); // No bonus, just reset
+            return;
         }
-        //if(_flying && _quadcopterToControl.GetGameObject().transform.localPosition.y <= 0&& _flying)
-        //{
-        //    _groundRenderer.material.color = Color.blue;
-        //    // EndTheEpisode(-5);
-        //    AddReward(-1);
-        //    return;
-        //}
-        //if(StepCount > 10 && !_flying)
-        //{
-        //    _groundRenderer.material.color = Color.black;
-        //    AddReward(-1);
-        //    return;
-        //}
-        if (_flying)
+
+        // 4. Orientation penalty or alignment reward
+        if (forwardError < 5f)
         {
-            // AddReward(.01f);// _quadcopterToControl.GetGameObject().transform.localPosition.y);
-            //AddReward(-dist);
-        }
-        // var forwardAngle = Vector3.Angle(_autoPilot.GetGameObject().transform.forward, _quadcopterToControl.GetGameObject().transform.forward);
-
-        var forwardError = Mathf.Abs(_autoPilot.GetGameObject().transform.localEulerAngles.y - _quadcopterToControl.GetGameObject().transform.localEulerAngles.y);
-
-        if (forwardError < -180)
-            forwardError = 360 - System.Math.Abs(forwardError);
-        else if (forwardError > 180)
-            forwardError = -(360 - forwardError);
-
-        //Debug.Log(forwardError);
-        if (forwardError < 5)
-        {
-           
-            //  AddReward(.1f);
             m_inRange = true;
-            _outOfYawRangeSeconds = 0;
+            _outOfYawRangeSeconds = 0f;
+            _groundRenderer.material.color = Color.yellow;
+            stepReward += 0.01f; // Tune this value higher/lower as needed
         }
         else
         {
-            _outOfYawRangeSeconds += Time.fixedDeltaTime;
-      
-            AddReward(-.1f);
+            _groundRenderer.material.color = Color.red;
             m_inRange = false;
+            _outOfYawRangeSeconds += Time.fixedDeltaTime;
+           // stepReward -= 0.1f;
         }
 
-        if (dist < .2 && forwardError < 10)
+        // 5. Target proximity reward
+        if (dist < 0.05f && forwardError < 5f)
         {
             _groundRenderer.material.color = Color.green;
-            // Debug.Log("Frame : " + Time.frameCount + " : " + _atTargetSeconds);
             _atTargetSeconds += Time.fixedDeltaTime;
-            //  AddReward(1 - dist);
-            //  AddReward(.1f);
-            //  Debug.Log("Getting reward");
-            AddReward(1 - (dist * 4));
-            if (_atTargetSeconds > 3)
-            {
-                AddReward(1);
-                _achievedWaypoints++;
-                //  _groundRenderer.material.color = Color.green;
-                if (_achievedWaypoints == 1)//_waypointGoal)
-                {
-                    EndTheEpisode(0);
-                }
-                else
-                {
-                    SetNewTarget(_autoPilot.transform);
+            m_atTarget = true;
+             stepReward += proximityReward * 0.01f; // scale to small per-step reward
+            // stepReward += 1f - (dist * 4f); // reward is higher the closer it gets
+            // stepReward += 0.01f; // Tune this value higher/lower as needed
+            //if (_atTargetSeconds > 3f)
+            //{
+            //  //  stepReward += 1f; // bonus for holding alignment and proximity
+            //    _achievedWaypoints++;
 
-                }
-            }
-            // // EndTheEpisode(1);
+            //    if (_achievedWaypoints >= 1)
+            //    {
+            //        EndTheEpisode(stepReward);
+            //        return;
+            //    }
+            //    else
+            //    {
+            //        SetNewTarget(_autoPilot.transform);
+            //        _atTargetSeconds = 0;
+            //    }
+            //}
         }
         else
         {
-            _groundRenderer.material.color = Color.red;
+            // stepReward -= 0.02f; // or -0.015f
+            stepReward -= proximityPenalty * 0.01f;
             _atTargetSeconds = 0;
+            m_atTarget = false;
+            if (forwardError < 10f)
+            {
+                _groundRenderer.material.color = Color.yellow;
+            }
+            else
+            {
+                _groundRenderer.material.color = Color.red;
+            }
         }
 
-        if (dist < .3f && forwardError < 10)
+        // 6. Reward for staying in flight (optional bonus)
+        if (_quadcopterToControl.GetGameObject().transform.localPosition.y > 0.2f)
         {
-            // AddReward(1);
+            _flying = true;
+          //  stepReward += 0.005f;
         }
+
+        // 7. Final reward application
+        AddReward(stepReward);
 
         m_episodeRewards = GetCumulativeReward();
-        //Debug.Log(StepCount);
+
+        // Optional: handle max step timeout
         if (StepCount == MaxStep)
         {
-            float exitReward = 0;
-            if (_achievedWaypoints == 0)
-            {
-                // exitReward = -5;
-            }
             _groundRenderer.material.color = Color.gray;
-            // EndTheEpisode(exitReward);
+            if (m_atTarget)
+            {
+                EndTheEpisode(5f);
+            }
+            else
+            {
+                EndTheEpisode(-5f);
+            }
+          
         }
-    }
-    private void CheckForErrors(out float dist)
-    {
-        //varangle = Vector3.Angle(Vector3.up, transform.up);
-        dist = Vector3.Distance(_autoPilot.GetGameObject().transform.position, _quadcopterToControl.GetGameObject().transform.position);
-
-        //if (StepCount > 50 && rigidbody.velocity.magnitude < .01f)
-        //{
-        //    ////Debug.Log("TimeOut ");
-        //    _groundRenderer.material.color = Color.green;
-        //    EndTheEpisode(-1);
-        //    return;
-        //}
-
-        //if (transform.localPosition.y > .1f)
-        //{
-        //    flying = true;
-        //}
-        //if (flying)
-        //{
-        //    if (transform.localPosition.y < .1f)
-        //    {
-        //        _groundRenderer.material.color = Color.blue;
-        //        EndTheEpisode(-5);
-        //    }
-        //}
-
-        //if (angle > _angleError)
-        //{
-        //    // //Debug.Log("flip out ");
-        //    _groundRenderer.material.color = Color.yellow;
-        //    EndTheEpisode(-5);
-        //}
-        var quadPosition = _quadcopterToControl.GetGameObject().transform.localPosition;
-        if ((Mathf.Abs(quadPosition.x) > _bounds.x) ||
-      (Mathf.Abs(quadPosition.y) > _bounds.y) ||
-      (Mathf.Abs(quadPosition.z) > _bounds.z))
-        {
-            _groundRenderer.material.color = Color.red;
-            EndTheEpisode(0);
-            // AddReward(-1);
-        }
-
-    }
-
-    private void Update()
-    {
-        //var forwardError = Mathf.Abs(_autoPilot.GetGameObject().transform.localEulerAngles.y - _quadcopterToControl.GetGameObject().transform.localEulerAngles.y);
-        //Debug.Log(forwardError);
     }
 
 
