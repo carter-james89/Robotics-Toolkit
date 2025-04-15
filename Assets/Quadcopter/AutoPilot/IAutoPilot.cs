@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace  QuadcopterUtilities
+namespace  FlightControllers.Quadcopters
 {
     /// <summary>
     /// Interface for all Autopilot modules, designed to work with <see cref="IQuadcopter"/>
@@ -8,7 +8,7 @@ namespace  QuadcopterUtilities
     /// <remarks>
     /// <see cref="AutoPilot"/> should be a valid solution for most autopilots, this exists if drastic changes are needed
     /// </remarks>
-    public interface IAutoPilot : IInputs
+    public interface IAutoPilot : IInputSource
     {
         /// <summary>
         /// Prepare the autopilot for activation

@@ -2,34 +2,32 @@
 using RoboticsToolkit.Gimbal;
 using RoboticsToolkit.Robotics.Limbs;
 using System.Collections.Generic;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace RoboticsToolkit.Robotics.Gaits
 {
-    public enum EventType
+    public enum GaitEventType
     {
         OnGaitCycleBegin,
         OnGaitPointHit,
         OnGaitCycleComplete,
         OnGaitReturnedHome
     }
-    public struct GaitEventData
+    public struct GaitEventData : IEventData
     {
-        public EventType EventType;
+        public GaitEventType EventType;
 
         public IGait Gait;
-        public GaitEventData(EventType eventType, IGait gait)
+        public GaitEventData(GaitEventType eventType, IGait gait)
         {
             EventType = eventType;
 
             Gait = gait;
         }
     }
-    public interface IGaitEventListener
-    {
-        public void OnGaitEventOccured(GaitEventData eventData);
-    }
-    public interface IGait
+
+    public interface IGait : IEventSource<GaitEventData>
     {
         public enum Direction
         {
@@ -51,7 +49,6 @@ namespace RoboticsToolkit.Robotics.Gaits
         public float GetRotationSpeedMultiplier();
 
         public bool IsRunning();
-        public void SubscribeToEvents(IGaitEventListener listener);
-        public void UnubscribeFromEvents(IGaitEventListener listener);
+ 
     }
 }

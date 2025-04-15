@@ -1,162 +1,135 @@
 using ProcessCommunicationToolkit;
 using System;
 using UnityEngine;
+using Toolkit.Utilities.Events;
+using Toolkit.Utilities;
 
-namespace QuadcopterUtilities
+namespace FlightControllers.Quadcopters
 {
-    /// <summary>
-    /// Interface for all Quadcopters, real or simulated 
-    /// Provides the basic functions to controlling a quadcopter
-    /// </summary>
-    /// <remarks>
-    /// For most cases, you can just inherit from <see cref="Quadcopter"/>, but this interface exists 
-    /// if that class is insufficient
-    /// </remarks>
-    public interface IQuadcopter
+    public enum QuadcopterEventType
     {
-        public class QuadcopterData : IUplinkData
+        None,
+        TakeOff,
+        Land,
+        BatteryLow,
+        EmergencyStop
+    }
+    /// <summary>
+    /// Event data class for quadcopter-related events.
+    /// </summary>
+    public class QuadcopterEventData : IEventData
+    {
+        public IQuadcopter Quadcopter { get; private set; }
+        public QuadcopterEventType EventType { get; private set; }
+
+        public QuadcopterData QuadcopterData { get; private set; }
+
+        public QuadcopterEventData(QuadcopterEventType eventType, IQuadcopter quadcopter, QuadcopterData quadcopterData)
         {
-            public double throttle;
-            public double yaw;
-            public double pitch;
-            public double roll;
-
-            public float gyroYaw;
-            public float gyroRoll;
-            public float gyroPitch;
-
-            public float posX;
-            public float posY;
-            public float posZ;
-
-            public float height;
-
-            public Vector3 VelocityVector;
+            EventType = eventType;
+            Quadcopter = quadcopter;
+            QuadcopterData = quadcopterData;
         }
-       
-        public class GroundStationData 
-        {
-            public double throttle = 0.0;
-            public double yaw = 0.0;
-            public double pitch = 0.0;
-            public double roll = 0.0;
+    }
 
-            public double motorFRSpeed = 0.0;
-            public double motorFLSpeed = 0.0;
-            public double motorBRSpeed = 0.0;
-            public double motorBLSpeed = 0.0;
-        }
-        public enum FlightStatus
-        {
-            /// <summary>
-            /// Quat is on the landing pad, ready for takeoff
-            /// </summary>
-            PreLaunch,
-            /// <summary>
-            /// Props are being activated, able to take off manually
-            /// </summary>
-            PrimingProps,
-            /// <summary>
-            /// Quad has left the ground and is traveling to set height
-            /// Cannont be controlled by User
-            /// </summary>
-            Launching,
-            /// <summary>
-            /// Quad is in flight mode, can be controlled by user or autopilot
-            /// </summary>
-            Flying,
-            /// <summary>
-            /// Quad is autonomously landing, cannot be controlled by user
-            /// </summary>
-            Landing
-        }
+    /// <summary>
+    /// Real-time telemetry data for a quadcopter.
+    /// Implements IUplinkData for communication.
+    /// </summary>
+    public class QuadcopterData : IUplinkData
+    {
+        public double throttle, yaw, pitch, roll;
+        public float gyroYaw, gyroRoll, gyroPitch;
+        public float posX, posY, posZ;
+        public float height;
+        public Vector3 VelocityVector;
+    }
+
+    /// <summary>
+    /// Ground station input data to be sent to the quad.
+    /// </summary>
+    public class GroundStationData
+    {
+        public double throttle = 0.0, yaw = 0.0, pitch = 0.0, roll = 0.0;
+        public double motorFRSpeed = 0.0, motorFLSpeed = 0.0, motorBRSpeed = 0.0, motorBLSpeed = 0.0;
+    }
+
+    /// <summary>
+    /// Current flight state of the quadcopter.
+    /// </summary>
+    public enum FlightStatus
+    {
+        PreLaunch,
+        PrimingProps,
+        Launching,
+        Flying,
+        Landing
+    }
+
+    /// <summary>
+    /// Interface for all quadcopters, real or simulated.
+    /// Provides control, telemetry, and event handling functionality.
+    /// </summary>
+    public interface IQuadcopter : IMonobehaviorInterface, IEventSource<QuadcopterEventData>
+    {
+        /// <summary>
+        /// Initialize autopilot and set dependencies.
+        /// </summary>
+        void Initialize(IFlightController flightController, IInputSource defaultInputSource);
 
         /// <summary>
-        /// Subscirbe to an Action that will be raised when the Quadcopter needs to abort
+        /// Override the input source with a new one.
         /// </summary>
-        /// <param name="actionToSubscribe">The function to be called</param>
-        public void SubscibeToAbort(Action actionToSubscribe);
-        /// <summary>
-        /// Unsubscribe from an Action that will be raised when the Quadcopter needs to abort
-        /// </summary>
-        /// <param name="actionToUnsubscribe">The function to unsubscribe, must previously be subscirbed</param>
-        public void UnsubscribeFromAbort(Action actionToUnsubscribe);
+        void OverrideInputSource(IInputSource inputValueSource);
 
         /// <summary>
-        /// Initialize the autopilot, and provide the depenencies it needs. 
+        /// Remove the input override and return to default.
         /// </summary>
-        /// <param name="pilotInputs">Where to find the inputs from the pilot</param>
-        /// <param name="autoPilot">The autopilot module used, activated via <see cref="ActivateAutoPilot"/></param>
-        public void Initialize(IFlightController flightController ,Func<IInputs.FlightControlValues> defaultInputSource);
+        void RemoveInputOverride(IInputSource inputValueSource);
 
         /// <summary>
-        /// Override the default source of <see cref="IInputs.FlightControlValues"/>
+        /// Get the tracking space transform local to the quad.
         /// </summary>
-        /// <param name="inputValueSource">The new source of input values</param>
-        /// <param name="abortListener">The function that will be called if the quad needs to abort, and return to default input source</param>
-        public void OverrideInputSource(Func<IInputs.FlightControlValues> inputValueSource, Action abortListener);
+        Transform GetLocalTrackingSpace();
 
         /// <summary>
-        /// Remove the overriden source of input values, and return to default source
+        /// Set the quadcopter's return-to-home location.
         /// </summary>
-        /// <param name="inputValueSource">The Input source to be removed</param>
-        /// <param name="abortListener">The function that was provided to be called when quad aborts</param>
-        public void RemoveInputOverride(Func<IInputs.FlightControlValues> inputValueSource, Action abortListener);
-
-
-        public Transform GetLocalTrackingSpace();
-        /// <summary>
-        /// Set the Home Point the Quad will attempt to return to
-        /// Usually set at launch
-        /// </summary>
-        public void SetHomePoint(Vector3 newHomePoint);
+        void SetHomePoint(Vector3 newHomePoint);
 
         /// <summary>
-        /// Get the <see cref="GameObject"/> this quadcopter exists on
+        /// Whether this is a simulator or a real vehicle.
         /// </summary>
-        public GameObject GetGameObject();
+        bool IsSimulator();
 
         /// <summary>
-        /// Is this quadcopter a simulator or a real quadcopter?
+        /// Get the current flight status.
         /// </summary>
-        /// <returns></returns>
-        public bool IsSimulator();
+        FlightStatus GetFlightStatus();
 
         /// <summary>
-        /// What is the current <see cref="FlightStatus"/> of the quad
+        /// Get sensor data for the current frame.
         /// </summary>
-        /// <returns>The current flight status</returns>
-        public FlightStatus GetFlightStatus();
+        QuadcopterData GetSensorData();
 
         /// <summary>
-        /// Get the <see cref="QuadcopterData"/> for this frame. Usually comes from <see cref="IFlightController"/>
+        /// Determine if tracking systems are valid.
         /// </summary>
-        /// <returns>Data for this frame</returns>
-        public QuadcopterData GetSensorData();
+        bool IsTracking();
 
         /// <summary>
-        /// Is the quadcopter currently experiencing valid tracking
+        /// Convert inputs into headless mode.
         /// </summary>
-        /// <returns>The state of the tracking</returns>
-        public bool IsTracking();
+        IInputSource.FlightControlValues ConvertToHeadlessInputs(IInputSource.FlightControlValues rawInputs);
 
         /// <summary>
-        /// Convert a set of <see cref="PilotInputs"/> to headless space in regards to this quadcopter
-        /// Headless means the quad's local orientation is not accounted for, and pitch and roll are applied on global coordinates
+        /// Initiate takeoff.
         /// </summary>
-        /// <param name="rawInputs">The inputs to convert</param>
-        /// <returns>The inputs required to match the raw inputs in global space</returns>
-        public IInputs.FlightControlValues ConvertToHeadlessInputs(IInputs.FlightControlValues rawInputs);
-
+        bool AttemptTakeoff();
 
         /// <summary>
-        /// Launch the quadcopter
+        /// Initiate landing.
         /// </summary>
-        public void Takeoff();
-
-        /// <summary>
-        /// Land the quadcopter
-        /// </summary>
-        public void Land();
-    } 
+        bool AttemptLand();
+    }
 }

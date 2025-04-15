@@ -1,9 +1,9 @@
-namespace  QuadcopterUtilities
+namespace  FlightControllers.Quadcopters
 {
     /// <summary>
     /// Interface for any source of input to <see cref="IQuadcopter"/>
     /// </summary>
-    public interface IInputs
+    public interface IInputSource
     {
         /// <summary>
         /// The values <see cref="IQuadcopter"/> needs to funtion
@@ -26,5 +26,7 @@ namespace  QuadcopterUtilities
         /// </summary>
         /// <returns>The inputs <see cref="IQuadcopter"/></returns> will attempt to execute
         public FlightControlValues GetInputValues();
+
+        public void Abort();
     } 
 }

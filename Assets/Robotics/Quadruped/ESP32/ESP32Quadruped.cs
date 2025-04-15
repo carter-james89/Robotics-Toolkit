@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Net.Sockets;
-using Utilities.Network;
+using Toolkit.Networking;
 using System.Net;
 using System.Text;
 using System;
@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using RoboticsToolkit.Robotics.Limbs;
 using RoboticsToolkit.Robotics.RoboticControllers;
+using Toolkit.Utilities.Events;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -65,7 +67,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         }
     }
     [RequireComponent(typeof(UDPCommunicationListener))]
-    public class ESP32Quadruped : Quadruped, IUDPConnectionEventListener
+    public class ESP32Quadruped : Quadruped, IEventListener<UDPConnectionEventData>
     {
         UdpClient udpClient;
         IPEndPoint remoteEndPoint;
@@ -85,14 +87,28 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         protected override void OnBootup()
         {
             base.OnBootup();
-            UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
+            UDPConnectionListener.Instance.SubscribeToEvents(this);
             UpdateStatus(IRobot.Status.Initialized);
+        }
+
+        public void OnEventOccured(UDPConnectionEventData eventData)
+        {
+            switch (eventData.EventType)
+            {
+                case UDPConnectionEventType.OnBroadcastReceived:
+                    OnConnectionEventOccured(eventData);
+                    break;
+                case UDPConnectionEventType.OnRobotDisconnected:
+                    break;
+                default:
+                    break;
+            }
         }
         /// <summary>
         /// the udp listener got a broadcast so connect to ti
         /// </summary>
         /// <param name="eventData"></param>
-        public void OnConnectionEventOccured(IUDPConnectionEventListener.EventData eventData)
+        public void OnConnectionEventOccured(UDPConnectionEventData eventData)
         {
             Debug.Log("Check broadcast for correct esp32 info");
             if (eventData.ConnectionData.BoardType.ToLower().Contains("esp32"))
@@ -112,7 +128,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             }
         }
 
-        public void EstablishConnection(IUDPConnectionEventListener.EventData eventData)
+        public void EstablishConnection(UDPConnectionEventData eventData)
         {
             Debug.Log("Attempt to establish connection");
             _ipAddress = IPAddress.Parse(eventData.ConnectionData.IP);
@@ -125,7 +141,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
             _connected = true;
             Debug.Log("CONNECTED");
-            UDPConnectionListener.Instance.UnsubscribeFromConnectionEvents(this);
+            UDPConnectionListener.Instance.UnsubscribeFromEvents(this);
 
             Task.Run(async () => await WaitForQuadHeartbeatAsync(10));
         }
@@ -336,7 +352,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             EditorApplication.isPlaying = false;
             return;
 #endif
-            UDPConnectionListener.Instance.SubscribeToConnectionEvents(this);
+            UDPConnectionListener.Instance.SubscribeToEvents(this);
             UpdateStatus(IRobot.Status.Ready);
         }
 
@@ -439,6 +455,13 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             }
             udpClient?.Close();
             UDPConnectionListener.Instance.Shutdown();
+        }
+
+      
+
+        public Component GetComponent()
+        {
+            throw new NotImplementedException();
         }
     }
     public class PhysicalRobotData

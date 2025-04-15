@@ -20,11 +20,11 @@ namespace RoboticsToolkit.Robotics.Gaits
                     return false;
                 }
             }
-            NotifyListeners(EventType.OnGaitPointHit);
+            NotifyListeners(GaitEventType.OnGaitPointHit);
 
             if (_currentStrideCount == 3)
             {
-                NotifyListeners(EventType.OnGaitCycleComplete);
+                NotifyListeners(GaitEventType.OnGaitCycleComplete);
             }
             return true;
         }

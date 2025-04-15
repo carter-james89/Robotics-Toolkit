@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace  QuadcopterUtilities
+namespace  FlightControllers.Quadcopters
 {
     /// <summary>
     /// Base class which provides functionality for most autopilots
@@ -43,10 +43,10 @@ namespace  QuadcopterUtilities
         }
 
         /// <summary>
-        /// Get the <see cref="IInputs.FlightControlValues"/> from <see cref="Run"/>
+        /// Get the <see cref="IInputSource.FlightControlValues"/> from <see cref="Run"/>
         /// </summary>
         /// <returns>The inputs that will maniuplate the Quad in the desired manner</returns>
-        public IInputs.FlightControlValues GetInputValues()
+        public IInputSource.FlightControlValues GetInputValues()
         {
             var returnValues = Run();
             returnValues.land = false;
@@ -59,7 +59,7 @@ namespace  QuadcopterUtilities
         /// The calculations used to manipulate <see cref="quadToControl"/> in the desired way
         /// </summary>
         /// <returns>The inputs that will maniuplate the Quad in the desired manner</returns>
-        public abstract IInputs.FlightControlValues Run();
+        public abstract IInputSource.FlightControlValues Run();
 
         /// <summary>
         /// Toggle the autopilot to the opposite state that it currently is
@@ -87,8 +87,7 @@ namespace  QuadcopterUtilities
                 autoPilotActive = true;
                 gameObject.SetActive(true);
                 MatchQuadTransform();
-                quadToControl.OverrideInputSource(GetInputValues, DeactivateAutoPilot);
-                quadToControl.SubscibeToAbort(DeactivateAutoPilot);
+                quadToControl.OverrideInputSource(this);
                 OnAutoPilotActivated();
             }
         }
@@ -106,8 +105,7 @@ namespace  QuadcopterUtilities
             {
                 //Debug.Log("AutoPilot Disabled");
                 autoPilotActive = false;
-                quadToControl.RemoveInputOverride(GetInputValues, DeactivateAutoPilot);
-                quadToControl.UnsubscribeFromAbort(DeactivateAutoPilot);
+                quadToControl.RemoveInputOverride(this);
                 OnAutoPilotDeactivated();
             }
             gameObject.SetActive(false);
@@ -155,6 +153,11 @@ namespace  QuadcopterUtilities
         }
 
         private void OnDestroy()
+        {
+            DeactivateAutoPilot();
+        }
+        
+        public void Abort()
         {
             DeactivateAutoPilot();
         }

@@ -1,32 +1,36 @@
-using QuadcopterUtilities;
+
 using System.Collections;
 using System.Collections.Generic;
 using Unity.MLAgents;
 using UnityEngine;
 
-public class MLAutoPilot : AutoPilot
+namespace FlightControllers.Quadcopters
 {
-    [SerializeField]
-    private AutoPilotMLAgent _autoPilotAgent;
-
-    private void Awake()
+    public class MLAutoPilot : AutoPilot
     {
-      //  _autoPilotAgent.Initialize(this);
+        [SerializeField]
+        private AutoPilotMLAgent _autoPilotAgent;
+
+        private void Awake()
+        {
+            //  _autoPilotAgent.Initialize(this);
+        }
+
+        public override IInputSource.FlightControlValues Run()
+        {
+            //Debug.Log("run auto pilot");
+            return _autoPilotAgent.GetFlightControlValues(this);
+        }
+
+        protected override void OnAutoPilotActivated()
+        {
+
+        }
+
+        protected override void OnAutoPilotDeactivated()
+        {
+
+        }
     }
 
-    public override IInputs.FlightControlValues Run()
-    {
-        //Debug.Log("run auto pilot");
-        return _autoPilotAgent.GetFlightControlValues(this);
-    }
-
-    protected override void OnAutoPilotActivated()
-    {
-      
-    }
-
-    protected override void OnAutoPilotDeactivated()
-    {
-        
-    }
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace QuadcopterUtilities
+namespace FlightControllers.Quadcopters
 {
     public class QuadcopterGroundControl : MonoBehaviour
     {
@@ -68,7 +68,7 @@ namespace QuadcopterUtilities
                     break;
             }
 
-            activeQuad.Initialize(_flightController, _pilotInupts.GetInputValues);
+            activeQuad.Initialize(_flightController, _pilotInupts);
             _waypointPilot.Initialize(activeQuad);
 
         }

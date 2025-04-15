@@ -1,10 +1,5 @@
-using RoboticsToolkit.Robotics;
-using RoboticsToolkit.Robotics.Limbs;
-using System.Collections;
-using System.Collections.Generic;
-using Utilities.Events;
+using Toolkit.Utilities.Events;
 using UnityEngine;
-using RoboticsToolkit.Gimbal;
 
 namespace RoboticsToolkit.Robotics.Gaits
 {
@@ -21,11 +16,11 @@ namespace RoboticsToolkit.Robotics.Gaits
 
         // private bool m_halfStride = false;
        // protected IRobot _robot;
-        private InterfaceEventManager<IGaitEventListener> _eventManager = new InterfaceEventManager<IGaitEventListener>("Gait");
+        private InterfaceEventManager<GaitEventData> _eventManager = new InterfaceEventManager<GaitEventData>("Gait");
         //public void Initialize()
         //{
         //   // _robot = robot;
-        //    //    NotifyListeners(IGaitEventListener.EventType.)
+        //    //    NotifyListeners(GaitEventData.LimbPositionerEventType.)
         //}
         public virtual  void Reset()
         {
@@ -37,33 +32,15 @@ namespace RoboticsToolkit.Robotics.Gaits
 
         public abstract bool CheckLimbPositions(ILimbPositioner[] limbPositioners);
 
-    
-
-
         public void Stop()
         {
             m_running = false;
         }
 
-        public void SubscribeToEvents(IGaitEventListener listener)
+        protected void NotifyListeners(GaitEventType eventType)
         {
-            _eventManager.AddListener(listener);
+            _eventManager.RaiseEvent(new GaitEventData(eventType, this));
         }
-
-        public void UnubscribeFromEvents(IGaitEventListener listener)
-        {
-           _eventManager.RemoveListener(listener);
-        }
-        protected void NotifyListeners(EventType eventType)
-        {
-            //Debug.Log("Fire Gait Event : " + eventType.ToString());
-            foreach (var item in _eventManager.GetListeners())
-            {
-                item.OnGaitEventOccured(new GaitEventData(eventType, this));
-            }
-        }
-
-  
 
         //public bool RequestBeginCMD(IGaitController requestingController, ILimbPositioner[] limbPositioners)
         //{
@@ -73,7 +50,7 @@ namespace RoboticsToolkit.Robotics.Gaits
         //    }
         //    m_running = true;
         //    _currentStrideCount = 0;
-        // //   NotifyListeners(IGaitEventListener.EventType.OnGaitCycleBegin);
+        // //   NotifyListeners(GaitEventData.LimbPositionerEventType.OnGaitCycleBegin);
         //    OnCMDRequestGranted();
         //    return true;
         //}
@@ -87,5 +64,25 @@ namespace RoboticsToolkit.Robotics.Gaits
         public abstract float GetRotationSpeedMultiplier();
 
         public abstract void Translate(ILimbPositioner[] limbPositioners, float speed, float strideLength, float strideHeight);
+
+        public void SubscribeToEvents(IEventListener<GaitEventData> listenerToSubscribe)
+        {
+           _eventManager.AddListener(listenerToSubscribe);
+        }
+
+        public void UnsubscribeFromEvents(IEventListener<GaitEventData> listenerToUnsubscribe)
+        {
+           _eventManager.RemoveListener(listenerToUnsubscribe);
+        }
+
+        public GameObject GetGameObject()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Component GetComponent()
+        {
+            throw new System.NotImplementedException();
+        }
     } 
 }

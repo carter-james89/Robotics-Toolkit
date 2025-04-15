@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace RoboticsToolkit.Robotics.RoboticControllers
@@ -15,9 +16,8 @@ namespace RoboticsToolkit.Robotics.RoboticControllers
             ServoAngles = servoAngles;
         }
     }
-    public interface IRoboticController
+    public interface IRoboticController : IEventSource<QuadrupedRoboticControllerEventData>
     {
-        public GameObject GetGameObject();
         public bool Initialize(IRobot robot);
         public bool SetTransformValues();
 
@@ -28,30 +28,25 @@ namespace RoboticsToolkit.Robotics.RoboticControllers
         public void SetRobotHeight(float height, float speed);
 
         public LimbValues[] CalculateLimbData(IRobot quadToControl);
-        public void SubscribeToControllerEvents(IRoboticControllerEventListener listener);
-        public void UnsubscribeFromControllerEvents(IRoboticControllerEventListener listener);
     }
-
-    public interface IRoboticControllerEventListener
+    public enum QuadrupedRoboticControllerEventType
     {
-        public enum EventType
+        OnControllerInitialized,
+        OnHeightAdjustmentBegin,
+        OnHeightAdjustmentEnd,
+    }
+    public class QuadrupedRoboticControllerEventData : IEventData
+    {
+
+
+        public QuadrupedRoboticControllerEventType EventType;
+        public IRoboticController Controller;
+        public IRobot Robot;
+        public QuadrupedRoboticControllerEventData(QuadrupedRoboticControllerEventType eventType, IRoboticController controller, IRobot robot)
         {
-            OnControllerInitialized,
-            OnHeightAdjustmentBegin,
-            OnHeightAdjustmentEnd,
+            this.EventType = eventType;
+            this.Controller = controller;
+            this.Robot = robot;
         }
-        public class QuadrupedRoboticControllerEvendData
-        {
-            public EventType EventType;
-            public IRoboticController Controller;
-            public IRobot Robot;
-            public QuadrupedRoboticControllerEvendData(EventType eventType, IRoboticController controller, IRobot robot)
-            {
-                this.EventType = eventType;
-                this.Controller = controller;
-                this.Robot = robot;
-            }
-        }
-        public void OnControllerEventOccured(QuadrupedRoboticControllerEvendData eventData);
     }
 }

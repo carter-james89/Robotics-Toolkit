@@ -3,11 +3,12 @@ using RoboticsToolkit.Robotics.RoboticControllers;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Toolkit.Utilities.Events;
 using UnityEngine.Assertions;
 
 namespace RoboticsToolkit.Robotics
 {
-    public class RobotManager : MonoBehaviour, IRobotEventListener, IRoboticControllerEventListener
+    public class RobotManager : MonoBehaviour, IEventListener<RobotEventData>, IEventListener<QuadrupedRoboticControllerEventData>
     {
         public enum InstanceType
         {
@@ -45,7 +46,7 @@ namespace RoboticsToolkit.Robotics
         void Start()
         {
             _roboticController = _controllerEnvironment.GetController();
-            _roboticController.SubscribeToControllerEvents(this);
+            _roboticController.SubscribeToEvents(this);
             // _controller.SetH
             _simulatedEnvironment.gameObject.SetActive(false);
            _physicalEnvironment.gameObject.SetActive(false);
@@ -133,15 +134,15 @@ namespace RoboticsToolkit.Robotics
             _roboticController.Initialize(_simulatedRobot);
         }
 
-        public void OnRobotEventOccured(IRobotEventListener.EventData eventData)
+        public void OnEventOccured(RobotEventData eventData)
         {
             switch (eventData.EventType)
             {
-                case IRobotEventListener.EventType.OnRobotInitialized:
+                case RobotEventType.OnRobotInitialized:
                     break;
-                case IRobotEventListener.EventType.OnRobotInPosition:
+                case RobotEventType.OnRobotInPosition:
                     break;
-                case IRobotEventListener.EventType.OnRobotReady:
+                case RobotEventType.OnRobotReady:
                     switch (_instanceType)
                     {
                         case InstanceType.Simulation:
@@ -170,11 +171,11 @@ namespace RoboticsToolkit.Robotics
                             break;
                     }
                     break;
-                case IRobotEventListener.EventType.OnLimbsPositioned:
+                case RobotEventType.OnLimbsPositioned:
                     break;
-                case IRobotEventListener.EventType.OnEmergencyStop:
+                case RobotEventType.OnEmergencyStop:
                     break;
-                case IRobotEventListener.EventType.OnReset:
+                case RobotEventType.OnReset:
                     break;
                 default:
                     break;
@@ -187,17 +188,17 @@ namespace RoboticsToolkit.Robotics
 
    
         private bool _bootupComplete = false;
-        public void OnControllerEventOccured(IRoboticControllerEventListener.QuadrupedRoboticControllerEvendData eventData)
+        public void OnControllerEventOccured(QuadrupedRoboticControllerEventData eventData)
         {
           //  if (_instanceType == InstanceType.Simulation)
             {
                 switch (eventData.EventType)
                 {
-                    case IRoboticControllerEventListener.EventType.OnControllerInitialized:
+                    case QuadrupedRoboticControllerEventType.OnControllerInitialized:
                         break;
-                    case IRoboticControllerEventListener.EventType.OnHeightAdjustmentBegin:
+                    case QuadrupedRoboticControllerEventType.OnHeightAdjustmentBegin:
                         break;
-                    case IRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd:
+                    case QuadrupedRoboticControllerEventType.OnHeightAdjustmentEnd:
                         if (!_bootupComplete)
                         {
                             _bootupComplete = true;
@@ -214,5 +215,22 @@ namespace RoboticsToolkit.Robotics
                 }
             }
         }
+
+        public void OnEventOccured(QuadrupedRoboticControllerEventData eventData)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public GameObject GetGameObject()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Component GetComponent()
+        {
+            throw new System.NotImplementedException();
+        }
+
+     
     }
 }

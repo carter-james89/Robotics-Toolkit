@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace  QuadcopterUtilities
+namespace FlightControllers.Quadcopters
 {
     /// <summary>
     /// A simulator Quadcopter meant to replicate the DJI Tello
@@ -31,12 +31,12 @@ namespace  QuadcopterUtilities
 
 
 
-        //public override void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
+        //public override void Initialize(Func<IInputSource.FlightControlValues> defaultInputSource)
         //{
         //    base.Initialize(defaultInputSource);
 
         //    var physicsCalculator = new GameObject("Simulation Physics Simulation");
-        //    rigidBody = physicsCalculator.AddComponent<Rigidbody>();
+        //    simulatedRB = physicsCalculator.AddComponent<Rigidbody>();
 
         //    Time.timeScale = timeSpeed;
         //}
@@ -61,12 +61,12 @@ namespace  QuadcopterUtilities
             {
                 Debug.DrawRay(rigidBody.transform.position, transform.TransformDirection(Vector3.down) * hit.distance, Color.yellow);
             }
-            //SetVirtualPosition(new Vector3(rigidBody.transform.position.x, rigidBody.transform.position.z), hit.distance,rigidBody.transform.rotation, rigidBody.velocity.y);
+            //SetVirtualPosition(new Vector3(simulatedRB.transform.position.x, simulatedRB.transform.position.z), hit.distance,simulatedRB.transform.rotation, simulatedRB.velocity.y);
             //deltaHeight = _prevHeight - hit.distance;
             //_prevHeight = hit.distance;
             //elvInput = currentInputs.throttle;
 
-            //var tempPos = rigidBody.transform.position;
+            //var tempPos = simulatedRB.transform.position;
 
             //if (Math.Abs(deltaHeight) > .1)
             //{
@@ -81,7 +81,7 @@ namespace  QuadcopterUtilities
             //newGroundSensorPoint.transform.position = transform.position + (Vector3.down * hit.distance);
 
             //transform.position = tempPos;
-            //transform.rotation = rigidBody.transform.rotation;
+            //transform.rotation = simulatedRB.transform.rotation;
             ProcessInputs();
         }
 
@@ -93,7 +93,7 @@ namespace  QuadcopterUtilities
         /// </remarks>
         public void FixedUpdate()
         {
-            if (_flightStatus != IQuadcopter.FlightStatus.PreLaunch)
+            if (_flightStatus != FlightStatus.PreLaunch)
             {
                 rigidBody.AddForce(transform.up * 9.81f);
                 bool receivingInput = false;
@@ -140,15 +140,16 @@ namespace  QuadcopterUtilities
             }
         }
 
-        public override void Land()
+        public override bool AttemptLand()
         {
             //TODO: write something to land the simulator, not really important
+            return true;
         }
 
         /// <summary>
-        /// Move the simulator into <see cref="IQuadcopter.FlightStatus.Flying"/> mode, and activate physics
+        /// Move the simulator into <see cref="FlightStatus.Flying"/> mode, and activate physics
         /// </summary>
-        public override void Takeoff()
+        public override bool AttemptTakeoff()
         {
             Debug.Log("Simulator TakeOff");
             rigidBody.transform.position += new Vector3(0, .8f, 0);
@@ -157,7 +158,8 @@ namespace  QuadcopterUtilities
             ResetKnownOffset();
             rigidBody.useGravity = true;
             SetHomePoint(transform.position);
-            _flightStatus = IQuadcopter.FlightStatus.Flying;
+            _flightStatus = FlightStatus.Flying;
+            return true;
         }
 
 

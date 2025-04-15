@@ -1,12 +1,13 @@
 using RoboticsToolkit.Gimbal;
 using RoboticsToolkit.Robotics.Limbs;
 using RoboticsToolkit.Robotics.RoboticControllers;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace RoboticsToolkit.Robotics
 {
 
-    public interface IRobot 
+    public interface IRobot : IEventSource<RobotEventData>
     {
         public enum Status
         {
@@ -48,34 +49,32 @@ namespace RoboticsToolkit.Robotics
 
         public void ResetController();
 
-        public void SubscribeToEvents(IRobotEventListener listener);
-        public void UnsubscribeToEvents(IRobotEventListener listener);
-    } 
-
-    public interface IRobotEventListener
+        public void SubscribeToEvents(RobotEventData listener);
+        public void UnsubscribeToEvents(RobotEventData listener);
+    }
+    public enum RobotEventType
     {
-        public enum EventType
-        {
-            OnRobotInitialized,
-            OnRobotInPosition,
-            OnRobotReady,
-            OnLimbsPositioned,
-            OnEmergencyStop,
-            OnReset
-        }
-        public struct EventData
-        {
-            public EventType EventType;
-            public IRobot Robot;
-            public IRoboticController Controller;
+        OnRobotInitialized,
+        OnRobotInPosition,
+        OnRobotReady,
+        OnLimbsPositioned,
+        OnEmergencyStop,
+        OnReset
+    }
+    public class RobotEventData : IEventData
+    {
 
-            public EventData(EventType eventType, IRobot robot, IRoboticController controller)
-            {
-                EventType = eventType;
-                Robot = robot;
-                Controller = controller;
-            }          
+
+        public RobotEventType EventType;
+        public IRobot Robot;
+        public IRoboticController Controller;
+
+        public RobotEventData(RobotEventType eventType, IRobot robot, IRoboticController controller)
+        {
+            EventType = eventType;
+            Robot = robot;
+            Controller = controller;
         }
-        public void OnRobotEventOccured(EventData eventData);
+
     }
 }

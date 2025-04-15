@@ -3,7 +3,7 @@ using TelloLib;
 using UnityEngine;
 
 
-namespace  QuadcopterUtilities
+namespace  FlightControllers.Quadcopters
 {
     /// <summary>
     /// Quadcopter class to control the real world DJI Tello
@@ -14,10 +14,7 @@ namespace  QuadcopterUtilities
         /// <summary>
         /// Video feed to display the camera from the Tello
         /// </summary>
-        [SerializeField]
-        private TelloVideoFeed _videoFeed;
-
-    
+        [SerializeField]private TelloVideoFeed _videoFeed;
 
         /// <summary>
         /// Is the Tello tracking accurate this frame?
@@ -33,8 +30,6 @@ namespace  QuadcopterUtilities
         /// </summary>
         public Tello.ConnectionState connectionState;
 
-
-
         /// <summary>
         /// The offset of the tracking values when tracking first achieved after liftoff
         /// </summary>
@@ -44,7 +39,7 @@ namespace  QuadcopterUtilities
         /// Once it achieves its hover, a huge and random offset is applied to the position, which needs to be accounted for for all 
         /// future positioning data
         /// </remarks>
-        private Vector3 _trackingFoundOffset;
+        private Vector3 _trackingFoundOffset = Vector3.zero;
         /// <summary>
         /// The offset of elevation when tracking first achieved
         /// </summary>
@@ -68,7 +63,7 @@ namespace  QuadcopterUtilities
         /// </summary>
         /// <param name="pilotInputs">Where to find the inputs from the pilot</param>
         /// <param name="autoPilot">The autopilot module used, activated via <see cref="ActivateAutoPilot"/></param>
-        //public override void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
+        //public override void Initialize(Func<IInputSource.FlightControlValues> defaultInputSource)
         //{
         //    base.Initialize(defaultInputSource);
      
@@ -86,10 +81,10 @@ namespace  QuadcopterUtilities
 
             //    switch (_flightStatus)
             //    {
-            //        case IQuadcopter.FlightStatus.Launching:
+            //        case FlightStatus.Launching:
             //            CheckForLaunchComplete();
             //            break;
-            //        case IQuadcopter.FlightStatus.Flying:
+            //        case FlightStatus.Flying:
             //            try
             //            {
             //                validTrackedFrame = SetVirtualTelloPosition();
@@ -110,7 +105,7 @@ namespace  QuadcopterUtilities
         /// </summary>
         public void SendTelloInputs()
         {
-            if (_flightStatus != IQuadcopter.FlightStatus.PreLaunch)
+            if (_flightStatus != FlightStatus.PreLaunch)
             {
                 Tello.controllerState.setAxis(currentInputs.yaw, currentInputs.throttle, currentInputs.roll, currentInputs.pitch);
             }
@@ -145,7 +140,7 @@ namespace  QuadcopterUtilities
 
                 _elevationOffset = height * .1f;
                 SetHomePoint(new Vector3(0, height * .1f, 0));
-                _flightStatus = IQuadcopter.FlightStatus.Flying;
+                _flightStatus = FlightStatus.Flying;
             }
         }
         /// <summary>
@@ -277,35 +272,39 @@ namespace  QuadcopterUtilities
         /// <summary>
         /// Launch the Tello via its auto liftoff feature
         /// </summary>
-        public override void Takeoff()
+        public override bool AttemptTakeoff()
         {
             if (connectionState == Tello.ConnectionState.Connected)
             {
                 Debug.Log("TakeOff");
                 Tello.takeOff();
-                _flightStatus = IQuadcopter.FlightStatus.Launching;
+                _flightStatus = FlightStatus.Launching;
                 _prevRawPosition = rawPosition;
+                return true;
             }
             else
             {
                 Debug.LogWarning("Not connected to tello prior to takeoff command : " + connectionState);
+                return false;
             }
         }
         /// <summary>
-        /// Land the Tello via its auto land feature
+        /// AttemptLand the Tello via its auto land feature
         /// </summary>
-        public override void Land()
+        public override bool AttemptLand()
         {
             if (connectionState == Tello.ConnectionState.Connected)
             {
                 Debug.Log("Land");
                 Tello.land();
                 transform.position = new Vector3(transform.position.x, 0, transform.position.z);
-                _flightStatus = IQuadcopter.FlightStatus.Landing;
+                _flightStatus = FlightStatus.Landing;
+                return true;
             }
             else
             {
                 Debug.LogWarning("Not connected to Tello at time of land command : " + connectionState);
+                return false;
             }
         }
 

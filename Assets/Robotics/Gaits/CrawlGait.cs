@@ -82,14 +82,14 @@ namespace RoboticsToolkit.Robotics.Gaits
             if (rotatingLimb.LimbAtTarget())
             {
                 Debug.Log("rotating limb at target");
-                NotifyListeners(EventType.OnGaitPointHit);
+                NotifyListeners(GaitEventType.OnGaitPointHit);
                 _rotatingLimb++;
                 _currentStride++;
                 if (_rotatingLimb == 4)
                 {
                     _currentStride = 0;
                     _rotatingLimb = 0;
-                    NotifyListeners(EventType.OnGaitCycleComplete);
+                    NotifyListeners(GaitEventType.OnGaitCycleComplete);
 
                 }
 
