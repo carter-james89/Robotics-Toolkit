@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace RoboticsToolkit.Robotics.Limbs
@@ -24,7 +25,7 @@ namespace RoboticsToolkit.Robotics.Limbs
 
         private IRoboticLimb m_limb;
 
-        private List<ILimbPositionerEventListener> m_eventListeners = new List<ILimbPositionerEventListener>();
+        private InterfaceEventManager<LimbPositionerEventData> m_eventManager = new InterfaceEventManager<LimbPositionerEventData>();
 
         [SerializeField]
         private bool m_log = false;
@@ -195,23 +196,6 @@ namespace RoboticsToolkit.Robotics.Limbs
             m_limb.SetIKTargetPos(position);
         }
 
-        public void SubscribeToEvents(ILimbPositionerEventListener listener)
-        {
-            if (m_eventListeners.Contains(listener))
-            {
-                return;
-            }
-            m_eventListeners.Add(listener);
-        }
-        public void UnsubscribeFromEvents(ILimbPositionerEventListener listener)
-        {
-            if (!m_eventListeners.Contains(listener))
-            {
-                return;
-            }
-            m_eventListeners.Remove(listener);
-        }
-
         public void RotateToPosition(Vector3 direction, Vector3 upDirection, float distance, float time)
         {
             SetStridePosition(Quaternion.LookRotation(direction, upDirection), distance);
@@ -270,6 +254,21 @@ namespace RoboticsToolkit.Robotics.Limbs
 
             m_strideLine.SetPosition(0, Vector3.zero);
             m_strideLine.SetPosition(1, new Vector3(0, 0, distance));
+        }
+
+        public void SubscribeToEvents(IEventListener<LimbPositionerEventData> listenerToSubscribe)
+        {
+          m_eventManager.AddListener(listenerToSubscribe);
+        }
+
+        public void UnsubscribeFromEvents(IEventListener<LimbPositionerEventData> listenerToUnsubscribe)
+        {
+           m_eventManager.RemoveListener(listenerToUnsubscribe);
+        }
+
+        public Component GetComponent()
+        {
+            throw new NotImplementedException();
         }
     }
 

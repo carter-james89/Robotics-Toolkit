@@ -1,9 +1,100 @@
 using ProcessCommunicationToolkit;
 using System;
 using UnityEngine;
+using Toolkit.Utilities.Events;
 
-namespace QuadcopterUtilities
+using Toolkit.Utilities;
+
+namespace FlightControllers.Quadcopters
 {
+    /// <summary>
+    /// Event data class for quadcopter-related events.
+    /// </summary>
+    public class QuadcopterEventData : IEventData
+    {
+        /// <summary>
+        /// Enum defining the types of quadcopter events.
+        /// </summary>
+        public enum QuadcopterEventType
+        {
+            None,
+            TakeOff,
+            Land,
+            BatteryLow,
+            EmergencyStop
+        }
+
+        /// <summary>
+        /// The specific event type represented by this event data instance.
+        /// </summary>
+        public QuadcopterEventType EventType { get; private set; }
+
+        /// <summary>
+        /// Constructs a new QuadcopterEventData with the specified event type.
+        /// </summary>
+        /// <param name="eventType">The event type to assign</param>
+        public QuadcopterEventData(QuadcopterEventType eventType)
+        {
+            EventType = eventType;
+        }
+    }
+
+    public class QuadcopterData : IEventData, IUplinkData
+    {
+        public double throttle;
+        public double yaw;
+        public double pitch;
+        public double roll;
+
+        public float gyroYaw;
+        public float gyroRoll;
+        public float gyroPitch;
+
+        public float posX;
+        public float posY;
+        public float posZ;
+
+        public float height;
+
+        public Vector3 VelocityVector;
+    }
+
+    public class GroundStationData
+    {
+        public double throttle = 0.0;
+        public double yaw = 0.0;
+        public double pitch = 0.0;
+        public double roll = 0.0;
+
+        public double motorFRSpeed = 0.0;
+        public double motorFLSpeed = 0.0;
+        public double motorBRSpeed = 0.0;
+        public double motorBLSpeed = 0.0;
+    }
+    public enum FlightStatus
+    {
+        /// <summary>
+        /// Quat is on the landing pad, ready for takeoff
+        /// </summary>
+        PreLaunch,
+        /// <summary>
+        /// Props are being activated, able to take off manually
+        /// </summary>
+        PrimingProps,
+        /// <summary>
+        /// Quad has left the ground and is traveling to set height
+        /// Cannont be controlled by User
+        /// </summary>
+        Launching,
+        /// <summary>
+        /// Quad is in flight mode, can be controlled by user or autopilot
+        /// </summary>
+        Flying,
+        /// <summary>
+        /// Quad is autonomously landing, cannot be controlled by user
+        /// </summary>
+        Landing
+    }
     /// <summary>
     /// Interface for all Quadcopters, real or simulated 
     /// Provides the basic functions to controlling a quadcopter
@@ -12,64 +103,9 @@ namespace QuadcopterUtilities
     /// For most cases, you can just inherit from <see cref="Quadcopter"/>, but this interface exists 
     /// if that class is insufficient
     /// </remarks>
-    public interface IQuadcopter
+    public interface IQuadcopter : IMonobehaviorInterface, IEventSource<QuadcopterData> 
     {
-        public class QuadcopterData : IUplinkData
-        {
-            public double throttle;
-            public double yaw;
-            public double pitch;
-            public double roll;
-
-            public float gyroYaw;
-            public float gyroRoll;
-            public float gyroPitch;
-
-            public float posX;
-            public float posY;
-            public float posZ;
-
-            public float height;
-
-            public Vector3 VelocityVector;
-        }
-       
-        public class GroundStationData 
-        {
-            public double throttle = 0.0;
-            public double yaw = 0.0;
-            public double pitch = 0.0;
-            public double roll = 0.0;
-
-            public double motorFRSpeed = 0.0;
-            public double motorFLSpeed = 0.0;
-            public double motorBRSpeed = 0.0;
-            public double motorBLSpeed = 0.0;
-        }
-        public enum FlightStatus
-        {
-            /// <summary>
-            /// Quat is on the landing pad, ready for takeoff
-            /// </summary>
-            PreLaunch,
-            /// <summary>
-            /// Props are being activated, able to take off manually
-            /// </summary>
-            PrimingProps,
-            /// <summary>
-            /// Quad has left the ground and is traveling to set height
-            /// Cannont be controlled by User
-            /// </summary>
-            Launching,
-            /// <summary>
-            /// Quad is in flight mode, can be controlled by user or autopilot
-            /// </summary>
-            Flying,
-            /// <summary>
-            /// Quad is autonomously landing, cannot be controlled by user
-            /// </summary>
-            Landing
-        }
+   
 
         /// <summary>
         /// Subscirbe to an Action that will be raised when the Quadcopter needs to abort
@@ -111,10 +147,6 @@ namespace QuadcopterUtilities
         /// </summary>
         public void SetHomePoint(Vector3 newHomePoint);
 
-        /// <summary>
-        /// Get the <see cref="GameObject"/> this quadcopter exists on
-        /// </summary>
-        public GameObject GetGameObject();
 
         /// <summary>
         /// Is this quadcopter a simulator or a real quadcopter?

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace  QuadcopterUtilities
+namespace  FlightControllers.Quadcopters
 {
     /// <summary>
     /// Base class which provides functionality for most autopilots

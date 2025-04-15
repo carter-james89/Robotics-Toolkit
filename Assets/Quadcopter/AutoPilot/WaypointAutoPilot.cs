@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace  QuadcopterUtilities
+namespace FlightControllers.Quadcopters
 {
     /// <summary>
     /// An autopilot which will attempt to fly <see cref="AutoPilot.quadToControl"/> to a <see cref="Waypoint"/> in 3D space

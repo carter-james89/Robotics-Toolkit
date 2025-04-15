@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace  QuadcopterUtilities
+namespace FlightControllers.Quadcopters
 {
     /// <summary>
     /// A point representing a postion in global space a <see cref="Quadcopter"/> traveled

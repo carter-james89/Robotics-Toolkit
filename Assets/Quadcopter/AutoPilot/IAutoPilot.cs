@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace  QuadcopterUtilities
+namespace  FlightControllers.Quadcopters
 {
     /// <summary>
     /// Interface for all Autopilot modules, designed to work with <see cref="IQuadcopter"/>

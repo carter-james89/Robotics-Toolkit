@@ -1,4 +1,4 @@
-namespace  QuadcopterUtilities
+namespace  FlightControllers.Quadcopters
 {
     /// <summary>
     /// Interface for any source of input to <see cref="IQuadcopter"/>

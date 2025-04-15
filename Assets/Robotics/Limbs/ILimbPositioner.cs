@@ -1,11 +1,11 @@
 using RoboticsToolkit.Robotics.Limbs;
 using System.Collections;
 using System.Collections.Generic;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
-public interface ILimbPositioner
+public interface ILimbPositioner : IEventSource<LimbPositionerEventData>
 {
-    public GameObject GetGameObject();
     public void RotateToPosition(Vector3 globalPosition, Quaternion rotationAxis, float time, bool localSpace);
 
     public void RotateToPosition(Vector3 direction, Vector3 upDirection, float distance, float time);
@@ -21,33 +21,27 @@ public interface ILimbPositioner
     public Vector3 GetLimbPosition(bool localSpace);
 
     public bool Run();
-
-    public void SubscribeToEvents(ILimbPositionerEventListener listener);
-    public void UnsubscribeFromEvents(ILimbPositionerEventListener listener);
 }
 
 
 
-public interface ILimbPositionerEventListener
+public class LimbPositionerEventData : IEventData
 {
-    public enum EventType
+    public enum LimbPositionerEventType
     {
         OnAtTarget,
         OnMovementCanceled
     }
-    public struct EventData
-    {   
-        public EventType EventType;
-        public IRoboticLimb Limb;
-        public Vector3 TargetPosition;
 
-        public EventData(EventType eventType, IRoboticLimb limb, Vector3 targetPosition)
-        {
-            EventType = eventType;
-            Limb = limb;
-            TargetPosition = targetPosition;
-        }
+    public LimbPositionerEventType EventType;
+    public IRoboticLimb Limb;
+    public Vector3 TargetPosition;
+
+    public LimbPositionerEventData(LimbPositionerEventType eventType, IRoboticLimb limb, Vector3 targetPosition)
+    {
+        EventType = eventType;
+        Limb = limb;
+        TargetPosition = targetPosition;
     }
-
-    public void OnLimbPositionerEventOccured(EventData eventData);
 }
+

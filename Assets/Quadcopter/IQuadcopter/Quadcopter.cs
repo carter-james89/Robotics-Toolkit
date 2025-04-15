@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
-namespace QuadcopterUtilities
+namespace FlightControllers.Quadcopters
 {
     /// <summary>
     /// Base class for standard quadcopters, both real and simulated
@@ -79,7 +80,7 @@ namespace QuadcopterUtilities
         /// The current status of the quadcopter
         /// </summary>
         [SerializeField]
-        protected IQuadcopter.FlightStatus _flightStatus;
+        protected FlightStatus _flightStatus;
 
         /// <summary>
         /// Should the Quad run in headless mode?
@@ -100,39 +101,6 @@ namespace QuadcopterUtilities
         }
 
         /// <summary>
-        /// Launch the quadcopter
-        /// </summary>
-        public virtual void Takeoff()
-        {
-            _flightController.Takeoff();
-
-            //Update();
-            var quadData = _flightController.GetSensorData();
-            SetVirtualPosition(quadData);
-            ResetKnownOffset();
-
-            SetHomePoint(transform.localPosition);
-            _flightStatus = IQuadcopter.FlightStatus.Flying;
-        }
-        /// <summary>
-        /// Land the quadcopter
-        /// </summary>
-        public virtual void Land()
-        {
-            //  Debug.Log("Land");
-            _flightController.Land();
-            _flightStatus = IQuadcopter.FlightStatus.PreLaunch;
-        }
-        /// <summary>
-        /// Is this quadcopter a simulator or a real quadcopter
-        /// </summary>
-        /// <returns></returns>
-        public bool IsSimulator()
-        {
-            return _flightController.IsSimulator();
-        }
-
-        /// <summary>
         /// Initialize the autopilot, and provide the depenencies it needs. 
         /// </summary>
         /// <param name="pilotInputs">Where to find the inputs from the pilot</param>
@@ -142,10 +110,10 @@ namespace QuadcopterUtilities
             //Debug.Log("Initialize Quadcopter : " + name + " - Flight Controller : " + flightController.ToString());
             if (flightController == null)
             {
-              //  Debug.Log("what the actual fuck");
+                //  Debug.Log("what the actual fuck");
                 Debug.Break();
             }
-            _flightStatus = IQuadcopter.FlightStatus.PreLaunch;
+            _flightStatus = FlightStatus.PreLaunch;
 
             _flightController = flightController;
             _flightController.Initialize(this, OnFlightStatusChanged);
@@ -159,20 +127,93 @@ namespace QuadcopterUtilities
 
             m_initialized = true;
         }
+        public void Update()
+        {
+            if (_flightController != null && _flightController.IsInitialized())
+            {
+                ProcessInputs();
+            }
+            if (m_initialized && !IsSimulator())
+            {
+                RunQuadcopterUpdate();
+            }
+        }
+        public void FixedUpdate()
+        {
+            if (m_initialized && IsSimulator())
+            {
+                RunQuadcopterUpdate();
+            }
+        }
 
-        private void OnFlightStatusChanged(IQuadcopter.FlightStatus newStatus)
+        private void RunQuadcopterUpdate()
+        {
+            if (_flightController != null && _flightController.IsInitialized())
+            {
+                if (_flightController.IsReadyToFly())
+                {
+                    var quadData = _flightController.GetSensorData();
+                    SetVirtualPosition(quadData);
+                    _flightController.Run(_flightStatus, currentInputs);
+                    OnTransformUpdated();
+                }
+                else
+                {
+                    // Debug.Log("not ready to fly");
+                }
+            }
+        }
+
+
+        #region Flight Commands
+        /// <summary>
+        /// Launch the quadcopter
+        /// </summary>
+        public virtual void Takeoff()
+        {
+            Debug.Log("Takeoff");
+            _flightController.Takeoff();
+
+            //Update();
+            var quadData = _flightController.GetSensorData();
+            SetVirtualPosition(quadData);
+            ResetKnownOffset();
+
+            SetHomePoint(transform.localPosition);
+            _flightStatus = FlightStatus.Flying;
+        }
+        /// <summary>
+        /// Land the quadcopter
+        /// </summary>
+        public virtual void Land()
+        {
+            //  Debug.Log("Land");
+            _flightController.Land();
+            _flightStatus = FlightStatus.PreLaunch;
+        }
+        #endregion
+        /// <summary>
+        /// Is this quadcopter a simulator or a real quadcopter
+        /// </summary>
+        /// <returns></returns>
+        public bool IsSimulator()
+        {
+            return _flightController.IsSimulator();
+        }
+
+        private void OnFlightStatusChanged(FlightStatus newStatus)
         {
             switch (newStatus)
             {
-                case IQuadcopter.FlightStatus.PreLaunch:
+                case FlightStatus.PreLaunch:
                     break;
-                case IQuadcopter.FlightStatus.PrimingProps:
+                case FlightStatus.PrimingProps:
                     break;
-                case IQuadcopter.FlightStatus.Launching:
+                case FlightStatus.Launching:
                     break;
-                case IQuadcopter.FlightStatus.Flying:
+                case FlightStatus.Flying:
                     break;
-                case IQuadcopter.FlightStatus.Landing:
+                case FlightStatus.Landing:
                     break;
                 default:
                     break;
@@ -182,7 +223,7 @@ namespace QuadcopterUtilities
 
 
 
-        public void SetVirtualPosition(IQuadcopter.QuadcopterData quadData)
+        public void SetVirtualPosition(QuadcopterData quadData)
         {
             deltaHeight = _prevHeight - quadData.height;
             _prevHeight = quadData.height;
@@ -192,7 +233,7 @@ namespace QuadcopterUtilities
 
             //var newGroundSensorPoint = CreateSensorPoint();
 
-            //if (_flightStatus == IQuadcopter.FlightStatus.Flying)
+            //if (_flightStatus == FlightStatus.Flying)
             //    if (Math.Abs(deltaHeight) > .1 && Math.Abs(elvInput) <= .05f)
             //    {
             //        heightOffset += deltaHeight;
@@ -254,44 +295,8 @@ namespace QuadcopterUtilities
             heightOffset = 0;
         }
 
-        public void Update()
-        {
-            if (m_initialized && !IsSimulator())
-            {
-                RunQuadcopterUpdate();
-            }
-            if (_flightController != null && _flightController.IsInitialized())
-            {
-                ProcessInputs();
-            }
-        }
 
-        public void FixedUpdate()
-        {
-            if (m_initialized && IsSimulator())
-            {
-                RunQuadcopterUpdate();
-            }
-        }
 
-        private void RunQuadcopterUpdate()
-        {
-            if (_flightController != null && _flightController.IsInitialized())
-            {
-                if (_flightController.IsReadyToFly())
-                {
-                    var quadData = _flightController.GetSensorData();
-                    SetVirtualPosition(quadData);
-                   // ProcessInputs();
-                    _flightController.Run(_flightStatus, currentInputs);
-                    OnTransformUpdated();
-                }
-                else
-                {
-                    // Debug.Log("not ready to fly");
-                }
-            }
-        }
 
         /// <summary>
         /// Proccess the inputs from either <see cref="defaultInputSource"/> or <see cref="overrideInputSource"/>
@@ -326,7 +331,7 @@ namespace QuadcopterUtilities
             yawInput = currentInputs.yaw;
 
 
-            if (currentInputs.takeOff && _flightStatus == IQuadcopter.FlightStatus.PreLaunch)
+            if (currentInputs.takeOff && _flightStatus == FlightStatus.PreLaunch)
             {
                 Takeoff();
             }
@@ -386,11 +391,11 @@ namespace QuadcopterUtilities
             onTransformChanged?.Invoke(transform.localPosition, transform.localRotation);
         }
 
-        public IQuadcopter.FlightStatus GetFlightStatus()
+        public FlightStatus GetFlightStatus()
         {
             return _flightStatus;
         }
-        public IQuadcopter.QuadcopterData GetSensorData()
+        public QuadcopterData GetSensorData()
         {
             return _flightController.GetSensorData();
         }
@@ -464,6 +469,21 @@ namespace QuadcopterUtilities
             {
                 Debug.LogWarning("Trying to Unsubscribe an action from Abort that was never Subscribed, this should not happen");
             }
+        }
+
+        public Component GetComponent()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeToEvents(IEventListener<QuadcopterData> listenerToSubscribe)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UnsubscribeFromEvents(IEventListener<QuadcopterData> listenerToUnsubscribe)
+        {
+            throw new NotImplementedException();
         }
     }
 }

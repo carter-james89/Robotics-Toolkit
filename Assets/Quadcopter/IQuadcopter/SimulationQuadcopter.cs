@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace  QuadcopterUtilities
+namespace FlightControllers.Quadcopters
 {
     /// <summary>
     /// A simulator Quadcopter meant to replicate the DJI Tello
@@ -93,7 +93,7 @@ namespace  QuadcopterUtilities
         /// </remarks>
         public void FixedUpdate()
         {
-            if (_flightStatus != IQuadcopter.FlightStatus.PreLaunch)
+            if (_flightStatus != FlightStatus.PreLaunch)
             {
                 rigidBody.AddForce(transform.up * 9.81f);
                 bool receivingInput = false;
@@ -146,7 +146,7 @@ namespace  QuadcopterUtilities
         }
 
         /// <summary>
-        /// Move the simulator into <see cref="IQuadcopter.FlightStatus.Flying"/> mode, and activate physics
+        /// Move the simulator into <see cref="FlightStatus.Flying"/> mode, and activate physics
         /// </summary>
         public override void Takeoff()
         {
@@ -157,7 +157,7 @@ namespace  QuadcopterUtilities
             ResetKnownOffset();
             rigidBody.useGravity = true;
             SetHomePoint(transform.position);
-            _flightStatus = IQuadcopter.FlightStatus.Flying;
+            _flightStatus = FlightStatus.Flying;
         }
 
 

@@ -1,10 +1,7 @@
 {
-    "name": "RoboticsToolkit.Robotics.Limbs-ASMDF",
+    "name": "UtilitiesASMDF",
     "rootNamespace": "",
-    "references": [
-        "GUID:515a76162327e894cb5dc6a1b696df4d",
-        "GUID:cb88c3c7ecd18b34e9c9b35228c67041"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

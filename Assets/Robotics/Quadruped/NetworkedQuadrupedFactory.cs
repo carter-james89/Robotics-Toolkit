@@ -1,15 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
-using Utilities.Network;
+using Toolkit.Networking;
 using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Toolkit.Utilities.Events;
 
 
 namespace RoboticsToolkit.Robotics.QuadrupedRobot
 {
-    public class NetworkedQuadrupedFactory : MonoBehaviour, IUDPConnectionEventListener
+    public class NetworkedQuadrupedFactory : MonoBehaviour, IEventListener<UDPConnectionEventData>
     {
         [SerializeField]
         private UDPConnectionListener _connectionManager;
@@ -23,11 +24,11 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         private void Awake()
         {
-            _connectionManager.SubscribeToConnectionEvents(this);
+            _connectionManager.SubscribeToEvents(this);
         }
-
-        public void OnConnectionEventOccured(IUDPConnectionEventListener.EventData eventData)
+        public void OnEventOccured(UDPConnectionEventData eventData)
         {
+    
             Debug.Log("Factor event occured");
             if (eventData.ConnectionData.BoardType.ToLower().Contains("esp32"))
             {
@@ -45,6 +46,16 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
             }   
         }
 
-     
+    
+
+        public GameObject GetGameObject()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Component GetComponent()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

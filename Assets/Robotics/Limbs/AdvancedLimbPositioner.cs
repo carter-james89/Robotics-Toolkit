@@ -1,5 +1,5 @@
-using Utilities.Events;
 using UnityEngine;
+using Toolkit.Utilities.Events;
 
 namespace RoboticsToolkit.Robotics.Gaits
 {
@@ -30,18 +30,8 @@ namespace RoboticsToolkit.Robotics.Gaits
         }
         public Status CurrentStatus { get; private set; } = Status.None;
 
-        private InterfaceEventManager<ILimbPositionerEventListener> _eventManager = new InterfaceEventManager<ILimbPositionerEventListener>("Advanced Limb Positioner");
+        private InterfaceEventManager<LimbPositionerEventData> _eventManager = new InterfaceEventManager<LimbPositionerEventData>("Advanced Limb Positioner");
         private bool _useEasing = false;
-
-        public void SubscribeToEvents(ILimbPositionerEventListener listener)
-        {
-            _eventManager.AddListener(listener);
-        }
-
-        public void UnsubscribeFromEvents(ILimbPositionerEventListener listener)
-        {
-            _eventManager.RemoveListener(listener);
-        }
 
         void Update()
         {
@@ -292,6 +282,21 @@ namespace RoboticsToolkit.Robotics.Gaits
                     break;
             }
            return CurrentStatus == Status.None;
+        }
+
+        public void SubscribeToEvents(IEventListener<LimbPositionerEventData> listenerToSubscribe)
+        {
+         _eventManager.AddListener(listenerToSubscribe);
+        }
+
+        public void UnsubscribeFromEvents(IEventListener<LimbPositionerEventData> listenerToUnsubscribe)
+        {
+            _eventManager.RemoveListener(listenerToUnsubscribe);    
+        }
+
+        public Component GetComponent()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

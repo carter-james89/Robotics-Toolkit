@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace QuadcopterUtilities
+namespace FlightControllers.Quadcopters
 {
     public class QuadcopterGroundControl : MonoBehaviour
     {

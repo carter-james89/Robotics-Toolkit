@@ -5,16 +5,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Utilities.Events;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 using RoboticsToolkit.Robotics.RoboticControllers;
 using UnityEngine.UIElements;
 
 
 
-public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobotEventListener
+public class DynamicRoboticController : MonoBehaviour, IRoboticController, IEventListener<RobotEventData>
 {
-    private InterfaceEventManager<IRoboticControllerEventListener> _eventManager = new InterfaceEventManager<IRoboticControllerEventListener>("Controlelr");
+    private InterfaceEventManager<QuadrupedRoboticControllerEventData> _eventManager = new InterfaceEventManager<QuadrupedRoboticControllerEventData>("Controlelr");
     // private IQuadruped _quadruped;
 
     private QuadrupedLeg m_frMirrorLeg;
@@ -114,7 +114,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         (quadToControl as IRobot).SubscribeToEvents(this);
 
 
-        NotifyEventListeners(IRoboticControllerEventListener.EventType.OnControllerInitialized);
+        NotifyEventListeners(QuadrupedRoboticControllerEventType.OnControllerInitialized);
 
         SetRobotHeight(_hipHeight, .09f);
 
@@ -134,7 +134,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         Debug.Log("Set new Height : " + _targetHeight);
         _heightAdjustmentSpeed = speed;
         _adjustingHeight = true;
-        NotifyEventListeners(IRoboticControllerEventListener.EventType.OnHeightAdjustmentBegin);
+        NotifyEventListeners(QuadrupedRoboticControllerEventType.OnHeightAdjustmentBegin);
     }
 
     #region Construction
@@ -321,7 +321,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
             if (_robotHeight == _targetHeight)
             {
                 _adjustingHeight = false; // Stop adjusting when the target height is reached
-                NotifyEventListeners(IRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd);
+                NotifyEventListeners(QuadrupedRoboticControllerEventType.OnHeightAdjustmentEnd);
             }
         }
         //  return null;
@@ -345,36 +345,28 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
         }
     }
 
-    public void SubscribeToControllerEvents(IRoboticControllerEventListener listener)
+
+    private void NotifyEventListeners(QuadrupedRoboticControllerEventType type)
     {
-        _eventManager.AddListener(listener);
-    }
-    public void UnsubscribeFromControllerEvents(IRoboticControllerEventListener listener)
-    {
-        _eventManager.RemoveListener(listener);
-    }
-    private void NotifyEventListeners(IRoboticControllerEventListener.EventType type)
-    {
-        foreach (var item in _eventManager.GetListeners())
-        {
-            item.OnControllerEventOccured(new IRoboticControllerEventListener.QuadrupedRoboticControllerEvendData(type, this, _robot));
-        }
+        _eventManager.RaiseEvent(new QuadrupedRoboticControllerEventData(type, this, _robot));
+
     }
 
-    public void OnRobotEventOccured(IRobotEventListener.EventData eventData)
+    public void OnEventOccured(RobotEventData eventData)
     {
+
         switch (eventData.EventType)
         {
-            case IRobotEventListener.EventType.OnRobotInitialized:
+            case RobotEventType.OnRobotInitialized:
                 break;
-            case IRobotEventListener.EventType.OnRobotInPosition:
+            case RobotEventType.OnRobotInPosition:
 
                 break;
-            case IRobotEventListener.EventType.OnLimbsPositioned:
+            case RobotEventType.OnLimbsPositioned:
                 break;
-            case IRobotEventListener.EventType.OnEmergencyStop:
+            case RobotEventType.OnEmergencyStop:
                 break;
-            case IRobotEventListener.EventType.OnReset:
+            case RobotEventType.OnReset:
                 break;
             default:
                 break;
@@ -402,4 +394,21 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IRobo
     {
         throw new NotImplementedException();
     }
+
+    public void SubscribeToEvents(IEventListener<QuadrupedRoboticControllerEventData> listenerToSubscribe)
+    {
+        _eventManager.AddListener(listenerToSubscribe);
+    }
+
+    public void UnsubscribeFromEvents(IEventListener<QuadrupedRoboticControllerEventData> listenerToUnsubscribe)
+    {
+        _eventManager.RemoveListener(listenerToUnsubscribe);
+    }
+
+    public Component GetComponent()
+    {
+        throw new NotImplementedException();
+    }
+
+
 }

@@ -3,113 +3,117 @@ using System.Collections.Generic;
 using  QuadcopterUtilities;
 using UnityEngine;
 
-public class WaypointMission : MonoBehaviour
+namespace FlightControllers.Quadcopters
 {
-    [SerializeField]
-    private List<Waypoint> _waypoints;
-
-    public Waypoint currentWaypoint { get; private set; }
-
-    public Waypoint startWaypoint;
-
-    private WaypointAutoPilot _autoPilot;
-
-    [SerializeField]
-    private bool _loopMission;
-
-    public bool IsFinalWaypoint(Waypoint waypointToCheck)
+    public class WaypointMission : MonoBehaviour
     {
-        if(waypointToCheck == _waypoints[_waypoints.Count - 1])
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+        [SerializeField]
+        private List<Waypoint> _waypoints;
 
-    public bool missionActive { get; private set; } = false;
+        public Waypoint currentWaypoint { get; private set; }
 
-    private int _waypointCount;
+        public Waypoint startWaypoint;
 
-    public void OnMissionBegun(WaypointAutoPilot autoPilot)
-    {
-        if (!autoPilot)
-        {
-            return;
-        }
-        if (_waypoints == null || _waypoints.Count == 0)
-        {
-            return;
-        }
-        missionActive = true;
-        _waypointCount = 0;
-        _autoPilot = autoPilot;
-        _autoPilot.onWaypointAchieved += OnQuadcopterAtTarget;
-        _autoPilot.onWaypointSet += OnNewWaypointSet;
-        if (startWaypoint)
-        {
-            autoPilot.SetNewWaypoint(startWaypoint);
-        }
-        else
-            HeadToNextWaypoint();
-    }
+        private WaypointAutoPilot _autoPilot;
 
-    public void EndMission()
-    {
-        if (missionActive)
-        {
-            Debug.Log("End Mission : " + name);
-            missionActive = false;
-            currentWaypoint = null;
-            _autoPilot.onWaypointAchieved -= OnQuadcopterAtTarget;
-            _autoPilot.onWaypointSet -= OnNewWaypointSet;
-        }
-    }
+        [SerializeField]
+        private bool _loopMission;
 
-    private void OnNewWaypointSet(Waypoint newWaypointSet)
-    {
-        if (missionActive && newWaypointSet != currentWaypoint && newWaypointSet != startWaypoint)
+        public bool IsFinalWaypoint(Waypoint waypointToCheck)
         {
-            Debug.Log("A waypoint has been set from outside the Mission : " + newWaypointSet);
+            if (waypointToCheck == _waypoints[_waypoints.Count - 1])
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool missionActive { get; private set; } = false;
+
+        private int _waypointCount;
+
+        public void OnMissionBegun(WaypointAutoPilot autoPilot)
+        {
+            if (!autoPilot)
+            {
+                return;
+            }
+            if (_waypoints == null || _waypoints.Count == 0)
+            {
+                return;
+            }
+            missionActive = true;
+            _waypointCount = 0;
+            _autoPilot = autoPilot;
+            _autoPilot.onWaypointAchieved += OnQuadcopterAtTarget;
+            _autoPilot.onWaypointSet += OnNewWaypointSet;
+            if (startWaypoint)
+            {
+                autoPilot.SetNewWaypoint(startWaypoint);
+            }
+            else
+                HeadToNextWaypoint();
+        }
+
+        public void EndMission()
+        {
+            if (missionActive)
+            {
+                Debug.Log("End Mission : " + name);
+                missionActive = false;
+                currentWaypoint = null;
+                _autoPilot.onWaypointAchieved -= OnQuadcopterAtTarget;
+                _autoPilot.onWaypointSet -= OnNewWaypointSet;
+            }
+        }
+
+        private void OnNewWaypointSet(Waypoint newWaypointSet)
+        {
+            if (missionActive && newWaypointSet != currentWaypoint && newWaypointSet != startWaypoint)
+            {
+                Debug.Log("A waypoint has been set from outside the Mission : " + newWaypointSet);
+                EndMission();
+            }
+        }
+
+        private void OnQuadcopterAtTarget(Waypoint targetTransform)
+        {
+            Debug.Log("Quad at Waypoint : " + _waypointCount);
+
+            if (_waypointCount != _waypoints.Count)
+            {
+                Debug.Log("Set Next Waypoint : " + _waypoints[_waypointCount].name);
+                HeadToNextWaypoint();
+                return;
+            }
+            else
+            {
+                if (_loopMission)
+                {
+                    _waypointCount = 0;
+                    HeadToNextWaypoint();
+                }
+                else
+                {
+                    EndMission();
+                }
+            }
+        }
+
+        private void HeadToNextWaypoint()
+        {
+            currentWaypoint = _waypoints[_waypointCount];
+            _autoPilot.SetNewWaypoint(currentWaypoint);
+            _waypointCount++;
+        }
+
+        private void OnDestroy()
+        {
             EndMission();
         }
     }
 
-    private void OnQuadcopterAtTarget(Waypoint targetTransform)
-    {
-        Debug.Log("Quad at Waypoint : " + _waypointCount);
-
-        if (_waypointCount != _waypoints.Count)
-        {
-            Debug.Log("Set Next Waypoint : " + _waypoints[_waypointCount].name);
-            HeadToNextWaypoint();
-            return;
-        }
-        else
-        {
-            if (_loopMission)
-            {
-                _waypointCount = 0;
-                HeadToNextWaypoint();
-            }
-            else
-            {
-                EndMission();
-            }
-        }
-    }
-
-    private void HeadToNextWaypoint()
-    {
-        currentWaypoint = _waypoints[_waypointCount];
-        _autoPilot.SetNewWaypoint(currentWaypoint);
-        _waypointCount++;
-    }
-
-    private void OnDestroy()
-    {
-        EndMission();
-    }
 }

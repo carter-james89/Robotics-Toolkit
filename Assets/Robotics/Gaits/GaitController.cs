@@ -3,6 +3,7 @@ using RoboticsToolkit.Robotics;
 using RoboticsToolkit.Robotics.Limbs;
 using System;
 using System.Collections.Generic;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace RoboticsToolkit.Robotics.Gaits
@@ -12,7 +13,7 @@ namespace RoboticsToolkit.Robotics.Gaits
         Crawl,
         Trot,
     }
-    public class GaitController : MonoBehaviour, IGaitController, IGaitEventListener
+    public class GaitController : MonoBehaviour, IGaitController, IEventListener<GaitEventData>
     {
         private IRoboticLimb[] _puppetLimbs;
         private ILimbPositioner[] _limbPositioners;
@@ -341,27 +342,35 @@ namespace RoboticsToolkit.Robotics.Gaits
             throw new System.NotImplementedException();
         }
 
-        public void OnGaitEventOccured(GaitEventData eventData)
+
+        public void OnEventOccured(GaitEventData eventData)
         {
             switch (eventData.EventType)
             {
-                case EventType.OnGaitCycleBegin:
+                case GaitEventType.OnGaitCycleBegin:
                     break;
-                case EventType.OnGaitPointHit:
+                case GaitEventType.OnGaitPointHit:
 
                     //    m_activeGait.SetNextCycle(_currentWalkDirection, _limbPositioners, _speed, _rotating);
                     break;
-                case EventType.OnGaitCycleComplete:
+                case GaitEventType.OnGaitCycleComplete:
                     break;
-                case EventType.OnGaitReturnedHome:
+                case GaitEventType.OnGaitReturnedHome:
                     break;
                 default:
                     break;
             }
-        
         }
 
+        public GameObject GetGameObject()
+        {
+            throw new NotImplementedException();
+        }
 
+        public Component GetComponent()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
 

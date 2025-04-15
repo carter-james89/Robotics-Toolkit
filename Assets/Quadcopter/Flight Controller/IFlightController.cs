@@ -1,28 +1,27 @@
-using QuadcopterUtilities;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static QuadcopterUtilities.IQuadcopter;
+using Toolkit.Utilities;
 
-public interface IFlightController 
+namespace FlightControllers.Quadcopters
 {
-    public bool IsInitialized();
+    public interface IFlightController : IMonobehaviorInterface
+    {
+        public bool IsInitialized();
 
-    public bool IsReadyToFly();
-    
-    public void Initialize(IQuadcopter quadToControl, Action<IQuadcopter.FlightStatus> onFlightStatusChanged);
+        public bool IsReadyToFly();
 
-    public Quaternion GetGyroRotation();
+        public void Initialize(IQuadcopter quadToControl, Action<FlightStatus> onFlightStatusChanged);
 
-    public QuadcopterData GetSensorData();
+        public Quaternion GetGyroRotation();
 
-    public void Run(IQuadcopter.FlightStatus flightStatus, IInputs.FlightControlValues craftInputs);
+        public QuadcopterData GetSensorData();
 
-    public bool IsSimulator();
+        public void Run(FlightStatus flightStatus, IInputs.FlightControlValues craftInputs);
 
-    public void Takeoff();
-    public void Land();
+        public bool IsSimulator();
 
+        public void Takeoff();
+        public void Land();
+    }
 
 }

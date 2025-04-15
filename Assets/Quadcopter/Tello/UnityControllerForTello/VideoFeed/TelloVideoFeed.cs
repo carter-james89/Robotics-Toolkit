@@ -1,7 +1,7 @@
 using TelloLib;
 using UnityEngine;
 
-namespace  QuadcopterUtilities
+namespace FlightControllers.Quadcopters
 {
     /// <summary>
     /// Controller which controls the Game UI, and displays the Tello's video feed to a texture

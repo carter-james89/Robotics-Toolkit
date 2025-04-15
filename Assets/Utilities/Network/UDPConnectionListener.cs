@@ -3,7 +3,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
-using Utilities.Events;
+using Toolkit.Utilities.Events;
 
 [Serializable]
 public class ConnectionData
@@ -16,40 +16,38 @@ public class ConnectionData
     public ConnectionData() { }
 }
 
-namespace Utilities.Network
+namespace Toolkit.Networking
 {
-    public interface IUDPConnectionEventListener
+    public class UDPConnectionEventData : IEventData
     {
-        public class EventData
-        {
-            public Type EventType;
-            public IPAddress BroadcastIP;
-            public int BroadcastPort;
-            public ConnectionData ConnectionData;
+        public UDPConnectionEventType EventType;
+        public IPAddress BroadcastIP;
+        public int BroadcastPort;
+        public ConnectionData ConnectionData;
 
-            public EventData(Type eventType, IPAddress broadcastIP, int broadcastPort, ConnectionData connectionData)
-            {
-                EventType = eventType;
-                BroadcastIP = broadcastIP;
-                BroadcastPort = broadcastPort;
-                ConnectionData = connectionData;
-            }
-        }
-        public enum Type
+        public UDPConnectionEventData(UDPConnectionEventType eventType, IPAddress broadcastIP, int broadcastPort, ConnectionData connectionData)
         {
-            OnBroadcastReceived,
-            OnRobotDisconnected,
+            EventType = eventType;
+            BroadcastIP = broadcastIP;
+            BroadcastPort = broadcastPort;
+            ConnectionData = connectionData;
         }
-        void OnConnectionEventOccured(EventData eventData);
+    }
+    public enum UDPConnectionEventType
+    {
+        OnBroadcastReceived,
+        OnRobotDisconnected,
     }
 
-    public class UDPConnectionListener
+
+
+    public class UDPConnectionListener : IEventSource<UDPConnectionEventData>
     {
         private static UDPConnectionListener _instance;
         private UdpClient listener;
         private bool isListening;
         private const int listenPort = 5501; // The port number to listen on
-        private InterfaceEventManager<IUDPConnectionEventListener> _listenerManager = new InterfaceEventManager<IUDPConnectionEventListener>("UDP Listener");
+        private InterfaceEventManager<UDPConnectionEventData> _listenerManager = new InterfaceEventManager<UDPConnectionEventData>("UDP Listener");
 
         public static UDPConnectionListener Instance
         {
@@ -84,7 +82,7 @@ namespace Utilities.Network
             // Deserialize the JSON string into the ConnectionData class
             ConnectionData data = JsonUtility.FromJson<ConnectionData>(receivedString);
 
-            NotifyListeners(new IUDPConnectionEventListener.EventData(IUDPConnectionEventListener.Type.OnBroadcastReceived, remoteEndPoint.Address, listenPort, data));
+            NotifyListeners(new UDPConnectionEventData(UDPConnectionEventType.OnBroadcastReceived, remoteEndPoint.Address, listenPort, data));
 
             // Continue listening for UDP messages
             if (isListening)
@@ -100,20 +98,33 @@ namespace Utilities.Network
             listener.Close();
         }
 
-        public void SubscribeToConnectionEvents(IUDPConnectionEventListener newListener)
-        {
-            _listenerManager.AddListener(newListener);
-        }
-        public void UnsubscribeFromConnectionEvents(IUDPConnectionEventListener listener)
-        {
-            _listenerManager.RemoveListener(listener);
-        }
-        private void NotifyListeners(IUDPConnectionEventListener.EventData eventData)
+
+        private void NotifyListeners(UDPConnectionEventData eventData)
         {
             foreach (var listener in _listenerManager.GetListeners())
             {
-                listener.OnConnectionEventOccured(eventData);
+                listener.OnEventOccured(eventData);
             }
+        }
+
+        public void SubscribeToEvents(IEventListener<UDPConnectionEventData> listenerToSubscribe)
+        {
+           _listenerManager.AddListener(listenerToSubscribe);
+        }
+
+        public void UnsubscribeFromEvents(IEventListener<UDPConnectionEventData> listenerToUnsubscribe)
+        {
+            _listenerManager.RemoveListener(listenerToUnsubscribe);
+        }
+
+        public GameObject GetGameObject()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Component GetComponent()
+        {
+            throw new NotImplementedException();
         }
     }
 }

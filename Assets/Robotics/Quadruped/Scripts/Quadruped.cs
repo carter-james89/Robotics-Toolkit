@@ -1,5 +1,5 @@
 using System;
-using Utilities.Events;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 using RoboticsToolkit.Robotics.Limbs;
 using RoboticsToolkit.Robotics.RoboticControllers;
@@ -76,7 +76,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
     //    }
     //}
 
-    public abstract class Quadruped : MonoBehaviour, IRobot, IRoboticControllerEventListener
+    public abstract class Quadruped : MonoBehaviour, IRobot, IEventListener< QuadrupedRoboticControllerEventData>
     {
         protected IRoboticLimb[] m_limbs;
 
@@ -141,13 +141,13 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
                     case IRobot.Status.NotReady:
                         break;
                     case IRobot.Status.Initialized:
-                        NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotInitialized);
+                        NotifyRobotEventListeners(RobotEventType.OnRobotInitialized);
                         break;
                     case IRobot.Status.AdjustingHeight:
-                        NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotInPosition);
+                        NotifyRobotEventListeners(RobotEventType.OnRobotInPosition);
                         break;
                     case IRobot.Status.Ready:
-                        NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotReady);
+                        NotifyRobotEventListeners(RobotEventType.OnRobotReady);
                         break;
                     default:
                         break;
@@ -178,7 +178,7 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         protected virtual void AtReadyHeight()
         {
             UpdateStatus(IRobot.Status.Ready);
-            NotifyRobotEventListeners(IRobotEventListener.EventType.OnRobotInPosition);
+            NotifyRobotEventListeners(RobotEventType.OnRobotInPosition);
         }
 
         public QuadrupedLeg ConstructDynamicLeg(Transform parentTransform, IRoboticLimb leg, string name, Color color, bool left = false)
@@ -347,33 +347,25 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         }
 
-        public void SubscribeToEvents(IRobotEventListener listener)
+
+        private InterfaceEventManager<RobotEventData> _robotEventManager = new InterfaceEventManager<RobotEventData>("Robot");
+ 
+        private void NotifyRobotEventListeners(RobotEventType eventType)
         {
-            _robotEventManager.AddListener(listener);
-        }
-        private InterfaceEventManager<IRobotEventListener> _robotEventManager = new InterfaceEventManager<IRobotEventListener>("Robot");
-        public void UnsubscribeToEvents(IRobotEventListener listener)
-        {
-            _robotEventManager.RemoveListener(listener);
-        }
-        private void NotifyRobotEventListeners(IRobotEventListener.EventType eventType)
-        {
-            foreach (var item in _robotEventManager.GetListeners())
-            {
-                item.OnRobotEventOccured(new IRobotEventListener.EventData(eventType, this, null));
-            }
+            _robotEventManager.RaiseEvent(new RobotEventData(eventType, this, null));
         }
 
-        public void OnControllerEventOccured(IRoboticControllerEventListener.QuadrupedRoboticControllerEvendData eventData)
+        public void OnEventOccured(QuadrupedRoboticControllerEventData eventData)
         {
-            Debug.Log(eventData.EventType);
+  
+        Debug.Log(eventData.EventType);
             switch (eventData.EventType)
             {
-                case IRoboticControllerEventListener.EventType.OnControllerInitialized:
+                case QuadrupedRoboticControllerEventType.OnControllerInitialized:
                     break;
-                case IRoboticControllerEventListener.EventType.OnHeightAdjustmentBegin:
+                case QuadrupedRoboticControllerEventType.OnHeightAdjustmentBegin:
                     break;
-                case IRoboticControllerEventListener.EventType.OnHeightAdjustmentEnd:
+                case QuadrupedRoboticControllerEventType.OnHeightAdjustmentEnd:
                     if (_status == IRobot.Status.AdjustingHeight)
                         AtReadyHeight();
                     break;
@@ -395,6 +387,33 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
         public IRobot.Status GetStatus()
         {
             return _status;
+        }
+
+   
+
+        public Component GetComponent()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeToEvents(RobotEventData listener)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UnsubscribeToEvents(RobotEventData listener)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeToEvents(IEventListener<RobotEventData> listenerToSubscribe)
+        {
+       _robotEventManager.AddListener(listenerToSubscribe);
+        }
+
+        public void UnsubscribeFromEvents(IEventListener<RobotEventData> listenerToUnsubscribe)
+        {
+            _robotEventManager.RemoveListener(listenerToUnsubscribe);
         }
     }
 
