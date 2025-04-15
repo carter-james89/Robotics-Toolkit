@@ -31,7 +31,7 @@ namespace FlightControllers.Quadcopters
             _motorThrustCalculator.OnEpisodeBeginEvent.AddListener(OnEpisodeBegin);
             _motorThrustCalculator.OnEpisodeEndEvent.AddListener(OnEpisodeEnd);
 
-            _quadcopter.Initialize(_simulatedOnBoardFlightController, _pilotInupts.GetInputValues);
+            _quadcopter.Initialize(_simulatedOnBoardFlightController, _pilotInupts);
 
 
         }

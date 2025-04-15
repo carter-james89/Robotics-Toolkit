@@ -46,7 +46,7 @@ namespace FlightControllers.Quadcopters
             throw new NotImplementedException();
         }
 
-        public void Run(FlightStatus flightStatus, IInputs.FlightControlValues craftInputs)
+        public void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
         {
 
         }

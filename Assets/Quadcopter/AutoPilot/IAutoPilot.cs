@@ -8,7 +8,7 @@ namespace  FlightControllers.Quadcopters
     /// <remarks>
     /// <see cref="AutoPilot"/> should be a valid solution for most autopilots, this exists if drastic changes are needed
     /// </remarks>
-    public interface IAutoPilot : IInputs
+    public interface IAutoPilot : IInputSource
     {
         /// <summary>
         /// Prepare the autopilot for activation

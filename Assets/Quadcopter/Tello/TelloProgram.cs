@@ -97,7 +97,7 @@ namespace  FlightControllers.Quadcopters
                 default:
                     break;
             }
-            quadcopter.Initialize(_flightController,_pilotInupts.GetInputValues);
+            quadcopter.Initialize(_flightController,_pilotInupts);
             _waypointPilot.Initialize(quadcopter);
 
             if(sceneType == SceneType.Simulation)

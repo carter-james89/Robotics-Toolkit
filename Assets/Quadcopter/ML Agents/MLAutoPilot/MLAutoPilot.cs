@@ -16,7 +16,7 @@ namespace FlightControllers.Quadcopters
             //  _autoPilotAgent.Initialize(this);
         }
 
-        public override IInputs.FlightControlValues Run()
+        public override IInputSource.FlightControlValues Run()
         {
             //Debug.Log("run auto pilot");
             return _autoPilotAgent.GetFlightControlValues(this);

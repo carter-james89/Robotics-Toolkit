@@ -1,50 +1,41 @@
-using FlightControllers.Quadcopters;
 using System;
 using UnityEngine;
 
 namespace FlightControllers.Quadcopters
 {
+    /// <summary>
+    /// A simulated flight controller that emulates a quadcopter with an onboard flight controller that accepts throttle, yaw, pitch, and roll inputs.
+    /// Simulates physical forces and sensor data for a quadcopter.
+    /// </summary>
     public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
     {
         private IQuadcopter _quadToControl;
-        /// <summary>
-        /// Rigidbody to control the physics of the simulator
-        /// </summary>
         private Rigidbody rigidBody;
-        /// <summary>
-        /// "Aerodynamic" drag when the user is inputing control values
-        /// </summary>
-        [SerializeField]
-        private float inputDrag;
-        /// <summary>
-        /// "Aerodynamic" drag when the user is not inputing control values
-        /// </summary>
-        [SerializeField]
-        private float drag;
+        private Action<FlightStatus> _onFlightStatusChanged;
+        private bool _isInitialized;
 
+        [SerializeField] private float inputDrag;
+        [SerializeField] private float drag;
         public float timeSpeed = 1;
 
-        private Action<FlightStatus> _onFlightStatusChanged;
+        private IInputSource.FlightControlValues _craftInputs;
+        private FlightStatus _flightStatus;
 
+        /// <inheritdoc/>
+        public bool IsInitialized() => _isInitialized;
 
-        private bool _isInitialized;
-        public bool IsInitialized()
-        {
-            return _isInitialized;
-        }
-        public bool IsReadyToFly()
-        {
-            return true;
-        }
+        /// <inheritdoc/>
+        public bool IsReadyToFly() => true;
 
+        /// <inheritdoc/>
         public void Initialize(IQuadcopter quadToControl, Action<FlightStatus> onFlightStatusChanged)
         {
-            // Debug.Log("initialize flight controller");
             _quadToControl = quadToControl;
-            var physicsCalculator = new GameObject("Simulation Physics Simulation");
-            physicsCalculator.transform.SetParent(_quadToControl.GetLocalTrackingSpace());
-            physicsCalculator.transform.position = quadToControl.GetGameObject().transform.position;
-            rigidBody = physicsCalculator.AddComponent<Rigidbody>();
+
+            var physicsSimulator = new GameObject("Simulation Physics Simulation");
+            physicsSimulator.transform.SetParent(_quadToControl.GetLocalTrackingSpace());
+            physicsSimulator.transform.position = quadToControl.GetGameObject().transform.position;
+            rigidBody = physicsSimulator.AddComponent<Rigidbody>();
             rigidBody.mass = quadToControl.GetGameObject().GetComponent<Rigidbody>().mass;
             rigidBody.useGravity = false;
 
@@ -58,138 +49,107 @@ namespace FlightControllers.Quadcopters
             _isInitialized = true;
         }
 
+        /// <inheritdoc/>
         public Quaternion GetGyroRotation()
         {
-            throw new System.NotImplementedException();
+            return rigidBody.transform.rotation;
         }
 
+        /// <inheritdoc/>
         public QuadcopterData GetSensorData()
         {
-            RaycastHit hit;
-            // Does the ray intersect any objects excluding the player layer
-            //if (Physics.Raycast(rigidBody.transform.localPosition, rigidBody.transform.TransformDirection(Vector3.down), out hit, Mathf.Infinity))
-            //{
-            //    Debug.DrawRay(rigidBody.transform.localPosition, Vector3.down * hit.distance, Color.yellow);
-            //}
-            //  new Vector3(rigidBody.transform.localPosition.x, rigidBody.transform.localPosition.z), hit.distance, rigidBody.transform.rotation, rigidBody.velocity.y);
-
-            var data = new QuadcopterData();
-
-            data.posX = rigidBody.transform.localPosition.x;
-            data.posY = rigidBody.transform.localPosition.y;
-            data.posZ = rigidBody.transform.localPosition.z;
-
-            data.gyroYaw = rigidBody.transform.localEulerAngles.y;
-            data.gyroPitch = rigidBody.transform.localEulerAngles.x;
-            data.gyroRoll = rigidBody.transform.localEulerAngles.z;
-
-            // data.height = hit.distance;
-            data.height = data.posY;
-            data.VelocityVector = rigidBody.angularVelocity;
-
-            return data;
-        }
-
-        /// <summary>
-        /// All the physics for the simulator
-        /// </summary>
-        /// <remarks>
-        /// Tried my best to tune the simulator to match real life Tello, but dont expect PID tunings for simulator to work for Tello
-        /// </remarks>
-        public void RunFixedUpdate()
-        {
-            if (_flightStatus != FlightStatus.PreLaunch)
+            return new QuadcopterData
             {
-                rigidBody.AddForce(rigidBody.transform.up * 9.81f);
-
-                bool receivingInput = false;
-                var pitchInput = _craftInputs.pitch;
-                rigidBody.AddForce(rigidBody.transform.forward * pitchInput);
-                if (System.Math.Abs(pitchInput) > 0)
-                {
-                    receivingInput = true;
-                }
-                var elvInput = _craftInputs.throttle;
-                rigidBody.AddForce(rigidBody.transform.up * elvInput);
-                if (System.Math.Abs(elvInput) > 0)
-                {
-                    receivingInput = true;
-                }
-                var rollInput = _craftInputs.roll;
-                rigidBody.AddForce(rigidBody.transform.right * rollInput);
-                if (System.Math.Abs(rollInput) > 0)
-                {
-
-                    receivingInput = true;
-                }
-
-                var yawInput = _craftInputs.yaw;
-                rigidBody.AddTorque(rigidBody.transform.up * yawInput);
-                if (System.Math.Abs(yawInput) > 0)
-                {
-
-                    receivingInput = true;
-                }
-
-                if (receivingInput & rigidBody.drag != inputDrag)
-                {
-                    rigidBody.drag = inputDrag;
-                    rigidBody.angularDrag = inputDrag;
-                }
-                else if (!receivingInput & rigidBody.drag != drag)
-                {
-                    rigidBody.drag = drag;
-                    rigidBody.angularDrag = drag * .9f;
-                }
-            }
+                posX = rigidBody.transform.localPosition.x,
+                posY = rigidBody.transform.localPosition.y,
+                posZ = rigidBody.transform.localPosition.z,
+                gyroYaw = rigidBody.transform.localEulerAngles.y,
+                gyroPitch = rigidBody.transform.localEulerAngles.x,
+                gyroRoll = rigidBody.transform.localEulerAngles.z,
+                height = rigidBody.transform.localPosition.y,
+                VelocityVector = rigidBody.angularVelocity
+            };
         }
 
-
-        public bool IsSimulator()
-        {
-            return true;
-        }
-
-        public void Land()
-        {
-            rigidBody.transform.position = _quadToControl.GetGameObject().transform.position;
-
-            _onFlightStatusChanged.Invoke(FlightStatus.Landing);
-            _onFlightStatusChanged.Invoke(FlightStatus.PreLaunch);
-        }
-
-        private IInputs.FlightControlValues _craftInputs;
-        private FlightStatus _flightStatus;
-        public void Run(FlightStatus flightStatus, IInputs.FlightControlValues craftInputs)
+        /// <inheritdoc/>
+        public void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
         {
             _craftInputs = craftInputs;
             _flightStatus = flightStatus;
             RunFixedUpdate();
-            // SetVirtualPosition(new Vector3(rigidBody.transform.localPosition.x, rigidBody.transform.localPosition.z), hit.distance, rigidBody.transform.localRotation, rigidBody.velocity.y);
         }
 
+        /// <inheritdoc/>
+        public bool IsSimulator() => true;
+
+        /// <inheritdoc/>
         public void Takeoff()
         {
-            rigidBody.Move(rigidBody.transform.position + new Vector3(0, .8f, 0), transform.rotation);
-            //.localPosition = rigidBody.transform.localPosition;
+            rigidBody.Move(rigidBody.transform.position + new Vector3(0, 0.8f, 0), transform.rotation);
             rigidBody.transform.position = _quadToControl.GetGameObject().transform.position;
             rigidBody.useGravity = true;
             rigidBody.velocity = Vector3.zero;
             rigidBody.angularVelocity = Vector3.zero;
 
-            _onFlightStatusChanged.Invoke(FlightStatus.Launching);
-            _onFlightStatusChanged.Invoke(FlightStatus.Flying);
+            _onFlightStatusChanged?.Invoke(FlightStatus.Launching);
+            _onFlightStatusChanged?.Invoke(FlightStatus.Flying);
         }
 
+        /// <inheritdoc/>
+        public void Land()
+        {
+            rigidBody.transform.position = _quadToControl.GetGameObject().transform.position;
+            _onFlightStatusChanged?.Invoke(FlightStatus.Landing);
+            _onFlightStatusChanged?.Invoke(FlightStatus.PreLaunch);
+        }
+
+        /// <summary>
+        /// Physics simulation that applies forces and torque to emulate flight behavior.
+        /// </summary>
+        private void RunFixedUpdate()
+        {
+            if (_flightStatus == FlightStatus.PreLaunch) return;
+
+            rigidBody.AddForce(rigidBody.transform.up * 9.81f);
+
+            bool receivingInput = false;
+
+            rigidBody.AddForce(rigidBody.transform.forward * _craftInputs.pitch);
+            receivingInput |= Mathf.Abs(_craftInputs.pitch) > 0;
+
+            rigidBody.AddForce(rigidBody.transform.up * _craftInputs.throttle);
+            receivingInput |= Mathf.Abs(_craftInputs.throttle) > 0;
+
+            rigidBody.AddForce(rigidBody.transform.right * _craftInputs.roll);
+            receivingInput |= Mathf.Abs(_craftInputs.roll) > 0;
+
+            rigidBody.AddTorque(rigidBody.transform.up * _craftInputs.yaw);
+            receivingInput |= Mathf.Abs(_craftInputs.yaw) > 0;
+
+            if (receivingInput && rigidBody.drag != inputDrag)
+            {
+                rigidBody.drag = inputDrag;
+                rigidBody.angularDrag = inputDrag;
+            }
+            else if (!receivingInput && rigidBody.drag != drag)
+            {
+                rigidBody.drag = drag;
+                rigidBody.angularDrag = drag * 0.9f;
+            }
+        }
+
+        /// <inheritdoc/>
         public GameObject GetGameObject()
         {
-            throw new NotImplementedException();
+            if (this == null) return null;
+            return gameObject;
         }
 
+        /// <inheritdoc/>
         public Component GetComponent()
         {
-            throw new NotImplementedException();
+            if (this == null) return null;
+            return this;
         }
     }
-
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace  FlightControllers.Quadcopters
 {
-    public class PilotInputs : MonoBehaviour, IInputs
+    public class PilotInputs : MonoBehaviour, IInputSource
     {
         public enum InputType { Thrustmaster16000, Keyboard, Rift, ThrustmasterThrottle }
         public InputType inputType = InputType.Keyboard;
@@ -16,9 +16,9 @@ namespace  FlightControllers.Quadcopters
         public Action toggleAutoPilot;
 
         private int _lastInputFrame = 0;
-        private IInputs.FlightControlValues frameValues;
+        private IInputSource.FlightControlValues frameValues;
 
-        public IInputs.FlightControlValues GetInputValues()
+        public IInputSource.FlightControlValues GetInputValues()
         {
             return CheckFlightInputs();
         }
@@ -30,7 +30,7 @@ namespace  FlightControllers.Quadcopters
         /// Override to add new input methods
         /// </remarks>
         /// <returns></returns>
-        protected virtual IInputs.FlightControlValues CheckFlightInputs()
+        protected virtual IInputSource.FlightControlValues CheckFlightInputs()
         {
            if(_lastInputFrame != Time.frameCount)
             {
@@ -91,6 +91,11 @@ namespace  FlightControllers.Quadcopters
                 }
             }
             return frameValues;
+        }
+
+        public void Abort()
+        {
+            throw new NotImplementedException();
         }
     }
 }

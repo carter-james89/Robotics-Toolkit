@@ -84,19 +84,19 @@ namespace  FlightControllers.Quadcopters
         public Vector3 targetOffset;
 
         /// <summary>
-        /// Calculate the <see cref="IInputs.FlightControlValues"/> needed to make <see cref="_quadToControl"/> match this Objects transform.position
+        /// Calculate the <see cref="IInputSource.FlightControlValues"/> needed to make <see cref="_quadToControl"/> match this Objects transform.position
         /// Values are calculated in global space, so they are converted via <see cref="IQuadcopter.ConvertToHeadlessInputs(PilotInputs.FlightControlValues)"/> before being returned
         /// </summary>
         /// <param name="deltaTime">The timespan since Run was called last, required for <see cref="PidController"/></param>
         /// <returns>The appropriate Yaw,Pitch,Roll, to achieve the target, in Headless space in regards to <see cref="_quadToControl"/></returns>
-        public override IInputs.FlightControlValues Run()
+        public override IInputSource.FlightControlValues Run()
         {
             _timeSinceLastUpdate = Time.time - prevDeltaTime;
             prevDeltaTime = Time.time;
             var deltaTime1 = (int)(_timeSinceLastUpdate * 1000);
             var deltaTime = new System.TimeSpan(0, 0, 0, 0, (deltaTime1));
 
-            IInputs.FlightControlValues returnValues = new IInputs.FlightControlValues();
+            IInputSource.FlightControlValues returnValues = new IInputSource.FlightControlValues();
 
             targetOffset = quadToControl.GetGameObject().transform.position - transform.position;
          

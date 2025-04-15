@@ -143,7 +143,7 @@ namespace FlightControllers.Quadcopters
         /// Values are calculated in global space, so they are converted via <see cref="IQuadcopter.ConvertToHeadlessInputs(PilotInputs.FlightControlValues)"/> before being returned
         /// </summary>
         /// <returns>The appropriate Yaw,Pitch,Roll, to achieve the target, in Headless space in regards to <see cref="_quadToControl"/></returns>
-        public override IInputs.FlightControlValues Run()
+        public override IInputSource.FlightControlValues Run()
         {        
             if (currentWaypoint)
             {              
@@ -173,7 +173,7 @@ namespace FlightControllers.Quadcopters
                     (quadToControl as Quadcopter).ResetKnownOffset();
                     if (currentMission.IsFinalWaypoint(currentWaypoint))
                     {
-                        (quadToControl as Quadcopter).DestroySensorPoints();
+                      //  (quadToControl as Quadcopter).DestroySensorPoints();
                     }
                     atWaypoint = true;
                     onWaypointAchieved?.Invoke(currentWaypoint);

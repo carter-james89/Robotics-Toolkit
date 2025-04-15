@@ -11,7 +11,7 @@ namespace FlightControllers.Quadcopters
         //private IAutoPilot _autoPilot;
         //private IQuadcopter _quadcopterToControl;
 
-        private IInputs.FlightControlValues _flightControlValues;
+        private IInputSource.FlightControlValues _flightControlValues;
 
         private bool _firstFlight = true;
 
@@ -47,8 +47,8 @@ namespace FlightControllers.Quadcopters
                 Debug.Log("Initialize ML Agent");
                 //_autoPilot = autoPilot;
                 //_quadcopterToControl = _autoPilot.GetQuadcopterToControl();
-                _flightControlValues = new IInputs.FlightControlValues();
-                _quadcopterToControl.Initialize(_quadcopterToControl.gameObject.GetComponent<IFlightController>(), GetComponent<PilotInputs>().GetInputValues);
+                _flightControlValues = new IInputSource.FlightControlValues();
+                _quadcopterToControl.Initialize(_quadcopterToControl.gameObject.GetComponent<IFlightController>(), GetComponent<PilotInputs>());
                 _autoPilot.Initialize(_quadcopterToControl);
                 _quadcopterToControl.onTransformChanged += OnQuadcopterPositioned;
                 _quadcopterInitialized = true;
@@ -61,7 +61,7 @@ namespace FlightControllers.Quadcopters
             CheckForErrors(out dist);
             CalculateRewards(dist);
         }
-        public IInputs.FlightControlValues GetFlightControlValues(IAutoPilot autoPilot)
+        public IInputSource.FlightControlValues GetFlightControlValues(IAutoPilot autoPilot)
         {
             // Debug.Log("get flight control values");
             RequestDecision();

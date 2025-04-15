@@ -64,7 +64,7 @@ namespace FlightControllers.Quadcopters
         }
 
         private float _yawHoldHeading;
-        public IMotorThrustCalculator.MotorThrustValues Run(Vector3 currentPos, Vector3 currentEuler, IInputs.FlightControlValues inputs)
+        public IMotorThrustCalculator.MotorThrustValues Run(Vector3 currentPos, Vector3 currentEuler, IInputSource.FlightControlValues inputs)
         {
             _timeSinceLastUpdate = Time.time - prevDeltaTime;
             prevDeltaTime = Time.time;
@@ -192,7 +192,7 @@ namespace FlightControllers.Quadcopters
             return float.IsNaN(value);
         }
 
-        private Vector3 calculateDesiredAngle(IInputs.FlightControlValues inputs)
+        private Vector3 calculateDesiredAngle(IInputSource.FlightControlValues inputs)
         {
             float pitchAngle = 0;
             if (inputs.pitch > 0)

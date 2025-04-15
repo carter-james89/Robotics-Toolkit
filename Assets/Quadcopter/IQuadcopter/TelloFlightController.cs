@@ -206,7 +206,7 @@ namespace FlightControllers.Quadcopters
             VallidateTrackingInfo(new Vector3(posX, posY, posZ));
         }
 
-        public void Run(FlightStatus flightStatus, IInputs.FlightControlValues craftInputs)
+        public void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
         {
             //Debug.Log(Time.frameCount);
             //Debug.Log("Tello State " + Tello.state);

@@ -68,7 +68,7 @@ namespace FlightControllers.Quadcopters
                     break;
             }
 
-            activeQuad.Initialize(_flightController, _pilotInupts.GetInputValues);
+            activeQuad.Initialize(_flightController, _pilotInupts);
             _waypointPilot.Initialize(activeQuad);
 
         }

@@ -15,7 +15,7 @@ namespace FlightControllers.Quadcopters
         public void SetAltitudeHold(float newHoldHeight);
 
         public void Initialize(float currentHeading);
-        public MotorThrustValues Run(Vector3 currentPos, Vector3 currentEuler, IInputs.FlightControlValues inputs);
+        public MotorThrustValues Run(Vector3 currentPos, Vector3 currentEuler, IInputSource.FlightControlValues inputs);
     }
 
     public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
@@ -121,7 +121,7 @@ namespace FlightControllers.Quadcopters
         }
 
 
-        public void Run(FlightStatus flightStatus, IInputs.FlightControlValues craftInputs)
+        public void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
         {
             if (flightStatus == FlightStatus.Launching)
             {

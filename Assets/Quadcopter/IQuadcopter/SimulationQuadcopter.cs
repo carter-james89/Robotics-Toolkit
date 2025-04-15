@@ -31,7 +31,7 @@ namespace FlightControllers.Quadcopters
 
 
 
-        //public override void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
+        //public override void Initialize(Func<IInputSource.FlightControlValues> defaultInputSource)
         //{
         //    base.Initialize(defaultInputSource);
 

@@ -143,7 +143,7 @@ namespace FlightControllers.Quadcopters
             return false;
         }
 
-        public void Run(FlightStatus flightStatus, IInputs.FlightControlValues desiredInputs)
+        public void Run(FlightStatus flightStatus, IInputSource.FlightControlValues desiredInputs)
         {
             if (Time.frameCount > 500)
             {

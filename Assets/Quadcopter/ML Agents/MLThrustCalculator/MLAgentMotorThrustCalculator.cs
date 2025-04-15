@@ -86,7 +86,7 @@ namespace FlightControllers.Quadcopters
             _atTargetSeconds = 0;
         }
         IMotorThrustCalculator.MotorThrustValues _trainerValues;
-        public IMotorThrustCalculator.MotorThrustValues Run(Vector3 currentPos, Vector3 currentEuler, IInputs.FlightControlValues inputs)
+        public IMotorThrustCalculator.MotorThrustValues Run(Vector3 currentPos, Vector3 currentEuler, IInputSource.FlightControlValues inputs)
         {
             if (_thrustCalculatorTrainer != null)
             {

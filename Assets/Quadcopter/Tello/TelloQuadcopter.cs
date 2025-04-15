@@ -63,7 +63,7 @@ namespace  FlightControllers.Quadcopters
         /// </summary>
         /// <param name="pilotInputs">Where to find the inputs from the pilot</param>
         /// <param name="autoPilot">The autopilot module used, activated via <see cref="ActivateAutoPilot"/></param>
-        //public override void Initialize(Func<IInputs.FlightControlValues> defaultInputSource)
+        //public override void Initialize(Func<IInputSource.FlightControlValues> defaultInputSource)
         //{
         //    base.Initialize(defaultInputSource);
      
