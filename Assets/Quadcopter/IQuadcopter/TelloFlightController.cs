@@ -1,10 +1,11 @@
 using System;
 using TelloLib;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace FlightControllers.Quadcopters
 {
-    public class TelloFlightController : MonoBehaviour, IFlightController
+    public class TelloFlightController : QuadcopterFlightController
     {
         /// <summary>
         /// Video feed to display the camera from the Tello
@@ -14,7 +15,7 @@ namespace FlightControllers.Quadcopters
 
         private Vector3 prevRecordedPos;
 
-        /// <summary>
+     
         /// The offset of the tracking values when tracking first achieved after liftoff
         /// </summary>
         /// <remarks>
@@ -38,9 +39,6 @@ namespace FlightControllers.Quadcopters
         /// </remarks>
         private bool validTrackingFrame;
 
-        private QuadcopterData _quadcopterData = new QuadcopterData();
-
-        private bool _waitingForLaunchComplete = false;
         /// <summary>
         /// How many packkages have we recieved from the Tello
         /// </summary>
@@ -51,14 +49,8 @@ namespace FlightControllers.Quadcopters
         /// </summary>
         private int _lastTelloUpdateFrame;
 
-        private Action<FlightStatus> _onFlightStatusChanged;
-
-        private bool _isInitialized;
-        public bool IsInitialized()
-        {
-            return _isInitialized;
-        }
-        public bool IsReadyToFly()
+  
+        public override bool IsReadyToFly()
         {
             if (_isInitialized && Tello.connectionState == Tello.ConnectionState.Connected)
             {
@@ -67,16 +59,15 @@ namespace FlightControllers.Quadcopters
             return false;
         }
 
-        public Quaternion GetGyroRotation()
+        public override Quaternion GetGyroRotation()
         {
             throw new System.NotImplementedException();
         }
 
-        public void Initialize(IQuadcopter quadToControl, Action<FlightStatus> onFlightStatusChanged)
+        protected override void OnInitialized()
         {
+            base.OnInitialized();
             ConnectToTello();
-            _onFlightStatusChanged = onFlightStatusChanged;
-            _isInitialized = true;
         }
 
         /// <summary>
@@ -129,7 +120,7 @@ namespace FlightControllers.Quadcopters
             _lastTelloUpdateFrame = Time.frameCount;
         }
 
-        public QuadcopterData GetSensorData()
+        public override QuadcopterData GetSensorData()
         {
             SyncDataWithTello();
             return _quadcopterData;
@@ -170,6 +161,10 @@ namespace FlightControllers.Quadcopters
             roll = (float)eulerInfo[1];
             yaw = (float)eulerInfo[2];
 
+            yaw = yaw * (180 / Mathf.PI);
+            pitch = (pitch * (180 / Mathf.PI));
+            roll = roll * (180 / Mathf.PI);
+
             toEuler = new Vector3(pitch, roll, yaw);
 
             posUncertainty = state.posUncertainty;
@@ -206,15 +201,11 @@ namespace FlightControllers.Quadcopters
             VallidateTrackingInfo(new Vector3(posX, posY, posZ));
         }
 
-        public void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
+        public override void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
         {
-            //Debug.Log(Time.frameCount);
-            //Debug.Log("Tello State " + Tello.state);
-            //Debug.Log("Flight Status : " + flightStatus);
-            //Debug.Log("Flight Mode : " + flymode);
-            //Debug.Log("Flying " + flying);
             if (_lastTelloUpdateFrame != Time.frameCount)
             {
+               // Debug.Log(flightStatus);
                 switch (flightStatus)
                 {
                     case FlightStatus.Launching:
@@ -265,15 +256,14 @@ namespace FlightControllers.Quadcopters
         /// <summary>
         /// Launch the Tello via its auto liftoff feature
         /// </summary>
-        public bool AttemptTakeoff()
+        public override bool AttemptTakeoff()
         {
 
             if (connectionState == Tello.ConnectionState.Connected)
             {
                 Debug.Log("Tello takeoff");
                 Tello.takeOff();
-                _waitingForLaunchComplete = true;
-                _onFlightStatusChanged.Invoke(FlightStatus.Launching);
+                NotifyListeners(FlightControllerEventType.OnTakeOffBegin);
                 return true;
             }
             else
@@ -286,10 +276,10 @@ namespace FlightControllers.Quadcopters
         /// <summary>
         /// AttemptLand the Tello via its auto land feature
         /// </summary>
-        public bool AttemptLand()
+        public override bool AttemptLand()
         {
             Tello.land();
-            _onFlightStatusChanged.Invoke(FlightStatus.Landing);
+            NotifyListeners(FlightControllerEventType.OnLandBegin);
             return true;
         }
         /// <summary>
@@ -306,18 +296,21 @@ namespace FlightControllers.Quadcopters
         {
             var deltaRawPosition = _prevRawPosition - rawPosition;
             _prevRawPosition = rawPosition;
-            Debug.Log("Check for launch complete " + flymode);
-            if (flymode == 11 && _waitingForLaunchComplete)// || deltaRawPosition.magnitude > 1)
+
+           // if (flymode == 11 && _waitingForLaunchComplete)// || deltaRawPosition.magnitude > 1)
+                if(deltaRawPosition.magnitude > 1)
             {
                 Debug.Log("launch complete");
                 _trackingFoundOffset = new Vector3(posX, posY, posZ);
-                _waitingForLaunchComplete = false;
+                Debug.Log("Set Launch offset to : " + _trackingFoundOffset);
 
-                _onFlightStatusChanged.Invoke(FlightStatus.Flying);
+                NotifyListeners(FlightControllerEventType.OnTakeOffEnd);
             }
         }
 
-        public bool IsSimulator()
+   
+
+        public override bool IsSimulator()
         {
             return false;
         }
@@ -338,15 +331,8 @@ namespace FlightControllers.Quadcopters
 
         }
 
-        public GameObject GetGameObject()
-        {
-            throw new NotImplementedException();
-        }
 
-        public Component GetComponent()
-        {
-            throw new NotImplementedException();
-        }
+
 
         public Vector3 rawPosition;
         private Vector3 _prevRawPosition;

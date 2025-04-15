@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace FlightControllers.Quadcopters
@@ -67,6 +68,21 @@ namespace FlightControllers.Quadcopters
         }
 
         public Component GetComponent()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Initialize(IQuadcopter quadToControl)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SubscribeToEvents(IEventListener<FlightControllerEventData> listenerToSubscribe)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UnsubscribeFromEvents(IEventListener<FlightControllerEventData> listenerToUnsubscribe)
         {
             throw new NotImplementedException();
         }

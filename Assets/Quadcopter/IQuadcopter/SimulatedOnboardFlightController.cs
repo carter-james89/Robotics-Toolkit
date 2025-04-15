@@ -7,13 +7,12 @@ namespace FlightControllers.Quadcopters
     /// A simulated flight controller that emulates a quadcopter with an onboard flight controller that accepts throttle, yaw, pitch, and roll inputs.
     /// Simulates physical forces and sensor data for a quadcopter.
     /// </summary>
-    public class SimulatedOnboardFlightController : MonoBehaviour, IFlightController
+    public class SimulatedOnboardFlightController : QuadcopterFlightController
     {
-        private IQuadcopter _quadToControl;
+    
         private Rigidbody simulatedRB;
         private Action<FlightStatus> _onFlightStatusChanged;
-        private bool _isInitialized;
-
+      
         [SerializeField] private float inputDrag;
         [SerializeField] private float drag;
         public float timeSpeed = 1;
@@ -21,19 +20,18 @@ namespace FlightControllers.Quadcopters
         private IInputSource.FlightControlValues _craftInputs;
         private FlightStatus _flightStatus;
 
-        /// <inheritdoc/>
-        public bool IsInitialized() => _isInitialized;
+
 
         /// <inheritdoc/>
-        public bool IsReadyToFly() => true;
+        public override bool IsReadyToFly() => true;
 
         /// <inheritdoc/>
-        public void Initialize(IQuadcopter quadToControl, Action<FlightStatus> onFlightStatusChanged)
+        protected override void OnInitialized()
         {
-            _quadToControl = quadToControl;
+    
 
             var physicsSimulator = new GameObject("Simulation Physics Simulation");
-            physicsSimulator.transform.SetParent(_quadToControl.GetLocalTrackingSpace());
+            physicsSimulator.transform.SetParent(quadToControl.GetLocalTrackingSpace());
             physicsSimulator.transform.position = quadToControl.GetGameObject().transform.position;
             simulatedRB = physicsSimulator.AddComponent<Rigidbody>();
             var quadRB = quadToControl.GetGameObject().GetComponent<Rigidbody>();
@@ -49,20 +47,20 @@ namespace FlightControllers.Quadcopters
             boxCollider.size = quadToControl.GetGameObject().GetComponent<BoxCollider>().size;
             boxCollider.center = quadToControl.GetGameObject().GetComponent<BoxCollider>().center;
 
-            _onFlightStatusChanged = onFlightStatusChanged;
+     
 
             Time.timeScale = timeSpeed;
             _isInitialized = true;
         }
 
         /// <inheritdoc/>
-        public Quaternion GetGyroRotation()
+        public override Quaternion GetGyroRotation()
         {
             return simulatedRB.transform.rotation;
         }
 
         /// <inheritdoc/>
-        public QuadcopterData GetSensorData()
+        public override QuadcopterData GetSensorData()
         {
             return new QuadcopterData
             {
@@ -78,7 +76,7 @@ namespace FlightControllers.Quadcopters
         }
 
         /// <inheritdoc/>
-        public void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
+        public override void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
         {
             _craftInputs = craftInputs;
             _flightStatus = flightStatus;
@@ -86,13 +84,13 @@ namespace FlightControllers.Quadcopters
         }
 
         /// <inheritdoc/>
-        public bool IsSimulator() => true;
+        public override  bool IsSimulator() => true;
 
         /// <inheritdoc/>
-        public bool AttemptTakeoff()
+        public override bool AttemptTakeoff()
         {
             simulatedRB.Move(simulatedRB.transform.position + new Vector3(0, 0.8f, 0), transform.rotation);
-            simulatedRB.transform.position = _quadToControl.GetGameObject().transform.position;
+            simulatedRB.transform.position = quadToControl.GetGameObject().transform.position;
             simulatedRB.useGravity = true;
             simulatedRB.velocity = Vector3.zero;
             simulatedRB.angularVelocity = Vector3.zero;
@@ -103,9 +101,9 @@ namespace FlightControllers.Quadcopters
         }
 
         /// <inheritdoc/>
-        public bool AttemptLand()
+        public override bool AttemptLand()
         {
-            simulatedRB.transform.position = _quadToControl.GetGameObject().transform.position;
+            simulatedRB.transform.position = quadToControl.GetGameObject().transform.position;
             _onFlightStatusChanged?.Invoke(FlightStatus.Landing);
             _onFlightStatusChanged?.Invoke(FlightStatus.PreLaunch);
             return true;
@@ -152,18 +150,5 @@ namespace FlightControllers.Quadcopters
             //}
         }
 
-        /// <inheritdoc/>
-        public GameObject GetGameObject()
-        {
-            if (this == null) return null;
-            return gameObject;
-        }
-
-        /// <inheritdoc/>
-        public Component GetComponent()
-        {
-            if (this == null) return null;
-            return this;
-        }
     }
 }

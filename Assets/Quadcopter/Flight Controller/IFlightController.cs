@@ -1,13 +1,31 @@
 using System;
 using UnityEngine;
 using Toolkit.Utilities;
+using Toolkit.Utilities.Events;
 
 namespace FlightControllers.Quadcopters
 {
+    public enum FlightControllerEventType
+    {
+        OnTakeOffBegin,
+        OnTakeOffEnd,
+        OnLandBegin,
+        OnInitialized,
+    }
+    public class FlightControllerEventData : IEventData
+    {
+        public FlightControllerEventType EventType;
+        public IFlightController FlightController;
+        public FlightControllerEventData(FlightControllerEventType eventType, IFlightController flightController)
+        {
+            EventType = eventType;
+            FlightController = flightController;
+        }
+    }
     /// <summary>
     /// Interface that defines the contract for all flight controllers (simulated or real) used by a quadcopter.
     /// </summary>
-    public interface IFlightController : IMonobehaviorInterface
+    public interface IFlightController : IMonobehaviorInterface, IEventSource<FlightControllerEventData>
     {
         /// <summary>
         /// Check if the flight controller has been initialized.
@@ -23,8 +41,7 @@ namespace FlightControllers.Quadcopters
         /// Initialize the flight controller with a reference to the quadcopter and a status callback.
         /// </summary>
         /// <param name="quadToControl">The quadcopter this controller will manage.</param>
-        /// <param name="onFlightStatusChanged">Callback to notify the quadcopter of status changes.</param>
-        void Initialize(IQuadcopter quadToControl, Action<FlightStatus> onFlightStatusChanged);
+        void Initialize(IQuadcopter quadToControl);
 
         /// <summary>
         /// Get the current orientation of the craft from the gyroscope.

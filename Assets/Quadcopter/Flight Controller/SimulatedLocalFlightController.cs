@@ -18,11 +18,10 @@ namespace FlightControllers.Quadcopters
         public MotorThrustValues Run(Vector3 currentPos, Vector3 currentEuler, IInputSource.FlightControlValues inputs);
     }
 
-    public class SimulatedLocalFlightController : MonoBehaviour, IFlightController
+    public class SimulatedLocalFlightController : QuadcopterFlightController
     {
         private IMotorThrustCalculator _motorCalculator;
 
-        private IQuadcopter _quadToControl;
 
         [SerializeField]
         private Motor flMotor;
@@ -53,22 +52,18 @@ namespace FlightControllers.Quadcopters
 
         private Rigidbody _rigidBody;
 
-        private bool _isInitialized;
-        public bool IsInitialized()
-        {
-            return _isInitialized;
-        }
-        public bool IsReadyToFly()
+
+        public override bool IsReadyToFly()
         {
             return true;
         }
 
-        public Quaternion GetGyroRotation()
+        public override Quaternion GetGyroRotation()
         {
             throw new NotImplementedException();
         }
 
-        public QuadcopterData GetSensorData()
+        public override QuadcopterData GetSensorData()
         {
             _quadcopterData = new QuadcopterData();
             _quadcopterData.gyroPitch = transform.localEulerAngles.x;
@@ -93,24 +88,22 @@ namespace FlightControllers.Quadcopters
 
 
 
-        public void Initialize(IQuadcopter quadToControl, Action<FlightStatus> onFlightStatusChanged)
+        protected override void OnInitialized()
         {
             Debug.Log("Initialize Local Fligth Controller");
-            _quadToControl = quadToControl;
             _motorCalculator = GetComponent<IMotorThrustCalculator>();
             _rigidBody = quadToControl.GetGameObject().GetComponent<Rigidbody>();
             _rigidBody.useGravity = false;
             _groundStatationData = new GroundStationData();
-            _onFlightStatusChanged = onFlightStatusChanged;
             _isInitialized = true;
         }
 
-        public bool IsSimulator()
+        public override bool IsSimulator()
         {
             return true;
         }
 
-        public bool AttemptLand()
+        public override bool AttemptLand()
         {
             _groundStatationData = new GroundStationData();
             frMotor.SetThrottle(0);
@@ -122,7 +115,7 @@ namespace FlightControllers.Quadcopters
         }
 
 
-        public void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
+        public override void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
         {
             if (flightStatus == FlightStatus.Launching)
             {
@@ -156,26 +149,17 @@ namespace FlightControllers.Quadcopters
             }
         }
 
-        public bool AttemptTakeoff()
+        public override bool AttemptTakeoff()
         {
             // Debug.Log("Simulator TakeOff");
             //  _motorCalculator = new MotorThrustCalculator();
-            _motorCalculator.Initialize(_quadToControl.GetGameObject().transform.eulerAngles.y);
+            _motorCalculator.Initialize(quadToControl.GetGameObject().transform.eulerAngles.y);
             _motorCalculator.SetAltitudeHold(1);
             _onFlightStatusChanged.Invoke(FlightStatus.Launching);
             _rigidBody.useGravity = true;
             return true;
         }
 
-        public GameObject GetGameObject()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Component GetComponent()
-        {
-            throw new NotImplementedException();
-        }
     }
 
 }
