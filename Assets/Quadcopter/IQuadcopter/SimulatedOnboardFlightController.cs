@@ -97,6 +97,8 @@ namespace FlightControllers.Quadcopters
 
             _onFlightStatusChanged?.Invoke(FlightStatus.Launching);
             _onFlightStatusChanged?.Invoke(FlightStatus.Flying);
+
+            NotifyListeners(FlightControllerEventType.OnTakeOffEnd);    
             return true;
         }
 
