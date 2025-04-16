@@ -38,7 +38,8 @@ namespace FlightControllers.Quadcopters
         /// </summary>
         [SerializeField]
         public TranslationStyle translationStyle = TranslationStyle.Linear;
-
+        // Add this field near the top of the class
+        private float _atWaypointDuration = 0f;
         /// <summary>
         /// <see cref="PIDProfile"/> to be used in <see cref="TranslationStyle.Linear"/>
         /// </summary>
@@ -166,17 +167,38 @@ namespace FlightControllers.Quadcopters
                         break;
                 }
 
-                var distToFinalTarget = Vector3.Distance(quadToControl.GetGameObject().transform.position, currentWaypoint.transform.position);
-                if (distToFinalTarget < _achieveTargetDist && !atWaypoint)
+                //var distToFinalTarget = Vector3.Distance(quadToControl.GetGameObject().transform.position, currentWaypoint.transform.position);
+                //if (distToFinalTarget < _achieveTargetDist && !atWaypoint)
+                //{
+                //   // (quadToControl as Quadcopter).ResetOffset();
+                //  //  (quadToControl as Quadcopter).ResetKnownOffset();
+                //    if (currentMission.IsFinalWaypoint(currentWaypoint))
+                //    {
+                //      //  (quadToControl as Quadcopter).DestroySensorPoints();
+                //    }
+                //    atWaypoint = true;
+                //    onWaypointAchieved?.Invoke(currentWaypoint);
+                //}
+                float quadToWaypointDist = Vector3.Distance(quadToControl.GetGameObject().transform.position, currentWaypoint.transform.position);
+
+                if (quadToWaypointDist < _achieveTargetDist)
                 {
-                    (quadToControl as Quadcopter).ResetOffset();
-                    (quadToControl as Quadcopter).ResetKnownOffset();
-                    if (currentMission.IsFinalWaypoint(currentWaypoint))
+                    _atWaypointDuration += Time.deltaTime;
+
+                    if (_atWaypointDuration >= currentWaypoint.GetLoiterTime() && !atWaypoint)
                     {
-                      //  (quadToControl as Quadcopter).DestroySensorPoints();
+                        atWaypoint = true;
+                        onWaypointAchieved?.Invoke(currentWaypoint);
+
+                        if (currentMission?.IsFinalWaypoint(currentWaypoint) == true)
+                        {
+                            // Optionally handle final waypoint logic here
+                        }
                     }
-                    atWaypoint = true;
-                    onWaypointAchieved?.Invoke(currentWaypoint);
+                }
+                else
+                {
+                    _atWaypointDuration = 0f; // reset if it leaves the radius
                 }
             }
             return base.Run();

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using Toolkit.Utilities.Events;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace FlightControllers.Quadcopters
 {
@@ -12,6 +14,14 @@ namespace FlightControllers.Quadcopters
     /// </summary>
     public class Quadcopter : MonoBehaviour, IQuadcopter
     {
+        [SerializeField] private LineRenderer _posXRay;
+        [SerializeField] private LineRenderer _negXRay;
+        [SerializeField] private LineRenderer _posYRay;
+        [SerializeField] private LineRenderer _negYRay;
+        [SerializeField] private LineRenderer _posZRay;
+        [SerializeField] private LineRenderer _negZRay;
+        [SerializeField] private float _maxRayLength = 10f;
+        [SerializeField] private float maxRayLength = 10f;
         #region Events
 
         /// <summary>
@@ -38,6 +48,14 @@ namespace FlightControllers.Quadcopters
         [SerializeField] private bool _headLessMode = false;
         [SerializeField] private bool _selfInitialize = false;
 
+        [SerializeField] private Button _abortButton;
+        [SerializeField] private TextMeshProUGUI _currentInputSourceText;
+        [SerializeField] private TextMeshProUGUI _flightStatusText;
+        [SerializeField] private TextMeshProUGUI _yawText;
+        [SerializeField] private TextMeshProUGUI _pitchText;
+        [SerializeField] private TextMeshProUGUI _rollText;
+        [SerializeField] private TextMeshProUGUI _throttleText;
+
         #endregion
 
         #region State and Input
@@ -62,6 +80,13 @@ namespace FlightControllers.Quadcopters
             {
                 Initialize(GetComponent<IFlightController>(), GetComponent<IInputSource>());
             }
+            if(_abortButton != null)
+            {
+                _abortButton.onClick.AddListener(() =>
+                {
+                    AttemptLand();
+                });
+            }
         }
 
         public void Update()
@@ -70,11 +95,50 @@ namespace FlightControllers.Quadcopters
             {
                 ProcessInputs();
             }
+            else
+            {
+                return;
+            }
             if (m_initialized && !IsSimulator())
             {
                 RunQuadcopterUpdate();
             }
+            DrawAxisRays();
+            _currentInputSourceText.text = currentInputSource.ToString();
+            _flightStatusText.text = _flightStatus.ToString();
         }
+        private void DrawAxisRays()
+        {
+            Vector3 _origin = transform.position;
+
+            DrawRay(_posXRay, _origin, transform.right);
+            DrawRay(_negXRay, _origin, -transform.right);
+            DrawRay(_posYRay, _origin, transform.up);
+            DrawRay(_negYRay, _origin, -transform.up);
+            DrawRay(_posZRay, _origin, transform.forward);
+            DrawRay(_negZRay, _origin, -transform.forward);
+        }
+
+        private void DrawRay(LineRenderer _line, Vector3 _origin, Vector3 _direction)
+        {
+            if (_line == null) return;
+
+            RaycastHit _hit;
+            Vector3 _end;
+
+            if (Physics.Raycast(_origin, _direction, out _hit, _maxRayLength))
+            {
+                _end = _hit.point;
+            }
+            else
+            {
+                _end = _origin + _direction * _maxRayLength;
+            }
+
+            _line.SetPosition(0, _origin);
+            _line.SetPosition(1, _end);
+        }
+
 
         public void FixedUpdate()
         {
@@ -93,11 +157,16 @@ namespace FlightControllers.Quadcopters
         /// <inheritdoc/>
         public virtual void Initialize(IFlightController flightController, IInputSource defaultInputSource)
         {
+            if(flightController == null)
+            {
+                Debug.LogError("Flight controller is null : " + name);
+            }
             _flightStatus = FlightStatus.PreLaunch;
             _flightController = flightController;
             _flightController.SubscribeToEvents(this);
             _flightController.Initialize(this);
             this.defaultInputSource = defaultInputSource;
+            currentInputSource = defaultInputSource;
 
             if (_trailVisualizer)
             {
@@ -137,7 +206,7 @@ namespace FlightControllers.Quadcopters
         {
             if (inputValueSource == currentInputSource)
             {
-                currentInputSource = null;
+                currentInputSource = defaultInputSource;
             }
         }
 
@@ -181,7 +250,11 @@ namespace FlightControllers.Quadcopters
         /// <inheritdoc/>
         public virtual bool AttemptLand()
         {
-           
+           if(currentInputSource != defaultInputSource)
+            {
+                currentInputSource.Abort();
+                RemoveInputOverride(currentInputSource);
+            }
             if (!_flightController.AttemptLand())
             {
                 return false;
@@ -231,6 +304,7 @@ namespace FlightControllers.Quadcopters
                 SetVirtualPosition(quadData);
                 _flightController.Run(_flightStatus, currentInputs);
                 OnTransformUpdated();
+                
             }
         }
 
@@ -238,10 +312,12 @@ namespace FlightControllers.Quadcopters
         {
             var defaultInputs = defaultInputSource.GetInputValues();
 
+    
+
             if (defaultInputs.yaw != 0 || defaultInputs.pitch != 0 || defaultInputs.roll != 0 ||
                 defaultInputs.throttle != 0 || defaultInputs.takeOff || defaultInputs.land)
             {
-                if (currentInputSource != null)
+                if (currentInputSource != null && currentInputSource != defaultInputSource)
                 {
                     Debug.LogWarning("Inputs detected from Default Input Source, aborting override");
                     currentInputSource.Abort();
@@ -256,10 +332,15 @@ namespace FlightControllers.Quadcopters
             elvInput = currentInputs.throttle;
             yawInput = currentInputs.yaw;
 
-            if (currentInputs.takeOff && _flightStatus == FlightStatus.PreLaunch)
-                AttemptTakeoff();
-            else if (currentInputs.land)
-                AttemptLand();
+            _yawText.text =  currentInputs.yaw.ToString("F2");
+            _pitchText.text =  currentInputs.pitch.ToString("F2");
+            _rollText.text =  currentInputs.roll.ToString("F2");
+            _throttleText.text =  currentInputs.throttle.ToString("F2");
+
+            //if (currentInputs.takeOff && _flightStatus == FlightStatus.PreLaunch)
+            //    AttemptTakeoff();
+            //else if (currentInputs.land)
+            //    AttemptLand();
         }
 
         #endregion

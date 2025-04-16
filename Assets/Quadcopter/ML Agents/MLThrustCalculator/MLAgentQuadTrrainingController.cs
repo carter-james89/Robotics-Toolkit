@@ -39,7 +39,7 @@ namespace FlightControllers.Quadcopters
         private void Start()
         {
             _waypointPilot.Initialize(_quadcopter);
-            // _waypointPilot.ToggleAutoPilot();
+            // _telloWaypointPilot.ToggleAutoPilot();
         }
 
         private void OnEpisodeEnd()
@@ -49,7 +49,7 @@ namespace FlightControllers.Quadcopters
                 _waypointPilot.DeactivateAutoPilot();
             }
 
-            //_waypointPilot.EndMission();
+            //_telloWaypointPilot.EndMission();
             _angleText.text = _motorThrustCalculator.GetCurrentAngle().ToString();
             _quadcopter.AttemptLand();
         }

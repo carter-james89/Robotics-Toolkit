@@ -1,5 +1,6 @@
 using System;
 using TelloLib;
+using TMPro;
 using Toolkit.Utilities.Events;
 using UnityEngine;
 
@@ -88,7 +89,10 @@ namespace FlightControllers.Quadcopters
             }
             Tello.startConnecting();
         }
-
+        [SerializeField]private TextMeshProUGUI _connectionStatusText;
+        [SerializeField] private TextMeshProUGUI _batteryStatusText;
+        [SerializeField] private TextMeshProUGUI _speedText;
+        [SerializeField] private TextMeshProUGUI _posUncertText;
         /// <summary>
         /// Called from <see cref="Tello.onConnection"/> when the state of the connection with the Tello is changed
         /// </summary>
@@ -97,6 +101,7 @@ namespace FlightControllers.Quadcopters
             Debug.Log("Tello State Updated : " + newState);
             if (newState == Tello.ConnectionState.Connected)
             {
+                _connectionStatusText.text = newState.ToString();
                 // Debug.Log("Connected to Tello, please wait for camera feed " + Tello.state.);
                 Tello.setPicVidMode(1); // 0: picture, 1: video
                 Tello.setVideoBitRate((int)TelloVideoFeed.VideoBitRate.VideoBitRateAuto);
@@ -197,6 +202,11 @@ namespace FlightControllers.Quadcopters
             _quadcopterData.gyroPitch = pitch;
             _quadcopterData.gyroRoll = roll;
             _quadcopterData.gyroYaw = yaw;
+
+            _batteryStatusText.text = batteryPercent + "%";
+            _speedText.text = flyspeed.ToString();
+            _posUncertText.text = posUncertainty.ToString();
+
 
             VallidateTrackingInfo(new Vector3(posX, posY, posZ));
         }

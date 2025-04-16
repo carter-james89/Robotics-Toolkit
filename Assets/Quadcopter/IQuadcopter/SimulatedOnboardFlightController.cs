@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace FlightControllers.Quadcopters
 {
@@ -9,10 +10,10 @@ namespace FlightControllers.Quadcopters
     /// </summary>
     public class SimulatedOnboardFlightController : QuadcopterFlightController
     {
-    
+
         private Rigidbody simulatedRB;
         private Action<FlightStatus> _onFlightStatusChanged;
-      
+
         [SerializeField] private float inputDrag;
         [SerializeField] private float drag;
         public float timeSpeed = 1;
@@ -28,7 +29,7 @@ namespace FlightControllers.Quadcopters
         /// <inheritdoc/>
         protected override void OnInitialized()
         {
-    
+
 
             var physicsSimulator = new GameObject("Simulation Physics Simulation");
             physicsSimulator.transform.SetParent(quadToControl.GetLocalTrackingSpace());
@@ -47,7 +48,7 @@ namespace FlightControllers.Quadcopters
             boxCollider.size = quadToControl.GetGameObject().GetComponent<BoxCollider>().size;
             boxCollider.center = quadToControl.GetGameObject().GetComponent<BoxCollider>().center;
 
-     
+
 
             Time.timeScale = timeSpeed;
             _isInitialized = true;
@@ -84,7 +85,7 @@ namespace FlightControllers.Quadcopters
         }
 
         /// <inheritdoc/>
-        public override  bool IsSimulator() => true;
+        public override bool IsSimulator() => true;
 
         /// <inheritdoc/>
         public override bool AttemptTakeoff()
@@ -98,7 +99,7 @@ namespace FlightControllers.Quadcopters
             _onFlightStatusChanged?.Invoke(FlightStatus.Launching);
             _onFlightStatusChanged?.Invoke(FlightStatus.Flying);
 
-            NotifyListeners(FlightControllerEventType.OnTakeOffEnd);    
+            NotifyListeners(FlightControllerEventType.OnTakeOffEnd);
             return true;
         }
 
@@ -131,7 +132,7 @@ namespace FlightControllers.Quadcopters
             receivingInput |= Mathf.Abs(_craftInputs.throttle) > 0;
             float hoverThrottle = 0.5f;
             float effectiveThrottle = (_craftInputs.throttle - hoverThrottle) * .5f;
-           // rigidBody.AddForce(rigidBody.transform.up * effectiveThrottle);
+            // rigidBody.AddForce(rigidBody.transform.up * effectiveThrottle);
 
 
             simulatedRB.AddForce(simulatedRB.transform.right * _craftInputs.roll);
@@ -139,6 +140,13 @@ namespace FlightControllers.Quadcopters
 
             simulatedRB.AddTorque(simulatedRB.transform.up * _craftInputs.yaw);
             receivingInput |= Mathf.Abs(_craftInputs.yaw) > 0;
+
+            Vector3 windNoise = new Vector3(
+   Random.Range(-0.2f, 0.2f),
+    Random.Range(-0.1f, 0.1f),
+    Random.Range(-0.2f, 0.2f)
+);
+            rigidBody.AddForce(windNoise, ForceMode.Force);
 
             //if (receivingInput && simulatedRB.drag != inputDrag)
             //{
