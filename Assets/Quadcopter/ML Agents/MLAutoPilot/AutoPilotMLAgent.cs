@@ -1,4 +1,3 @@
-
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
@@ -8,81 +7,49 @@ namespace FlightControllers.Quadcopters
 {
     public class AutoPilotMLAgent : Agent
     {
-        //private IAutoPilot _autoPilot;
-        //private IQuadcopter _quadcopterToControl;
-
         private IInputSource.FlightControlValues _flightControlValues;
-
         private bool _firstFlight = true;
-
         private bool _flying = false;
-        [SerializeField]
-        private MeshRenderer _groundRenderer;
-
-        [SerializeField]
-        private MLAutoPilot _autoPilot;
-        [SerializeField]
-        private Quadcopter _quadcopterToControl;
-
         private bool _quadcopterInitialized = false;
+        private bool m_inRange = false;
+        private bool m_atTarget = false;
+
+        [SerializeField] private MeshRenderer _groundRenderer;
+        [SerializeField] private MLAutoPilot _autoPilot;
+        [SerializeField] private Quadcopter _quadcopterToControl;
 
         private int _achievedWaypoints = 0;
-
         private Vector3 _bounds = new Vector3(1, 1, 1);
-
-        [SerializeField]
-        private float m_episodeRewards;
-        private void Start()
-        {
-            InitializeQuadcopter();
-        }
-
         private float _atTargetSeconds;
         private float _outOfYawRangeSeconds;
+        [SerializeField] private float m_episodeRewards;
+
+        private void Start() => InitializeQuadcopter();
 
         public void InitializeQuadcopter()
         {
-            if (!_quadcopterInitialized)
-            {
-                Debug.Log("Initialize ML Agent");
-                //_autoPilot = autoPilot;
-                //_quadcopterToControl = _autoPilot.GetQuadcopterToControl();
-                _flightControlValues = new IInputSource.FlightControlValues();
-                _quadcopterToControl.Initialize(_quadcopterToControl.gameObject.GetComponent<IFlightController>(), GetComponent<PilotInputs>());
-                _autoPilot.Initialize(_quadcopterToControl);
-                _quadcopterToControl.onTransformChanged += OnQuadcopterPositioned;
-                _quadcopterInitialized = true;
-            }
+            if (_quadcopterInitialized) return;
 
+            Debug.Log("Initialize ML Agent");
+            _flightControlValues = new IInputSource.FlightControlValues();
+            _quadcopterToControl.Initialize(_quadcopterToControl.GetComponent<IFlightController>(), GetComponent<PilotInputs>());
+            _autoPilot.Initialize(_quadcopterToControl);
+            _quadcopterToControl.onTransformChanged += OnQuadcopterPositioned;
+            _quadcopterInitialized = true;
         }
+
         private void OnQuadcopterPositioned(Vector3 pos, Quaternion rot)
         {
             float dist = 0;
-            CheckForErrors(out dist);
             CalculateRewards(dist);
         }
+
         public IInputSource.FlightControlValues GetFlightControlValues(IAutoPilot autoPilot)
         {
-            // Debug.Log("get flight control values");
             RequestDecision();
-            return _flightControlValues;// _quadcopterToControl.ConvertToHeadlessInputs(_flightControlValues);
+            return _flightControlValues;
         }
-        public override void Heuristic(in ActionBuffers actionsOut)
-        {
-            //  Debug.Log("get heuristic");
 
-            var descreteActions = actionsOut.DiscreteActions;
-            // descreteActions[0] = ((int)Input.GetAxisRaw("Horizontal")) * 10; //FR
-            //descreteActions[1] = (int)Input.GetAxisRaw("Vertical") * 10; //fl
-            //descreteActions[2] = (int)Input.GetAxisRaw("Horizontal") * 10; //br
-            //  descreteActions[3] = (int)Input.GetAxisRaw("Vertical") * 10; //bl
-
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-
-            }
-
-        }
         public override void OnEpisodeBegin()
         {
             InitializeQuadcopter();
@@ -93,309 +60,133 @@ namespace FlightControllers.Quadcopters
                 _autoPilot.DeactivateAutoPilot();
                 _quadcopterToControl.AttemptLand();
 
-                _flightControlValues.throttle = 0;
-                _flightControlValues.pitch = 0;
-                _flightControlValues.yaw = 0;
-                _flightControlValues.roll = 0;
-
-                _quadcopterToControl.GetGameObject().transform.localPosition = new Vector3(0, 0, 0);
-                // _quadcopterToControl.GetGameObject().GetComponent<Rigidbody>().velocity = Vector3.zero;
-
+                _flightControlValues = new IInputSource.FlightControlValues();
+                _quadcopterToControl.transform.localPosition = Vector3.zero;
             }
+
             _firstFlight = false;
-            //if (!_endedEpisodeManually)
-            //{
-            //    _groundRenderer.material.color = Color.black;
-            //}
-            //_endedEpisodeManually = false;
-            // //Debug.Log("Episode begin ");
-            //OnEpisodeBeginEvent.Invoke();
-            // flying = false;
-            // _episodeSeconds = 0;
             _achievedWaypoints = 0;
             _atTargetSeconds = 0;
             _outOfYawRangeSeconds = 0;
-
             _flying = false;
             m_inRange = false;
 
-            //_flightControlValues.throttle = 0;
-            //_flightControlValues.pitch = 0;
-            //_flightControlValues.yaw = 0;
-            //_flightControlValues.roll = 0;
-
-            //_quadcopterToControl.GetGameObject().transform.localPosition = new Vector3(0, 0, 0);
-            //_quadcopterToControl.GetGameObject().GetComponent<Rigidbody>().velocity = Vector3.zero;
-
-            _quadcopterToControl.transform.localPosition = new Vector3(0, .5f, 0);
-
+            _quadcopterToControl.transform.localPosition = new Vector3(0, 0.5f, 0);
             _quadcopterToControl.AttemptTakeoff();
             _autoPilot.ActivateAutoPilot();
-
-            SetNewTarget(_autoPilot.GetGameObject().transform);
-
-
-            // _autoPilot.GetGameObject().transform.localPosition = new Vector3(0, 3, 0);
-
-            //_distReward = 0;
-            // _angleReward = 0;
-
-            //_onEpisodeBeginPosition = transform.localPosition;
+            SetNewTarget(_autoPilot.transform);
         }
-        private void EndTheEpisode(float reward)
-        {
-            ////Debug.Log("Angle Quit " + _currentAngle);
-            //  _endedEpisodeManually = true;
-            //  OnEpisodeEndEvent.Invoke();
-            AddReward(reward);
-            //_autoPilot.DeactivateAutoPilot();
-            //_quadcopterToControl.AttemptLand();
 
-            //_flightControlValues.throttle = 0;
-            //_flightControlValues.pitch = 0;
-            //_flightControlValues.yaw = 0;
-            //_flightControlValues.roll = 0;
+        public override void Heuristic(in ActionBuffers actionsOut) { }
 
-            //_quadcopterToControl.GetGameObject().transform.localPosition = new Vector3(0, 0, 0);
-            //_quadcopterToControl.GetGameObject().GetComponent<Rigidbody>().velocity = Vector3.zero;
-
-            // Debug.Log("end the episode");
-            EndEpisode();
-        }
-        private bool m_inRange;
         public override void CollectObservations(VectorSensor sensor)
         {
-            //Debug.Log("collect observations");
-            base.CollectObservations(sensor);
-            //Debug.Log("Collect observations");
+            Vector3 relativePos = _autoPilot.transform.InverseTransformPoint(_quadcopterToControl.transform.position);
+            sensor.AddObservation(Vector3.ClampMagnitude(relativePos, 1f));
 
-            // sensor.AddObservation(StepCount);
-            //sensor.AddObservation(Vector3.Distance(_autoPilot.GetGameObject().transform.position, _quadcopterToControl.GetGameObject().transform.position));
-            //sensor.AddObservation(transform.localPosition);
-            //  sensor.AddObservation(_autoPilot.GetGameObject().transform.localPosition - _quadcopterToControl.GetGameObject().transform.localPosition);
-            sensor.AddObservation(_autoPilot.GetGameObject().transform.InverseTransformPoint(_quadcopterToControl.GetGameObject().transform.position));
-            sensor.AddObservation(_quadcopterToControl.GetSensorData().VelocityVector.y);
-            //  sensor.AddObservation(rigidbody.angularVelocity);
-            //sensor.AddObservation(_targetTransform.localEulerAngles - transform.localEulerAngles);
-            sensor.AddObservation(_autoPilot.GetGameObject().transform.localEulerAngles.y - _quadcopterToControl.GetGameObject().transform.localEulerAngles.y);
-            //  sensor.AddObservation(_atTargetSeconds);
+            Vector3 vel = _quadcopterToControl.GetSensorData().VelocityVector;
+            sensor.AddObservation(Vector3.ClampMagnitude(vel / 10f, 1f).y);
 
+            float relativeYaw = Vector3.SignedAngle(_autoPilot.transform.forward, _quadcopterToControl.transform.forward, Vector3.up);
+            sensor.AddObservation(relativeYaw / 180f);
         }
+
         public override void OnActionReceived(ActionBuffers actions)
         {
-            // Debug.Log("on action recieved");
-            //_flightControlValues.pitch = ConvertInput(actions.DiscreteActions[0]) * .1f;
-            //_flightControlValues.yaw = ConvertInput(actions.DiscreteActions[1]) * .1f;
-            //_flightControlValues.roll = ConvertInput(actions.DiscreteActions[2]) * .1f;
-            //_flightControlValues.throttle = ConvertInput(actions.DiscreteActions[3]) * .1f;
-
-            _flightControlValues.yaw = Mathf.Clamp(actions.ContinuousActions[0], -1, 1);
+            _flightControlValues.yaw = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
 
             if (m_inRange)
             {
-                //_flightControlValues.yaw = 0;
-                _flightControlValues.throttle = Mathf.Clamp(actions.ContinuousActions[1], -1, 1);
-
-                //_flightControlValues.yaw = Mathf.Clamp(actions.ContinuousActions[1], -1, 1);
-
-                _flightControlValues.pitch = Mathf.Clamp(actions.ContinuousActions[2], -1, 1);
-
-                _flightControlValues.roll = Mathf.Clamp(actions.ContinuousActions[3], -1, 1);
+                _flightControlValues.throttle = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+                _flightControlValues.pitch = Mathf.Clamp(actions.ContinuousActions[2], -1f, 1f);
+                _flightControlValues.roll = Mathf.Clamp(actions.ContinuousActions[3], -1f, 1f);
             }
             else
             {
-
                 _flightControlValues.throttle = 0;
-
-                //_flightControlValues.yaw = Mathf.Clamp(actions.ContinuousActions[1], -1, 1);
-
                 _flightControlValues.pitch = 0;
-
                 _flightControlValues.roll = 0;
             }
-
-
-
-            //Debug.Log(actions.DiscreteActions[1]);
-
-            //CalculateRewards1();
-
-        }
-        private float ConvertInput(float input)
-        {
-            //if(input >= 10)
-            //{
-            return input - 10;
-            //}
-            //else
-            //{
-            //    return -(input-10);
-            //}
         }
 
         private void CalculateRewards(float dist)
         {
-            if (_quadcopterToControl.GetGameObject().transform.localPosition.y < .1f)
-            {
-                _flying = true;
-                // AddReward(-.1f);
-            }
-            //if(_flying && _quadcopterToControl.GetGameObject().transform.localPosition.y <= 0&& _flying)
-            //{
-            //    _groundRenderer.material.color = Color.blue;
-            //    // EndTheEpisode(-5);
-            //    AddReward(-1);
-            //    return;
-            //}
-            //if(StepCount > 10 && !_flying)
-            //{
-            //    _groundRenderer.material.color = Color.black;
-            //    AddReward(-1);
-            //    return;
-            //}
-            if (_flying)
-            {
-                // AddReward(.01f);// _quadcopterToControl.GetGameObject().transform.localPosition.y);
-                //AddReward(-dist);
-            }
-            // var forwardAngle = Vector3.Angle(_autoPilot.GetGameObject().transform.forward, _quadcopterToControl.GetGameObject().transform.forward);
+            float stepReward = 0f;
 
-            var forwardError = Mathf.Abs(_autoPilot.GetGameObject().transform.localEulerAngles.y - _quadcopterToControl.GetGameObject().transform.localEulerAngles.y);
+            Vector3 posAgent = _quadcopterToControl.transform.position;
+            Vector3 posTarget = _autoPilot.transform.position;
+            dist = Vector3.Distance(posTarget, posAgent);
+            float maxDistance = _bounds.magnitude;
+            float proximityReward = Mathf.Clamp01(1f - (dist / maxDistance));
+            float proximityPenalty = Mathf.Clamp01(dist / maxDistance);
 
-            if (forwardError < -180)
-                forwardError = 360 - System.Math.Abs(forwardError);
-            else if (forwardError > 180)
-                forwardError = -(360 - forwardError);
+            Vector3 forwardAgent = _quadcopterToControl.transform.forward;
+            Vector3 forwardTarget = _autoPilot.transform.forward;
+            float forwardError = Mathf.Abs(Vector3.SignedAngle(forwardTarget, forwardAgent, Vector3.up));
 
-            //Debug.Log(forwardError);
-            if (forwardError < 5)
-            {
-
-                //  AddReward(.1f);
-                m_inRange = true;
-                _outOfYawRangeSeconds = 0;
-            }
-            else
-            {
-                _outOfYawRangeSeconds += Time.fixedDeltaTime;
-
-                AddReward(-.1f);
-                m_inRange = false;
-            }
-
-            if (dist < .2 && forwardError < 10)
-            {
-                _groundRenderer.material.color = Color.green;
-                // Debug.Log("Frame : " + Time.frameCount + " : " + _atTargetSeconds);
-                _atTargetSeconds += Time.fixedDeltaTime;
-                //  AddReward(1 - dist);
-                //  AddReward(.1f);
-                //  Debug.Log("Getting reward");
-                AddReward(1 - (dist * 4));
-                if (_atTargetSeconds > 3)
-                {
-                    AddReward(1);
-                    _achievedWaypoints++;
-                    //  _groundRenderer.material.color = Color.green;
-                    if (_achievedWaypoints == 1)//_waypointGoal)
-                    {
-                        EndTheEpisode(0);
-                    }
-                    else
-                    {
-                        SetNewTarget(_autoPilot.transform);
-
-                    }
-                }
-                // // EndTheEpisode(1);
-            }
-            else
+            Vector3 quadLocal = _quadcopterToControl.transform.localPosition;
+            if (Mathf.Abs(quadLocal.x) > _bounds.x || Mathf.Abs(quadLocal.y) > _bounds.y || Mathf.Abs(quadLocal.z) > _bounds.z)
             {
                 _groundRenderer.material.color = Color.red;
-                _atTargetSeconds = 0;
+                EndTheEpisode(-5f);
+                return;
             }
 
-            if (dist < .3f && forwardError < 10)
+            if (forwardError < 5f)
             {
-                // AddReward(1);
+                m_inRange = true;
+                _outOfYawRangeSeconds = 0f;
+                _groundRenderer.material.color = Color.yellow;
+                stepReward += 0.01f;
+            }
+            else
+            {
+                m_inRange = false;
+                _outOfYawRangeSeconds += Time.fixedDeltaTime;
             }
 
+            if (dist < 0.03f && forwardError < 5f)
+            {
+                m_atTarget = true;
+                _groundRenderer.material.color = Color.green;
+                stepReward += proximityReward * 0.01f;
+            }
+            else
+            {
+                m_atTarget = false;
+                _atTargetSeconds = 0;
+                _groundRenderer.material.color = forwardError < 5f ? Color.yellow : Color.red;
+                stepReward -= proximityPenalty * 0.01f;
+            }
+
+            if (_quadcopterToControl.transform.localPosition.y > 0.2f)
+                _flying = true;
+
+            AddReward(stepReward);
             m_episodeRewards = GetCumulativeReward();
-            //Debug.Log(StepCount);
+
             if (StepCount == MaxStep)
             {
-                float exitReward = 0;
-                if (_achievedWaypoints == 0)
-                {
-                    // exitReward = -5;
-                }
                 _groundRenderer.material.color = Color.gray;
-                // EndTheEpisode(exitReward);
+                EndTheEpisode(m_atTarget ? 10f : -10f);
             }
         }
-        private void CheckForErrors(out float dist)
+
+        private void EndTheEpisode(float reward)
         {
-            //varangle = Vector3.Angle(Vector3.up, transform.up);
-            dist = Vector3.Distance(_autoPilot.GetGameObject().transform.position, _quadcopterToControl.GetGameObject().transform.position);
-
-            //if (StepCount > 50 && rigidbody.velocity.magnitude < .01f)
-            //{
-            //    ////Debug.Log("TimeOut ");
-            //    _groundRenderer.material.color = Color.green;
-            //    EndTheEpisode(-1);
-            //    return;
-            //}
-
-            //if (transform.localPosition.y > .1f)
-            //{
-            //    flying = true;
-            //}
-            //if (flying)
-            //{
-            //    if (transform.localPosition.y < .1f)
-            //    {
-            //        _groundRenderer.material.color = Color.blue;
-            //        EndTheEpisode(-5);
-            //    }
-            //}
-
-            //if (angle > _angleError)
-            //{
-            //    // //Debug.Log("flip out ");
-            //    _groundRenderer.material.color = Color.yellow;
-            //    EndTheEpisode(-5);
-            //}
-            var quadPosition = _quadcopterToControl.GetGameObject().transform.localPosition;
-            if ((Mathf.Abs(quadPosition.x) > _bounds.x) ||
-          (Mathf.Abs(quadPosition.y) > _bounds.y) ||
-          (Mathf.Abs(quadPosition.z) > _bounds.z))
-            {
-                _groundRenderer.material.color = Color.red;
-                EndTheEpisode(0);
-                // AddReward(-1);
-            }
-
+            AddReward(reward);
+            EndEpisode();
         }
-
-        private void Update()
-        {
-            //var forwardError = Mathf.Abs(_autoPilot.GetGameObject().transform.localEulerAngles.y - _quadcopterToControl.GetGameObject().transform.localEulerAngles.y);
-            //Debug.Log(forwardError);
-        }
-
-
 
         private void SetNewTarget(Transform transformToSet)
         {
-            var randomX = UnityEngine.Random.Range(-(_bounds.x - .5f), _bounds.x - .5f);
-            var randomy = UnityEngine.Random.Range(1, _bounds.y - .5f);
-            var randomZ = UnityEngine.Random.Range(-(_bounds.z - .5f), _bounds.z - .5f);
+            float x = Random.Range(-(_bounds.x - 0.5f), _bounds.x - 0.5f);
+            float y = Random.Range(1f, _bounds.y - 0.5f);
+            float z = Random.Range(-(_bounds.z - 0.5f), _bounds.z - 0.5f);
 
             _atTargetSeconds = 0;
-
-            transformToSet.localPosition = new Vector3(randomX, randomy, randomZ);
-            transformToSet.localEulerAngles += new Vector3(0, UnityEngine.Random.Range(-180, 180));
+            transformToSet.localPosition = new Vector3(x, y, z);
+            transformToSet.localEulerAngles += new Vector3(0, Random.Range(-180, 180));
         }
     }
-
 }
