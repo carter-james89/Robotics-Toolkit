@@ -3,6 +3,7 @@ using TelloLib;
 using TMPro;
 using Toolkit.Utilities.Events;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace FlightControllers.Quadcopters
 {
@@ -16,7 +17,10 @@ namespace FlightControllers.Quadcopters
 
         private Vector3 prevRecordedPos;
 
-     
+        [SerializeField] private Transform _positionOffsset;
+        private Vector3 _manualOffset = Vector3.zero;
+
+
         /// The offset of the tracking values when tracking first achieved after liftoff
         /// </summary>
         /// <remarks>
@@ -50,7 +54,7 @@ namespace FlightControllers.Quadcopters
         /// </summary>
         private int _lastTelloUpdateFrame;
 
-  
+
         public override bool IsReadyToFly()
         {
             if (_isInitialized && Tello.connectionState == Tello.ConnectionState.Connected)
@@ -89,7 +93,7 @@ namespace FlightControllers.Quadcopters
             }
             Tello.startConnecting();
         }
-        [SerializeField]private TextMeshProUGUI _connectionStatusText;
+        [SerializeField] private TextMeshProUGUI _connectionStatusText;
         [SerializeField] private TextMeshProUGUI _batteryStatusText;
         [SerializeField] private TextMeshProUGUI _speedText;
         [SerializeField] private TextMeshProUGUI _posUncertText;
@@ -125,6 +129,20 @@ namespace FlightControllers.Quadcopters
             _lastTelloUpdateFrame = Time.frameCount;
         }
 
+        public void ManuallyCallibrate()
+        {
+            //var rightHandDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+            //// If the device is valid, check for the primary button press
+            //if (rightHandDevice.isValid)
+            //{
+            //    bool primaryButtonPressed;
+            //    if (rightHandDevice.TryGetFeatureValue(CommonUsages.secondaryButton, out primaryButtonPressed) && primaryButtonPressed)
+            //    {
+            _manualOffset = transform.position - _positionOffsset.position;
+            //    }
+            //}
+        }
+
         public override QuadcopterData GetSensorData()
         {
             SyncDataWithTello();
@@ -144,6 +162,10 @@ namespace FlightControllers.Quadcopters
             posX = Tello.state.posY - _trackingFoundOffset.x;
             posY = -Tello.state.posZ - _trackingFoundOffset.y;
             posZ = Tello.state.posX - _trackingFoundOffset.z;
+            //posX = Tello.state.posY - _manualOffset.x;
+            //posY = -Tello.state.posZ - _manualOffset.y;
+            //posZ = Tello.state.posX - _manualOffset.z;
+
 
             _quadcopterData.posX = posX;
             _quadcopterData.posY = posY;
@@ -215,7 +237,7 @@ namespace FlightControllers.Quadcopters
         {
             if (_lastTelloUpdateFrame != Time.frameCount)
             {
-               // Debug.Log(flightStatus);
+                // Debug.Log(flightStatus);
                 switch (flightStatus)
                 {
                     case FlightStatus.Launching:
@@ -307,18 +329,24 @@ namespace FlightControllers.Quadcopters
             var deltaRawPosition = _prevRawPosition - rawPosition;
             _prevRawPosition = rawPosition;
 
-           // if (flymode == 11 && _waitingForLaunchComplete)// || deltaRawPosition.magnitude > 1)
-                if(deltaRawPosition.magnitude > 1)
+            // if (flymode == 11)// || deltaRawPosition.magnitude > 1)
+            if (flymode == 6 && flying)
             {
-                Debug.Log("launch complete");
+                var state = Tello.state;
+                posX = Tello.state.posY;
+                posY = -Tello.state.posZ;
+                posZ = Tello.state.posX;
+
                 _trackingFoundOffset = new Vector3(posX, posY, posZ);
+                Debug.Log("launch complete");
+                // _trackingFoundOffset = new Vector3(posX, posY, posZ);
                 Debug.Log("Set Launch offset to : " + _trackingFoundOffset);
 
                 NotifyListeners(FlightControllerEventType.OnTakeOffEnd);
             }
         }
 
-   
+
 
         public override bool IsSimulator()
         {

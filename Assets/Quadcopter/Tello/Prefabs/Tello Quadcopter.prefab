@@ -50,6 +50,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f40e33bc063923b418434be1df54b465, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _posXRay: {fileID: 0}
+  _negXRay: {fileID: 0}
+  _posYRay: {fileID: 0}
+  _negYRay: {fileID: 0}
+  _posZRay: {fileID: 0}
+  _negZRay: {fileID: 0}
+  _maxRayLength: 10
+  maxRayLength: 10
   heightOffset: 0
   assumedHeightOffset: 0
   elvInput: 0
@@ -59,6 +67,13 @@ MonoBehaviour:
   _flightStatus: 0
   _headLessMode: 0
   _selfInitialize: 0
+  _abortButton: {fileID: 0}
+  _currentInputSourceText: {fileID: 0}
+  _flightStatusText: {fileID: 0}
+  _yawText: {fileID: 0}
+  _pitchText: {fileID: 0}
+  _rollText: {fileID: 0}
+  _throttleText: {fileID: 0}
   deltaHeight: 0
 --- !u!120 &1295233342847293546
 LineRenderer:
@@ -243,8 +258,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _videoFeed: {fileID: 0}
+  _positionOffsset: {fileID: 0}
   connectionState: 0
   _telloFrameCount: 0
+  _connectionStatusText: {fileID: 0}
+  _batteryStatusText: {fileID: 0}
+  _speedText: {fileID: 0}
+  _posUncertText: {fileID: 0}
   rawPosition: {x: 0, y: 0, z: 0}
   flying: 0
   hover: 0
@@ -299,15 +319,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ffa2eb396e70a7246afb2ba79066e8b3, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.40515
+      value: 0.24221082
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ffa2eb396e70a7246afb2ba79066e8b3, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.40514994
+      value: 0.24221079
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ffa2eb396e70a7246afb2ba79066e8b3, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.40515
+      value: 0.24221082
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: ffa2eb396e70a7246afb2ba79066e8b3, type: 3}
       propertyPath: m_LocalPosition.x

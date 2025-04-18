@@ -23,6 +23,7 @@ namespace RoboticsToolkit.Robotics
         private IRoboticController _myController;
         public IRoboticController GetController()
         {
+            Debug.Log("Get Robotot from environment : " + name);
             if (_myController == null)
             {
                 _myController = GetComponentInChildren<IRoboticController>();

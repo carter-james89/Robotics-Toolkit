@@ -11,7 +11,7 @@ public class FlightControllerUI : MonoBehaviour
     [SerializeField] private Button _beginWaypointMisson;
 
     // [SerializeField] private QuadcopterGroundControl _quadcopterGroundControl;
-    [SerializeField] private Transform _lidarScan;
+    [SerializeField] private MeshRenderer _lidarScan;
 
     [SerializeField] private Text _launchText;
     [SerializeField] private Text _autopilotText;
@@ -67,7 +67,7 @@ public class FlightControllerUI : MonoBehaviour
 
     private void OnLidarModelToggleChanged(bool arg0)
     {
-        _lidarScan.gameObject.SetActive(arg0);
+        _lidarScan.enabled =  (arg0);
     }
 
     private void OnAutopilotToggleChanged(bool arg0)

@@ -157,7 +157,19 @@ namespace FlightControllers.Quadcopters
                         transform.position = Vector3.Lerp(_originalQuadPos, currentWaypoint.transform.position, fractTraveled + (Time.deltaTime * _linearSpeed));
                         break;
                     case TranslationStyle.NonLinear:
-                        transform.position = Vector3.Lerp(transform.position, currentWaypoint.transform.position, Time.deltaTime * _nonLinearSpeed);
+                        //  transform.position = Vector3.Lerp(transform.position, currentWaypoint.transform.position, Time.deltaTime * _nonLinearSpeed);
+                        float distToTarget = Vector3.Distance(transform.position, currentWaypoint.transform.position);
+
+                        // Full speed until 0.5m away, then begin to slow
+                        float slowdownStartDistance = 0.5f;
+                        float slowdownFactor = Mathf.Clamp01(distToTarget / slowdownStartDistance); // 1 when far, 0 when very close
+
+                        float adjustedSpeed = _nonLinearSpeed * slowdownFactor;
+                        transform.position = Vector3.MoveTowards(
+                            transform.position,
+                            currentWaypoint.transform.position,
+                            adjustedSpeed * Time.deltaTime
+                        );
                         break;
                     case TranslationStyle.Instant:
                         transform.position = currentWaypoint.transform.position;

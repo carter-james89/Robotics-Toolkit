@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Toolkit.Utilities;
+using System.Linq;
 
 namespace Toolkit.Utilities.Events
 {
@@ -90,20 +91,31 @@ namespace Toolkit.Utilities.Events
 
         /// <summary>
         /// Dispatches the event to all subscribed listeners.
+        /// Removes any null listeners before dispatch.
         /// </summary>
         /// <param name="eventData">The event data to send</param>
         public void RaiseEvent(T eventData)
         {
-            foreach (var listener in _subscribedListeners)
+            int initialCount = _subscribedListeners.Count;
+            _subscribedListeners.RemoveAll(listener => listener == null);
+            int removedCount = initialCount - _subscribedListeners.Count;
+
+            if (removedCount > 0)
             {
-                try
-                {
+                Debug.LogWarning($"[{_debugString}] Removed {removedCount} null listener(s) before dispatching event.");
+            }
+
+            foreach (var listener in _subscribedListeners.ToList())
+            {
+                //try
+                //{ 
+                    Debug.Log(listener.GetGameObject().name);   
                     listener.OnEventOccured(eventData);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"[{_debugString}] Error while dispatching event to listener: {e.Message}");
-                }
+                //}
+                //catch (Exception e)
+                //{
+                //    Debug.LogError($"[{_debugString}] Error while dispatching event to listener: {e.Message} : " + listener.GetGameObject().name);
+                //}
             }
         }
 

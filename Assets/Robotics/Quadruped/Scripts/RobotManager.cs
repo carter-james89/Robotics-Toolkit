@@ -218,17 +218,17 @@ namespace RoboticsToolkit.Robotics
 
         public void OnEventOccured(QuadrupedRoboticControllerEventData eventData)
         {
-            throw new System.NotImplementedException();
+         
         }
 
         public GameObject GetGameObject()
         {
-            throw new System.NotImplementedException();
+            return this == null ? null : gameObject;
         }
 
         public Component GetComponent()
         {
-            throw new System.NotImplementedException();
+            return this;
         }
 
      
