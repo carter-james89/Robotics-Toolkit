@@ -70,7 +70,7 @@ namespace FlightControllers.Quadcopters
     /// Interface for all quadcopters, real or simulated.
     /// Provides control, telemetry, and event handling functionality.
     /// </summary>
-    public interface IQuadcopter : IMonobehaviorInterface, IEventSource<QuadcopterEventData>
+    public interface IQuadcopter : IMonobehaviorInterface, IEventSource<QuadcopterEventData>, IEventListener<FlightControllerEventData>
     {
         /// <summary>
         /// Initialize autopilot and set dependencies.

@@ -95,7 +95,8 @@ namespace FlightControllers.Quadcopters
         {
             _flightStatus = FlightStatus.PreLaunch;
             _flightController = flightController;
-            _flightController.Initialize(this, OnFlightStatusChanged);
+            _flightController.SubscribeToEvents(this);
+            _flightController.Initialize(this);
             this.defaultInputSource = defaultInputSource;
 
             if (_trailVisualizer)
@@ -173,7 +174,6 @@ namespace FlightControllers.Quadcopters
             SetVirtualPosition(quadData);
             ResetKnownOffset();
             SetHomePoint(transform.localPosition);
-            _flightStatus = FlightStatus.Flying;
             NotifyEventListeners(QuadcopterEventType.TakeOff);
             return true;
         }
@@ -186,7 +186,7 @@ namespace FlightControllers.Quadcopters
             {
                 return false;
             }
-            _flightStatus = FlightStatus.PreLaunch;
+         
             return true;
         }
 
@@ -271,11 +271,6 @@ namespace FlightControllers.Quadcopters
             onTransformChanged?.Invoke(transform.localPosition, transform.localRotation);
         }
 
-        private void OnFlightStatusChanged(FlightStatus newStatus)
-        {
-            _flightStatus = newStatus;
-        }
-
         public void SetVirtualPosition(QuadcopterData quadData)
         {
             deltaHeight = _prevHeight - quadData.height;
@@ -287,6 +282,25 @@ namespace FlightControllers.Quadcopters
         public void ResetOffset() => assumedHeightOffset = 0;
 
         public void ResetKnownOffset() => heightOffset = 0;
+
+        public void OnEventOccured(FlightControllerEventData eventData)
+        {
+            Debug.Log("Got event update from Fligth controller : " + eventData.EventType);
+            switch (eventData.EventType)
+            {
+                case FlightControllerEventType.OnTakeOffBegin:
+                    _flightStatus = FlightStatus.Launching;
+                    break;
+                case FlightControllerEventType.OnTakeOffEnd:
+                    _flightStatus = FlightStatus.Flying;
+                    break;
+                case FlightControllerEventType.OnLandBegin:
+                    _flightStatus = FlightStatus.Landing;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         #endregion
     }
