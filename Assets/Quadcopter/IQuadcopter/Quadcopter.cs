@@ -104,8 +104,12 @@ namespace FlightControllers.Quadcopters
                 RunQuadcopterUpdate();
             }
             DrawAxisRays();
-            _currentInputSourceText.text = currentInputSource.ToString();
-            _flightStatusText.text = _flightStatus.ToString();
+            if(_currentInputSourceText != null)
+            {
+                _currentInputSourceText.text = currentInputSource.ToString();
+                _flightStatusText.text = _flightStatus.ToString();
+            }
+          
         }
         private void DrawAxisRays()
         {
@@ -332,10 +336,14 @@ namespace FlightControllers.Quadcopters
             elvInput = currentInputs.throttle;
             yawInput = currentInputs.yaw;
 
-            _yawText.text =  currentInputs.yaw.ToString("F2");
-            _pitchText.text =  currentInputs.pitch.ToString("F2");
-            _rollText.text =  currentInputs.roll.ToString("F2");
-            _throttleText.text =  currentInputs.throttle.ToString("F2");
+            if(_yawText != null)
+            {
+                _yawText.text = currentInputs.yaw.ToString("F2");
+                _pitchText.text = currentInputs.pitch.ToString("F2");
+                _rollText.text = currentInputs.roll.ToString("F2");
+                _throttleText.text = currentInputs.throttle.ToString("F2");
+            }
+          
 
             //if (currentInputs.takeOff && _flightStatus == FlightStatus.PreLaunch)
             //    AttemptTakeoff();
