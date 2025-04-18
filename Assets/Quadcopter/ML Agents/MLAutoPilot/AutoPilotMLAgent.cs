@@ -85,7 +85,7 @@ namespace FlightControllers.Quadcopters
             sensor.AddObservation(Vector3.ClampMagnitude(relativePos, 1f));
 
             Vector3 vel = _quadcopterToControl.GetSensorData().VelocityVector;
-            sensor.AddObservation(Vector3.ClampMagnitude(vel / 10f, 1f));
+            sensor.AddObservation(Vector3.ClampMagnitude(vel / 10f, 1f).y);
 
             float relativeYaw = Vector3.SignedAngle(_autoPilot.transform.forward, _quadcopterToControl.transform.forward, Vector3.up);
             sensor.AddObservation(relativeYaw / 180f);
@@ -145,7 +145,7 @@ namespace FlightControllers.Quadcopters
                 _outOfYawRangeSeconds += Time.fixedDeltaTime;
             }
 
-            if (dist < 0.05f && forwardError < 5f)
+            if (dist < 0.03f && forwardError < 5f)
             {
                 m_atTarget = true;
                 _groundRenderer.material.color = Color.green;
@@ -168,7 +168,7 @@ namespace FlightControllers.Quadcopters
             if (StepCount == MaxStep)
             {
                 _groundRenderer.material.color = Color.gray;
-                EndTheEpisode(m_atTarget ? 5f : -5f);
+                EndTheEpisode(m_atTarget ? 10f : -10f);
             }
         }
 
