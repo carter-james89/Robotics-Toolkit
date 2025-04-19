@@ -42,7 +42,8 @@ namespace FlightControllers.Quadcopters
         public float gyroYaw, gyroRoll, gyroPitch;
         public float posX, posY, posZ;
         public float height;
-        public Vector3 VelocityVector;
+        public Vector3 AngularVelocityVector;
+        public Vector3 LinearVelocityVector;
     }
 
     /// <summary>

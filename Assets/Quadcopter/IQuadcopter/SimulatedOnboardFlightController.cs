@@ -72,7 +72,9 @@ namespace FlightControllers.Quadcopters
                 gyroPitch = simulatedRB.transform.localEulerAngles.x,
                 gyroRoll = simulatedRB.transform.localEulerAngles.z,
                 height = simulatedRB.transform.localPosition.y,
-                VelocityVector = simulatedRB.angularVelocity
+                AngularVelocityVector = simulatedRB.angularVelocity,
+                LinearVelocityVector = simulatedRB.linearVelocity,
+
             };
         }
 

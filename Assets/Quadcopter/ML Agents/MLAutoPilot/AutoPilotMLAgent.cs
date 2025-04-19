@@ -77,15 +77,15 @@ namespace FlightControllers.Quadcopters
             SetNewTarget(_autoPilot.transform);
         }
 
-        public override void Heuristic(in ActionBuffers actionsOut) { }
-
         public override void CollectObservations(VectorSensor sensor)
         {
             Vector3 relativePos = _autoPilot.transform.InverseTransformPoint(_quadcopterToControl.transform.position);
             sensor.AddObservation(Vector3.ClampMagnitude(relativePos, 1f));
 
-            Vector3 vel = _quadcopterToControl.GetSensorData().VelocityVector;
+            Vector3 vel = _quadcopterToControl.GetSensorData().AngularVelocityVector;
             sensor.AddObservation(Vector3.ClampMagnitude(vel / 10f, 1f).y);
+
+            sensor.AddObservation(Vector3.ClampMagnitude(_quadcopterToControl.GetSensorData().LinearVelocityVector / 10f, 1f));
 
             float relativeYaw = Vector3.SignedAngle(_autoPilot.transform.forward, _quadcopterToControl.transform.forward, Vector3.up);
             sensor.AddObservation(relativeYaw / 180f);
@@ -149,7 +149,12 @@ namespace FlightControllers.Quadcopters
             {
                 m_atTarget = true;
                 _groundRenderer.material.color = Color.green;
-                stepReward += proximityReward * 0.01f;
+               // stepReward += proximityReward * 0.01f;
+
+                // Reward for being stable (velocity near zero)
+                float speed = _quadcopterToControl.GetSensorData().LinearVelocityVector.magnitude;
+                float stabilityReward = Mathf.Clamp01(1f - speed / 0.5f); // full reward if speed ~0, fades out at 0.5 m/s
+                stepReward += stabilityReward * 0.01f;
             }
             else
             {
