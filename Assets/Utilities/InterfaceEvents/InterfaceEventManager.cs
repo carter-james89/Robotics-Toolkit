@@ -108,8 +108,7 @@ namespace Toolkit.Utilities.Events
             foreach (var listener in _subscribedListeners.ToList())
             {
                 //try
-                //{ 
-                    Debug.Log(listener.GetGameObject().name);   
+                //{  
                     listener.OnEventOccured(eventData);
                 //}
                 //catch (Exception e)

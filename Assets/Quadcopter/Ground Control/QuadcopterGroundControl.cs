@@ -7,15 +7,18 @@ namespace FlightControllers.Quadcopters
     {
         public enum GroundControlMode
         {
-            Tello,
-            TelloSim,
-            TelloSimBoth,
-            Picopter,
-            PicopterSim,
-            Ardupilot,
-            ArdupilotSim
+            RemoteQuadcopter,
+            SiimulatedQuadcopter,
+            Both,
         }
         [SerializeField] private GroundControlMode _controlMode;
+
+        public enum AutoPilotMode
+        {
+            PID,
+            MLAgent,
+        }
+        [SerializeField] private AutoPilotMode _autoPilotMode;
         public GroundControlMode GetGroundControlMode()
         {
             return _controlMode;
@@ -25,8 +28,8 @@ namespace FlightControllers.Quadcopters
             _controlMode = mode;
             Initialize();
         }
-        [SerializeField] private Quadcopter _tello;
-        [SerializeField] private Quadcopter _telloSim;
+        [SerializeField] private Quadcopter _remoteQuadcopter;
+        [SerializeField] private Quadcopter _simulatedQuadcopter;
 
         private bool _isFlying = false;
         public bool IsFlying()
@@ -44,11 +47,14 @@ namespace FlightControllers.Quadcopters
         //  [SerializeField] private Quadcopter _ardupilot;
         // public Quadcopter activeQuad { get; private set; }
 
-        private SimulatedOnboardFlightController _simulatedOnboardFlightController;
-        private TelloFlightController _telloFlightController;
+       // private SimulatedOnboardFlightController _simulatedOnboardFlightController;
+       // private TelloFlightController _telloFlightController;
         // [SerializeField] private PiCopterFlightController _picopterFlightController;
         // [SerializeField] private PiCopterFlightController _ardupilotFlightController;
         // private IFlightController _flightController;
+
+        private IAutoPilot _autoPilot;
+        [SerializeField] private WaypointAutoPilotController _waypointMissionController;
 
 
         [SerializeField] private WaypointMission _waypointMission;
@@ -56,12 +62,8 @@ namespace FlightControllers.Quadcopters
         /// <summary>
         /// The autopilot to provide to the <see cref="quadcopter/>
         /// </summary>
-        [SerializeField] private WaypointAutoPilot _telloWaypointPilot;
-        /// <summary>
-        /// The autopilot to provide to the <see cref="quadcopter/>
-        /// </summary>
-        [SerializeField] private WaypointAutoPilot _telloSimWaypointPilot;
-
+       // [SerializeField] private WaypointAutoPilotController _telloWaypointPilotController;
+       // [SerializeField] private WaypointAutoPilotController _telloSimPilotController;
         /// <summary>
         /// The source of the Pilot inputs for this program
         /// </summary>
@@ -69,54 +71,90 @@ namespace FlightControllers.Quadcopters
         // Start is called before the first frame update
         void Start()
         {
-            _telloFlightController = _tello.gameObject.GetComponent<TelloFlightController>();
-            _simulatedOnboardFlightController = _telloSim.gameObject.GetComponent<SimulatedOnboardFlightController>();
+            //_telloFlightController = _remoteQuadcopter.gameObject.GetComponent<TelloFlightController>();
+            //_simulatedOnboardFlightController = _simulatedQuadcopter.gameObject.GetComponent<SimulatedOnboardFlightController>();
 
-            if(_telloFlightController == null)
-            {
-                Debug.LogError("Tello Flight Controller is null__");
-                return;
-            }
-            if(_simulatedOnboardFlightController == null)
-            {
-                Debug.LogError("Simulated Onboard Flight Controller is null__");
-                return;
-            }
+            //if(_telloFlightController == null)
+            //{
+            //    Debug.LogError("Tello Flight Controller is null__");
+            //    return;
+            //}
+            //if(_simulatedOnboardFlightController == null)
+            //{
+            //    Debug.LogError("Simulated Onboard Flight Controller is null__");
+            //    return;
+            //}
 
-            Debug.Log(_telloFlightController.name);
+        
 
             Initialize();
         }
         private void Initialize()
         {
+             _autoPilot = null;
+            Debug.Log("Initialize ground control in mode : " + _controlMode);
             switch (_controlMode)
             {
-                case GroundControlMode.Tello:
-                    _tello.Initialize(_telloFlightController, _pilotInupts);
-                    _telloWaypointPilot.Initialize(_tello);
+                case GroundControlMode.RemoteQuadcopter:
+                    foreach (var flightController in _remoteQuadcopter.GetComponents<IFlightController>())
+                    {
+                        if (!flightController.IsSimulator())
+                        {
+                            _remoteQuadcopter.Initialize(flightController, _pilotInupts);
+                            _autoPilot = GetAutoPilot(_remoteQuadcopter);
+                            _waypointMissionController.Initialize(_autoPilot, _remoteQuadcopter);//has to happen first
+                            _autoPilot.Initialize(_remoteQuadcopter);
+                        }
+                    }
                     break;
-                case GroundControlMode.TelloSim:
-                    _telloSim.Initialize(_simulatedOnboardFlightController, _pilotInupts);
-                    _telloSimWaypointPilot.Initialize(_telloSim);
+                case GroundControlMode.SiimulatedQuadcopter:
+                    foreach (var flightController in _simulatedQuadcopter.GetComponents<IFlightController>())
+                    {
+                        if (flightController.IsSimulator())
+                        {
+                            _simulatedQuadcopter.Initialize(flightController, _pilotInupts);
+                            _autoPilot = GetAutoPilot(_simulatedQuadcopter);
+                            _waypointMissionController.Initialize(_autoPilot, _simulatedQuadcopter);//has to happen first
+                            _autoPilot.Initialize(_simulatedQuadcopter);
+                        }
+                    }
                     break;
-                case GroundControlMode.TelloSimBoth:
-                    _tello.Initialize(_telloFlightController, _pilotInupts);
-                    _telloSim.Initialize(_simulatedOnboardFlightController, _pilotInupts);
-
-                    _telloWaypointPilot.Initialize(_tello);
-                    _telloSimWaypointPilot.Initialize(_telloSim);
-                    break;
-                case GroundControlMode.Picopter:
-                    break;
-                case GroundControlMode.PicopterSim:
-                    break;
-                case GroundControlMode.Ardupilot:
-                    break;
-                case GroundControlMode.ArdupilotSim:
+                case GroundControlMode.Both://not working yet
+                    foreach (var flightController in _simulatedQuadcopter.GetComponents<IFlightController>())
+                    {
+                        if (!flightController.IsSimulator())
+                        {
+                            _remoteQuadcopter.Initialize(flightController, _pilotInupts);
+                            _autoPilot = GetAutoPilot(_remoteQuadcopter);
+                            _waypointMissionController.Initialize(_autoPilot, _remoteQuadcopter);//has to happen first
+                            _autoPilot.Initialize(_remoteQuadcopter);
+                        }
+                        else
+                        {
+                            _simulatedQuadcopter.Initialize(flightController, _pilotInupts);
+                            _autoPilot = GetAutoPilot(_simulatedQuadcopter);
+                            _waypointMissionController.Initialize(_autoPilot, _simulatedQuadcopter);//has to happen first
+                            _autoPilot.Initialize(_simulatedQuadcopter);
+                        }
+                    }
                     break;
                 default:
                     break;
             }
+        }
+    
+        private IAutoPilot GetAutoPilot(Quadcopter quad)
+        {
+            switch (_autoPilotMode)
+            {
+                case AutoPilotMode.PID:
+                    return _waypointMissionController.GetComponent<PIDAutoPilot>();
+                case AutoPilotMode.MLAgent:
+                    return _waypointMissionController.GetComponent<MLAutoPilot>();
+                default:
+                    break;
+            }
+            return null;
         }
 
         public void TakeOff()
@@ -124,22 +162,14 @@ namespace FlightControllers.Quadcopters
             bool success = false;
             switch (_controlMode)
             {
-                case GroundControlMode.Tello:
-                    success = _tello.AttemptTakeoff();
+                case GroundControlMode.RemoteQuadcopter:
+                    success = _remoteQuadcopter.AttemptTakeoff();
                     break;
-                case GroundControlMode.TelloSim:
-                    success = _telloSim.AttemptTakeoff();
+                case GroundControlMode.SiimulatedQuadcopter:
+                    success = _simulatedQuadcopter.AttemptTakeoff();
                     break;
-                case GroundControlMode.TelloSimBoth:
-                    success = _tello.AttemptTakeoff() && _telloSim.AttemptTakeoff();
-                    break;
-                case GroundControlMode.Picopter:
-                    break;
-                case GroundControlMode.PicopterSim:
-                    break;
-                case GroundControlMode.Ardupilot:
-                    break;
-                case GroundControlMode.ArdupilotSim:
+                case GroundControlMode.Both:
+                    success = _remoteQuadcopter.AttemptTakeoff() && _simulatedQuadcopter.AttemptTakeoff();
                     break;
                 default:
                     break;
@@ -162,23 +192,15 @@ namespace FlightControllers.Quadcopters
             }
             switch (_controlMode)
             {
-                case GroundControlMode.Tello:
-                    _tello.AttemptLand();
+                case GroundControlMode.RemoteQuadcopter:
+                    _remoteQuadcopter.AttemptLand();
                     break;
-                case GroundControlMode.TelloSim:
-                    _telloSim.AttemptLand();
+                case GroundControlMode.SiimulatedQuadcopter:
+                    _simulatedQuadcopter.AttemptLand();
                     break;
-                case GroundControlMode.TelloSimBoth:
-                    _tello.AttemptLand();
-                    _telloSim.AttemptLand();
-                    break;
-                case GroundControlMode.Picopter:
-                    break;
-                case GroundControlMode.PicopterSim:
-                    break;
-                case GroundControlMode.Ardupilot:
-                    break;
-                case GroundControlMode.ArdupilotSim:
+                case GroundControlMode.Both:
+                    _remoteQuadcopter.AttemptLand();
+                    _simulatedQuadcopter.AttemptLand();
                     break;
                 default:
                     break;
@@ -193,30 +215,31 @@ namespace FlightControllers.Quadcopters
                 Debug.LogError("not flying");   
                 return;
             }
-            switch (_controlMode)
-            {
-                case GroundControlMode.Tello:
-                    _telloWaypointPilot.ToggleAutoPilot();
-                  
-                    break;
-                case GroundControlMode.TelloSim:
-                    _telloSimWaypointPilot.ToggleAutoPilot();
-                    break;
-                case GroundControlMode.TelloSimBoth:
-                    _telloWaypointPilot.ToggleAutoPilot();
-                    _telloSimWaypointPilot.ToggleAutoPilot();
-                    break;
-                case GroundControlMode.Picopter:
-                    break;
-                case GroundControlMode.PicopterSim:
-                    break;
-                case GroundControlMode.Ardupilot:
-                    break;
-                case GroundControlMode.ArdupilotSim:
-                    break;
-                default:
-                    break;
-            }
+            _autoPilot.ToggleAutoPilot();
+            //switch (_controlMode)
+            //{
+            //    case GroundControlMode.RemoteQuadcopter:
+            //        _telloWaypointPilotController.ToggleAutoPilot();
+
+            //        break;
+            //    case GroundControlMode.SiimulatedQuadcopter:
+            //        _telloSimWaypointPilot.ToggleAutoPilot();
+            //        break;
+            //    case GroundControlMode.Both:
+            //        _telloWaypointPilotController.ToggleAutoPilot();
+            //        _telloSimWaypointPilot.ToggleAutoPilot();
+            //        break;
+            //    case GroundControlMode.Picopter:
+            //        break;
+            //    case GroundControlMode.PicopterSim:
+            //        break;
+            //    case GroundControlMode.Ardupilot:
+            //        break;
+            //    case GroundControlMode.ArdupilotSim:
+            //        break;
+            //    default:
+            //        break;
+            //}
             _autoPilotActive = !_autoPilotActive;
         }
         internal void BeginWaypointMission()
@@ -225,29 +248,30 @@ namespace FlightControllers.Quadcopters
             {
                 return;
             }
-            switch (_controlMode)
-            {
-                case GroundControlMode.Tello:
-                    _telloWaypointPilot.BeginMission(_waypointMission);
-                    break;
-                case GroundControlMode.TelloSim:
-                    _telloSimWaypointPilot.BeginMission(_waypointMission);
-                    break;
-                case GroundControlMode.TelloSimBoth:
-                    _telloWaypointPilot.BeginMission(_waypointMission);
-                    _telloSimWaypointPilot.BeginMission(_waypointMission);
-                    break;
-                case GroundControlMode.Picopter:
-                    break;
-                case GroundControlMode.PicopterSim:
-                    break;
-                case GroundControlMode.Ardupilot:
-                    break;
-                case GroundControlMode.ArdupilotSim:
-                    break;
-                default:
-                    break;
-            }
+            _waypointMissionController.BeginMission(_waypointMission);
+            //switch (_controlMode)
+            //{
+            //    case GroundControlMode.RemoteQuadcopter:
+            //        _telloWaypointPilotController.BeginMission(_waypointMission);
+            //        break;
+            //    case GroundControlMode.SiimulatedQuadcopter:
+            //        _telloSimWaypointPilot.BeginMission(_waypointMission);
+            //        break;
+            //    case GroundControlMode.Both:
+            //        _telloWaypointPilotController.BeginMission(_waypointMission);
+            //        _telloSimWaypointPilot.BeginMission(_waypointMission);
+            //        break;
+            //    case GroundControlMode.Picopter:
+            //        break;
+            //    case GroundControlMode.PicopterSim:
+            //        break;
+            //    case GroundControlMode.Ardupilot:
+            //        break;
+            //    case GroundControlMode.ArdupilotSim:
+            //        break;
+            //    default:
+            //        break;
+            //}
         }
 
         // Update is called once per frame

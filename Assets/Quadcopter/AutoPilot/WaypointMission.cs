@@ -14,7 +14,7 @@ namespace FlightControllers.Quadcopters
 
         public Waypoint startWaypoint;
 
-        private WaypointAutoPilot _autoPilot;
+        private WaypointAutoPilotController _autoPilot;
 
         [SerializeField]
         private bool _loopMission;
@@ -35,7 +35,7 @@ namespace FlightControllers.Quadcopters
 
         private int _waypointCount;
 
-        public void OnMissionBegun(WaypointAutoPilot autoPilot)
+        public void OnMissionBegun(WaypointAutoPilotController autoPilot)
         {
             if (!autoPilot)
             {

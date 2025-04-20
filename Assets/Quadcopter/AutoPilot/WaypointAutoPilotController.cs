@@ -1,15 +1,14 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using Toolkit.Utilities.Events;
 using UnityEngine;
+
 
 namespace FlightControllers.Quadcopters
 {
-    /// <summary>
-    /// An autopilot which will attempt to fly <see cref="AutoPilot.quadToControl"/> to a <see cref="Waypoint"/> in 3D space
-    /// </summary>
-    public class WaypointAutoPilot : PIDAutoPilot
+    public class WaypointAutoPilotController : MonoBehaviour, IEventListener<AutoPilotEventData>
     {
+        private IAutoPilot _autopilot;
+
         /// <summary>
         /// How should the target drone move towardes its endpoint
         /// </summary>
@@ -40,49 +39,7 @@ namespace FlightControllers.Quadcopters
         public TranslationStyle translationStyle = TranslationStyle.Linear;
         // Add this field near the top of the class
         private float _atWaypointDuration = 0f;
-        /// <summary>
-        /// <see cref="PIDProfile"/> to be used in <see cref="TranslationStyle.Linear"/>
-        /// </summary>
-        [SerializeField]
-        private PIDProfile _linearPIDProfile;
-        /// <summary>
-        /// <see cref="PIDProfile"/> to be used in <see cref="TranslationStyle.NonLinear"/>
-        /// </summary>
-        [SerializeField]
-        private PIDProfile _nonLinearPIDProfile;
-        /// <summary>
-        /// <see cref="PIDProfile"/> to be used in <see cref="TranslationStyle.Instant"/>
-        /// </summary>
-        [SerializeField]
-        private PIDProfile _instantPIDProfile;
-        /// <summary>
-        /// Update the <see cref="TranslationStyle"/> of the PIDAutoPilot Target
-        /// Will automatically update <see cref="PIDProfile"/> to the approprate Profile for the Mode
-        /// Any custom <see cref="PIDProfile"/> assigned via <see cref="UpdatePIDProfile(PIDProfile)"/> will be overwritten
-        /// </summary>
-        public void SetTransitionSytle(TranslationStyle newStyle)
-        {
-            translationStyle = newStyle;
-            switch (translationStyle)
-            {
-                case TranslationStyle.Linear:
-                    _currentPIDProfile = _linearPIDProfile;
-                    break;
-                case TranslationStyle.NonLinear:
-                    _currentPIDProfile = _nonLinearPIDProfile;
-                    break;
-                case TranslationStyle.Instant:
-                    _currentPIDProfile = _instantPIDProfile;
-                    break;
-                default:
-                    break;
-            }
-            UpdatePIDProfile(_currentPIDProfile);
-            if (currentWaypoint)
-            {
-                SetNewWaypoint(currentWaypoint);
-            }
-        }
+    
 
         public bool atWaypoint { get; private set; }
 
@@ -128,94 +85,45 @@ namespace FlightControllers.Quadcopters
         /// </summary>
         public Waypoint currentWaypoint { get; private set; }
 
-        protected override void OnAutoPilotActivated()
+
+        public Component GetComponent()
         {
-            SetTransitionSytle(translationStyle);
-            base.OnAutoPilotActivated();
-        }
-        protected override void OnAutoPilotDeactivated()
-        {
-            base.OnAutoPilotDeactivated();
-            EndMission();
+            return this;
         }
 
-        /// <summary>
-        /// Calculate the <see cref="PilotInputs.FlightControlValues"/> needed to make <see cref="_quadToControl"/> match this Objects transform.position
-        /// Values are calculated in global space, so they are converted via <see cref="IQuadcopter.ConvertToHeadlessInputs(PilotInputs.FlightControlValues)"/> before being returned
-        /// </summary>
-        /// <returns>The appropriate Yaw,Pitch,Roll, to achieve the target, in Headless space in regards to <see cref="_quadToControl"/></returns>
-        public override IInputSource.FlightControlValues Run()
-        {        
-            if (currentWaypoint)
-            {              
-                switch (translationStyle)
-                {
-                    case TranslationStyle.Linear:
-                        var currentDist = Vector3.Distance(transform.position, currentWaypoint.transform.position);
-                        var distTraveled = _originalDistToTarget - currentDist;
-                        var fractTraveled = distTraveled / _originalDistToTarget;
-                        transform.position = Vector3.Lerp(_originalQuadPos, currentWaypoint.transform.position, fractTraveled + (Time.deltaTime * _linearSpeed));
-                        break;
-                    case TranslationStyle.NonLinear:
-                        //  transform.position = Vector3.Lerp(transform.position, currentWaypoint.transform.position, Time.deltaTime * _nonLinearSpeed);
-                        float distToTarget = Vector3.Distance(transform.position, currentWaypoint.transform.position);
+        public GameObject GetGameObject()
+        {
+           return this == null ? null : this.gameObject;
+        }
 
-                        // Full speed until 0.5m away, then begin to slow
-                        float slowdownStartDistance = 0.5f;
-                        float slowdownFactor = Mathf.Clamp01(distToTarget / slowdownStartDistance); // 1 when far, 0 when very close
-
-                        float adjustedSpeed = _nonLinearSpeed * slowdownFactor;
-                        transform.position = Vector3.MoveTowards(
-                            transform.position,
-                            currentWaypoint.transform.position,
-                            adjustedSpeed * Time.deltaTime
-                        );
-                        break;
-                    case TranslationStyle.Instant:
-                        transform.position = currentWaypoint.transform.position;
-                        transform.rotation = currentWaypoint.transform.rotation;
-                        break;
-                    default:
-                        break;
-                }
-
-                //var distToFinalTarget = Vector3.Distance(quadToControl.GetGameObject().transform.position, currentWaypoint.transform.position);
-                //if (distToFinalTarget < _achieveTargetDist && !atWaypoint)
-                //{
-                //   // (quadToControl as Quadcopter).ResetOffset();
-                //  //  (quadToControl as Quadcopter).ResetKnownOffset();
-                //    if (currentMission.IsFinalWaypoint(currentWaypoint))
-                //    {
-                //      //  (quadToControl as Quadcopter).DestroySensorPoints();
-                //    }
-                //    atWaypoint = true;
-                //    onWaypointAchieved?.Invoke(currentWaypoint);
-                //}
-                float quadToWaypointDist = Vector3.Distance(quadToControl.GetGameObject().transform.position, currentWaypoint.transform.position);
-
-                if (quadToWaypointDist < _achieveTargetDist)
-                {
-                    _atWaypointDuration += Time.deltaTime;
-
-                    if (_atWaypointDuration >= currentWaypoint.GetLoiterTime() && !atWaypoint)
+        public void OnEventOccured(AutoPilotEventData eventData)
+        {
+            switch (eventData.EventType)
+            {
+                case AutoPilotEventType.OnAutoPilotInitialized:
+                    break;
+                case AutoPilotEventType.OnAutoPilotEngaged:
+                 //   SetTransitionSytle(translationStyle);
+                    if (currentWaypoint)
                     {
-                        atWaypoint = true;
-                        onWaypointAchieved?.Invoke(currentWaypoint);
-
-                        if (currentMission?.IsFinalWaypoint(currentWaypoint) == true)
-                        {
-                            // Optionally handle final waypoint logic here
-                        }
+                        SetNewWaypoint(currentWaypoint);
                     }
-                }
-                else
-                {
-                    _atWaypointDuration = 0f; // reset if it leaves the radius
-                }
+                    break;
+                case AutoPilotEventType.OnAutoPilotDisEngaged:
+                    EndMission();
+                    break;
+                default:
+                    break;
             }
-            return base.Run();
         }
-
+        private IQuadcopter _targetQuad;
+        public void Initialize(IAutoPilot autoPilotToControl, IQuadcopter quadcopter)//not guaranteed to be the same
+        {
+            Debug.Log("Initializing WaypointAutoPilotController with Autopilot : " + autoPilotToControl.GetGameObject().name);
+            _autopilot = autoPilotToControl;
+            _autopilot.SubscribeToEvents(this);
+            _targetQuad = quadcopter;
+        }
 
         /// <summary>
         /// Set a new Target for <see cref="_quadToControl"/> to try and achieve
@@ -227,11 +135,11 @@ namespace FlightControllers.Quadcopters
             {
                 Debug.Log("Set new target point : " + newWaypoint.gameObject.name);
                 atWaypoint = false;
-                MatchQuadTransform();
+             //   MatchQuadTransform();
                 currentWaypoint = newWaypoint;
                 _originalQuadPos = transform.position;
                 _originalDistToTarget = Vector3.Distance(_originalQuadPos, currentWaypoint.transform.position);
-                SetAutoPilotRot(currentWaypoint.transform.rotation);
+             // _autopilot.PositionAutoPilot(t  (currentWaypoint.transform.rotation);
                 onWaypointSet?.Invoke(newWaypoint);
             }
             else
@@ -255,5 +163,81 @@ namespace FlightControllers.Quadcopters
                 currentMission = null;
             }
         }
+
+        void Update()
+        {
+            if (currentWaypoint)
+            {
+                Vector3 pos = _autopilot.GetGameObject().transform.position;
+                switch (translationStyle)
+                {        
+                    case TranslationStyle.Linear:
+                        var currentDist = Vector3.Distance(pos, currentWaypoint.transform.position);
+                        var distTraveled = _originalDistToTarget - currentDist;
+                        var fractTraveled = distTraveled / _originalDistToTarget;
+                       pos  = Vector3.Lerp(_originalQuadPos, currentWaypoint.transform.position, fractTraveled + (Time.deltaTime * _linearSpeed));
+                     
+                        break;
+                    case TranslationStyle.NonLinear:
+                        //  transform.position = Vector3.Lerp(transform.position, currentWaypoint.transform.position, Time.deltaTime * _nonLinearSpeed);
+                        float distToTarget = Vector3.Distance(pos, currentWaypoint.transform.position);
+
+                        // Full speed until 0.5m away, then begin to slow
+                        float slowdownStartDistance = 0.5f;
+                        float slowdownFactor = Mathf.Clamp01(distToTarget / slowdownStartDistance); // 1 when far, 0 when very close
+
+                        float adjustedSpeed = _nonLinearSpeed * slowdownFactor;
+                        pos = Vector3.MoveTowards(
+                            pos,
+                            currentWaypoint.transform.position,
+                            adjustedSpeed * Time.deltaTime
+                        );
+                        break;
+                    case TranslationStyle.Instant:
+                        pos = currentWaypoint.transform.position;
+                        break;
+                    default:
+                        break;
+             
+                }
+                _autopilot.PositionAutoPilot(pos, currentWaypoint.transform.rotation);
+
+                //var distToFinalTarget = Vector3.Distance(quadToControl.GetGameObject().transform.position, currentWaypoint.transform.position);
+                //if (distToFinalTarget < _achieveTargetDist && !atWaypoint)
+                //{
+                //   // (quadToControl as Quadcopter).ResetOffset();
+                //  //  (quadToControl as Quadcopter).ResetKnownOffset();
+                //    if (currentMission.IsFinalWaypoint(currentWaypoint))
+                //    {
+                //      //  (quadToControl as Quadcopter).DestroySensorPoints();
+                //    }
+                //    atWaypoint = true;
+                //    onWaypointAchieved?.Invoke(currentWaypoint);
+                //}
+                float quadToWaypointDist = Vector3.Distance(_targetQuad.GetGameObject().transform.position, currentWaypoint.transform.position);
+
+                if (quadToWaypointDist < _achieveTargetDist)
+                {
+                    _atWaypointDuration += Time.deltaTime;
+
+                    if (_atWaypointDuration >= currentWaypoint.GetLoiterTime() && !atWaypoint)
+                    {
+                        atWaypoint = true;
+                        onWaypointAchieved?.Invoke(currentWaypoint);
+
+                        if (currentMission?.IsFinalWaypoint(currentWaypoint) == true)
+                        {
+                            // Optionally handle final waypoint logic here
+                        }
+                    }
+                }
+                else
+                {
+                    _atWaypointDuration = 0f; // reset if it leaves the radius
+                }
+            }
+        
+        }
     }
+    
 }

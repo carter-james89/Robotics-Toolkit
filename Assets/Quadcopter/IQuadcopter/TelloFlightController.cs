@@ -10,7 +10,7 @@ namespace FlightControllers.Quadcopters
     public class TelloFlightController : QuadcopterFlightController
     {
         /// <summary>
-        /// Video feed to display the camera from the Tello
+        /// Video feed to display the camera from the RemoteQuadcopter
         /// </summary>
         [SerializeField]
         private TelloVideoFeed _videoFeed;
@@ -24,28 +24,28 @@ namespace FlightControllers.Quadcopters
         /// The offset of the tracking values when tracking first achieved after liftoff
         /// </summary>
         /// <remarks>
-        /// This is a weird bug either with the <see cref="Tello"/> library or the Tello itself
-        /// When you take off the position of the Tello is (0,0,0)
+        /// This is a weird bug either with the <see cref="RemoteQuadcopter"/> library or the RemoteQuadcopter itself
+        /// When you take off the position of the RemoteQuadcopter is (0,0,0)
         /// Once it achieves its hover, a huge and random offset is applied to the position, which needs to be accounted for for all 
         /// future positioning data
         /// </remarks>
         private Vector3 _trackingFoundOffset = Vector3.zero;
         /// <summary>
-        /// The current connection state with the Tello, must be <see cref="Tello.ConnectionState.Connected"/> to control
+        /// The current connection state with the RemoteQuadcopter, must be <see cref="Tello.ConnectionState.Connected"/> to control
         /// </summary>
         public Tello.ConnectionState connectionState;
 
         /// <summary>
-        /// Is the Tello tracking accurate this frame?
+        /// Is the RemoteQuadcopter tracking accurate this frame?
         /// </summary>
         /// <remarks>
-        /// In poor lighting conditions or for no reason at all sometimes the position tracking of the Tello is way off
+        /// In poor lighting conditions or for no reason at all sometimes the position tracking of the RemoteQuadcopter is way off
         /// The deltaposition from the last valid frame is used to determine if there is an unreasonable jump
         /// </remarks>
         private bool validTrackingFrame;
 
         /// <summary>
-        /// How many packkages have we recieved from the Tello
+        /// How many packkages have we recieved from the RemoteQuadcopter
         /// </summary>
         [SerializeField]
         private int _telloFrameCount = 0;
@@ -76,11 +76,12 @@ namespace FlightControllers.Quadcopters
         }
 
         /// <summary>
-        /// Attempt to connect to the Tello via <see cref="Tello"/> Library
+        /// Attempt to connect to the RemoteQuadcopter via <see cref="Tello"/> Library
         /// Must be connected to quadcopter via wifi
         /// </summary>
         public void ConnectToTello()
         {
+            Debug.Log("Connecting to Tello");
             Tello.onConnection += Tello_onStateChanged;
             Tello.onUpdate += Tello_onUpdate;
             if (_videoFeed)
@@ -98,7 +99,7 @@ namespace FlightControllers.Quadcopters
         [SerializeField] private TextMeshProUGUI _speedText;
         [SerializeField] private TextMeshProUGUI _posUncertText;
         /// <summary>
-        /// Called from <see cref="Tello.onConnection"/> when the state of the connection with the Tello is changed
+        /// Called from <see cref="Tello.onConnection"/> when the state of the connection with the RemoteQuadcopter is changed
         /// </summary>
         private void Tello_onStateChanged(Tello.ConnectionState newState)
         {
@@ -106,7 +107,7 @@ namespace FlightControllers.Quadcopters
             if (newState == Tello.ConnectionState.Connected)
             {
                 _connectionStatusText.text = newState.ToString();
-                // Debug.Log("Connected to Tello, please wait for camera feed " + Tello.state.);
+                // Debug.Log("Connected to RemoteQuadcopter, please wait for camera feed " + RemoteQuadcopter.state.);
                 Tello.setPicVidMode(1); // 0: picture, 1: video
                 Tello.setVideoBitRate((int)TelloVideoFeed.VideoBitRate.VideoBitRateAuto);
                 Tello.requestIframe();
@@ -117,11 +118,11 @@ namespace FlightControllers.Quadcopters
             }
         }
         /// <summary>
-        /// Called from <see cref="Tello.onUpdate"/> when an update a package is recieved from the Tello
+        /// Called from <see cref="Tello.onUpdate"/> when an update a package is recieved from the RemoteQuadcopter
         /// </summary>
         ///<remarks>
         ///<see cref="Tello_onUpdate(int)"/> happens on its own thread, and to interact with unity/inputs we need to use <see cref="Update"/>
-        ///This simply records that an update has been recieved from the Tello, and will be handled in the next <see cref="Update"/>
+        ///This simply records that an update has been recieved from the RemoteQuadcopter, and will be handled in the next <see cref="Update"/>
         /// </remarks>
         private void Tello_onUpdate(int cmdID)
         {
@@ -149,10 +150,10 @@ namespace FlightControllers.Quadcopters
             return _quadcopterData;
         }
         /// <summary>
-        /// Store all the information from the Tello package locally
+        /// Store all the information from the RemoteQuadcopter package locally
         /// </summary>
         /// <remmarks>
-        /// Not all values are guaranteed to work or be accurate, they come from Tello and <see cref="Tello"/> library
+        /// Not all values are guaranteed to work or be accurate, they come from RemoteQuadcopter and <see cref="Tello"/> library
         /// </remmarks>
         public void SyncDataWithTello()
         {
@@ -162,9 +163,9 @@ namespace FlightControllers.Quadcopters
             posX = Tello.state.posY - _trackingFoundOffset.x;
             posY = -Tello.state.posZ - _trackingFoundOffset.y;
             posZ = Tello.state.posX - _trackingFoundOffset.z;
-            //posX = Tello.state.posY - _manualOffset.x;
-            //posY = -Tello.state.posZ - _manualOffset.y;
-            //posZ = Tello.state.posX - _manualOffset.z;
+            //posX = RemoteQuadcopter.state.posY - _manualOffset.x;
+            //posY = -RemoteQuadcopter.state.posZ - _manualOffset.y;
+            //posZ = RemoteQuadcopter.state.posX - _manualOffset.z;
 
 
             _quadcopterData.posX = posX;
@@ -259,7 +260,7 @@ namespace FlightControllers.Quadcopters
             Tello.controllerState.setAxis(craftInputs.yaw, craftInputs.throttle, craftInputs.roll, craftInputs.pitch);
         }
         /// <summary>
-        /// Set the position of the virtual Tello in the Unity environment
+        /// Set the position of the virtual RemoteQuadcopter in the Unity environment
         /// </summary>
         /// <returns>Is this an accurate frame, <see cref="validTrackingFrame"/> </returns>
         public bool VallidateTrackingInfo(Vector3 pos)
@@ -286,7 +287,7 @@ namespace FlightControllers.Quadcopters
         }
 
         /// <summary>
-        /// Launch the Tello via its auto liftoff feature
+        /// Launch the RemoteQuadcopter via its auto liftoff feature
         /// </summary>
         public override bool AttemptTakeoff()
         {
@@ -306,7 +307,7 @@ namespace FlightControllers.Quadcopters
 
         }
         /// <summary>
-        /// AttemptLand the Tello via its auto land feature
+        /// AttemptLand the RemoteQuadcopter via its auto land feature
         /// </summary>
         public override bool AttemptLand()
         {
@@ -315,11 +316,11 @@ namespace FlightControllers.Quadcopters
             return true;
         }
         /// <summary>
-        /// Check to see if the Tello has finished its auto takeoff
+        /// Check to see if the RemoteQuadcopter has finished its auto takeoff
         /// </summary>
         /// <remarks>
-        /// This is a weird but either with the <see cref="Tello"/> library or the Tello itself
-        /// When you take off the position of the Tello is (0,0,0)
+        /// This is a weird but either with the <see cref="Tello"/> library or the RemoteQuadcopter itself
+        /// When you take off the position of the RemoteQuadcopter is (0,0,0)
         /// Once it achieves its hover hover, a huge and random offset is applied to the position, which needs to be accounted for
         /// Also difficult to determin when this happens. <see cref="flymode"/> used to work but as of 3.0 it isnt realiable unless you also check for <see cref="flying"/>
         /// And even that isnt great as there is a long delay
@@ -360,7 +361,7 @@ namespace FlightControllers.Quadcopters
                 Debug.Log("Stop Tello Connection");
                 if (connectionState == Tello.ConnectionState.Connecting)
                 {
-                    //Tello.stopConnecting();
+                    //RemoteQuadcopter.stopConnecting();
                 }
                 Tello.onConnection -= Tello_onStateChanged;
                 Tello.onUpdate -= Tello_onUpdate;
@@ -378,7 +379,7 @@ namespace FlightControllers.Quadcopters
         public int verticalSpeed { get; private set; }
         public float velY { get; private set; }
 
-        //Tello api, public so they can be seen in inspector
+        //RemoteQuadcopter api, public so they can be seen in inspector
         public bool flying;
         public bool hover;
         public float posUncertainty;

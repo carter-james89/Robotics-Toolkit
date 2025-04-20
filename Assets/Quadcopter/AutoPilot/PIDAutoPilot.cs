@@ -1,4 +1,5 @@
 using System;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace  FlightControllers.Quadcopters
@@ -33,6 +34,31 @@ namespace  FlightControllers.Quadcopters
         /// The current <see cref="PIDProfile"/> being used to control the <see cref="PidController"/>s
         /// </summary>
         protected PIDProfile _currentPIDProfile;
+
+
+        private enum PIDProfileType
+        {
+            Linear,
+            NonLinear,
+            Instant
+        }
+        [SerializeField]private PIDProfileType _pidProfileType = PIDProfileType.Linear;
+        /// <summary>
+        /// <see cref="PIDProfile"/> to be used in <see cref="TranslationStyle.Linear"/>
+        /// </summary>
+        [SerializeField]
+        private PIDProfile _linearPIDProfile;
+        /// <summary>
+        /// <see cref="PIDProfile"/> to be used in <see cref="TranslationStyle.NonLinear"/>
+        /// </summary>
+        [SerializeField]
+        private PIDProfile _nonLinearPIDProfile;
+        /// <summary>
+        /// <see cref="PIDProfile"/> to be used in <see cref="TranslationStyle.Instant"/>
+        /// </summary>
+        [SerializeField]
+        private PIDProfile _instantPIDProfile;
+
 
 
         /// <summary>
@@ -133,7 +159,20 @@ namespace  FlightControllers.Quadcopters
 
         protected override void OnAutoPilotActivated()
         {
-          
+            switch (_pidProfileType)
+            {
+                case PIDProfileType.Linear:
+                    UpdatePIDProfile(_linearPIDProfile);
+                    break;
+                case PIDProfileType.NonLinear:
+                    UpdatePIDProfile(_nonLinearPIDProfile);
+                    break;
+                case PIDProfileType.Instant:
+                    UpdatePIDProfile(_instantPIDProfile);
+                    break;
+                default:
+                    break;
+            }
         }
 
         protected override void OnAutoPilotDeactivated()

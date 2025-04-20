@@ -188,7 +188,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7909170848425817815}
-  - component: {fileID: 7909170848425817812}
+  - component: {fileID: 5345689548330092364}
   m_Layer: 0
   m_Name: Waypoint PID Autopilot
   m_TagString: Untagged
@@ -213,7 +213,7 @@ Transform:
   - {fileID: 7909170847843574823}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7909170848425817812
+--- !u!114 &5345689548330092364
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -222,22 +222,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 7909170848425817813}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2bb43818fc1c44041ba5307fa8b008fb, type: 3}
+  m_Script: {fileID: 11500000, guid: 3dcfbdfacebf6a6458abfe35952fa64c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _pidProfileType: 1
+  _linearPIDProfile: {fileID: 7909170848716612859}
+  _nonLinearPIDProfile: {fileID: 7909170848216289380}
+  _instantPIDProfile: {fileID: 7909170848501096010}
   _timeSinceLastUpdate: 0
   DebugPitch: 0
   DebugYaw: 0
   DebugRoll: 0
   DebugElv: 0
   targetOffset: {x: 0, y: 0, z: 0}
-  translationStyle: 0
-  _linearPIDProfile: {fileID: 7909170848716612859}
-  _nonLinearPIDProfile: {fileID: 7909170848216289380}
-  _instantPIDProfile: {fileID: 7909170848501096010}
-  _linearSpeed: 0.11
-  _nonLinearSpeed: 0.5
-  _achieveTargetDist: 0.15
 --- !u!1 &7909170848501096008
 GameObject:
   m_ObjectHideFlags: 0

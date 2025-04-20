@@ -165,6 +165,7 @@ namespace FlightControllers.Quadcopters
             {
                 Debug.LogError("Flight controller is null : " + name);
             }
+            Debug.Log("Initializing Quadcopter : " + name + " with Flight Controller : " + flightController.GetGameObject().name);
             _flightStatus = FlightStatus.PreLaunch;
             _flightController = flightController;
             _flightController.SubscribeToEvents(this);

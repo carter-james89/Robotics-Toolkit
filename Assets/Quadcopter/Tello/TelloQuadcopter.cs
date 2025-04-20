@@ -6,27 +6,27 @@ using UnityEngine;
 namespace  FlightControllers.Quadcopters
 {
     /// <summary>
-    /// Quadcopter class to control the real world DJI Tello
+    /// Quadcopter class to control the real world DJI RemoteQuadcopter
     /// Uses the <see cref="Tello"/> library to send and recieve data from the craft
     /// </summary>
     public class TelloQuadcopter : Quadcopter
     {
         /// <summary>
-        /// Video feed to display the camera from the Tello
+        /// Video feed to display the camera from the RemoteQuadcopter
         /// </summary>
         [SerializeField]private TelloVideoFeed _videoFeed;
 
         /// <summary>
-        /// Is the Tello tracking accurate this frame?
+        /// Is the RemoteQuadcopter tracking accurate this frame?
         /// </summary>
         /// <remarks>
-        /// In poor lighting conditions or for no reason at all sometimes the position tracking of the Tello is way off
+        /// In poor lighting conditions or for no reason at all sometimes the position tracking of the RemoteQuadcopter is way off
         /// The deltaposition from the last valid frame is used to determine if there is an unreasonable jump
         /// </remarks>
         private bool validTrackingFrame;
 
         /// <summary>
-        /// The current connection state with the Tello, must be <see cref="Tello.ConnectionState.Connected"/> to control
+        /// The current connection state with the RemoteQuadcopter, must be <see cref="Tello.ConnectionState.Connected"/> to control
         /// </summary>
         public Tello.ConnectionState connectionState;
 
@@ -34,8 +34,8 @@ namespace  FlightControllers.Quadcopters
         /// The offset of the tracking values when tracking first achieved after liftoff
         /// </summary>
         /// <remarks>
-        /// This is a weird bug either with the <see cref="Tello"/> library or the Tello itself
-        /// When you take off the position of the Tello is (0,0,0)
+        /// This is a weird bug either with the <see cref="Tello"/> library or the RemoteQuadcopter itself
+        /// When you take off the position of the RemoteQuadcopter is (0,0,0)
         /// Once it achieves its hover, a huge and random offset is applied to the position, which needs to be accounted for for all 
         /// future positioning data
         /// </remarks>
@@ -51,7 +51,7 @@ namespace  FlightControllers.Quadcopters
         [SerializeField]
         private Transform _takeOffGround;
         /// <summary>
-        /// Quad representation of where the Tello sensor thinks the ground is, set continuously
+        /// Quad representation of where the RemoteQuadcopter sensor thinks the ground is, set continuously
         /// </summary>
         [SerializeField]
         private Transform _sensorGround;
@@ -101,7 +101,7 @@ namespace  FlightControllers.Quadcopters
             //}
         }
         /// <summary>
-        /// Sent the Inputs from either the <see cref="PilotInputs"/> or <see cref="IAutoPilot"/> to the Tello
+        /// Sent the Inputs from either the <see cref="PilotInputs"/> or <see cref="IAutoPilot"/> to the RemoteQuadcopter
         /// </summary>
         public void SendTelloInputs()
         {
@@ -112,11 +112,11 @@ namespace  FlightControllers.Quadcopters
         }
 
         /// <summary>
-        /// Check to see if the Tello has finished its auto takeoff
+        /// Check to see if the RemoteQuadcopter has finished its auto takeoff
         /// </summary>
         /// <remarks>
-        /// This is a weird but either with the <see cref="Tello"/> library or the Tello itself
-        /// When you take off the position of the Tello is (0,0,0)
+        /// This is a weird but either with the <see cref="Tello"/> library or the RemoteQuadcopter itself
+        /// When you take off the position of the RemoteQuadcopter is (0,0,0)
         /// Once it achieves its hover hover, a huge and random offset is applied to the position, which needs to be accounted for
         /// Also difficult to determin when this happens. <see cref="flymode"/> used to work but as of 3.0 it isnt realiable unless you also check for <see cref="flying"/>
         /// And even that isnt great as there is a long delay
@@ -144,7 +144,7 @@ namespace  FlightControllers.Quadcopters
             }
         }
         /// <summary>
-        /// Set the <see cref="sensorGround"/> position to viusalize where the Tello thinks the ground is
+        /// Set the <see cref="sensorGround"/> position to viusalize where the RemoteQuadcopter thinks the ground is
         /// </summary>
         public void SetSensorGround()
         {
@@ -155,9 +155,9 @@ namespace  FlightControllers.Quadcopters
         }
 
         /// <summary>
-        /// Get the current position of the Tello, taking into account the <see cref="_trackingFoundOffset"/> described in <see cref="CheckForLaunchComplete"/>
+        /// Get the current position of the RemoteQuadcopter, taking into account the <see cref="_trackingFoundOffset"/> described in <see cref="CheckForLaunchComplete"/>
         /// </summary>
-        /// <returns>The Global Postion of the Tello</returns>
+        /// <returns>The Global Postion of the RemoteQuadcopter</returns>
         public Vector3 GetCurrentPos()
         {
            // return new Vector3(posX - _trackingFoundOffset.x, posY - _trackingFoundOffset.y + _elevationOffset, posZ - _trackingFoundOffset.z);
@@ -165,10 +165,10 @@ namespace  FlightControllers.Quadcopters
         }
 
         /// <summary>
-        /// Store all the information from the Tello package locally
+        /// Store all the information from the RemoteQuadcopter package locally
         /// </summary>
         /// <remmarks>
-        /// Not all values are guaranteed to work or be accurate, they come from Tello and <see cref="Tello"/> library
+        /// Not all values are guaranteed to work or be accurate, they come from RemoteQuadcopter and <see cref="Tello"/> library
         /// </remmarks>
         public void SyncDataWithTello()
         {
@@ -233,7 +233,7 @@ namespace  FlightControllers.Quadcopters
         public float velY { get; private set; }
 
         /// <summary>
-        /// Set the position of the virtual Tello in the Unity environment
+        /// Set the position of the virtual RemoteQuadcopter in the Unity environment
         /// </summary>
         /// <returns>Is this an accurate frame, <see cref="validTrackingFrame"/> </returns>
         public bool SetVirtualTelloPosition()
@@ -270,7 +270,7 @@ namespace  FlightControllers.Quadcopters
         }
 
         /// <summary>
-        /// Launch the Tello via its auto liftoff feature
+        /// Launch the RemoteQuadcopter via its auto liftoff feature
         /// </summary>
         public override bool AttemptTakeoff()
         {
@@ -289,7 +289,7 @@ namespace  FlightControllers.Quadcopters
             }
         }
         /// <summary>
-        /// AttemptLand the Tello via its auto land feature
+        /// AttemptLand the RemoteQuadcopter via its auto land feature
         /// </summary>
         public override bool AttemptLand()
         {
@@ -315,20 +315,20 @@ namespace  FlightControllers.Quadcopters
             base.OnDestroy();
             if(connectionState == Tello.ConnectionState.Connecting)
             {
-                //Tello.stopConnecting();
+                //RemoteQuadcopter.stopConnecting();
             }
-          //  Tello.onConnection -= Tello_onStateChanged;
-           // Tello.onUpdate -= Tello_onUpdate;
-            //if(connectionState == Tello.ConnectionState.Connected)
+          //  RemoteQuadcopter.onConnection -= Tello_onStateChanged;
+           // RemoteQuadcopter.onUpdate -= Tello_onUpdate;
+            //if(connectionState == RemoteQuadcopter.ConnectionState.Connected)
             //{
-            //   Tello.sto
+            //   RemoteQuadcopter.sto
             //}
             Tello.stopConnecting();
         }
 
 
 
-        //Tello api, public so they can be seen in inspector
+        //RemoteQuadcopter api, public so they can be seen in inspector
         public bool flying;
         public bool hover;
         public float posUncertainty;

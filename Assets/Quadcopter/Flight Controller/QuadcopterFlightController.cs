@@ -26,8 +26,9 @@ namespace FlightControllers.Quadcopters
             {
                 return;
             }
+            Debug.Log("Flight Controller Initialized : " + name);
 
-         this.quadToControl = quadToControl;
+            this.quadToControl = quadToControl;
             _isInitialized = true;
             OnInitialized();
 

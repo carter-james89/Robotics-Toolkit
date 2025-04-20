@@ -547,7 +547,7 @@ namespace TelloLib
                                 requestIframe();
                                 //for(int i=74;i<80;i++)
                                 //queryUnk(i);
-                                //Console.WriteLine("Tello connected!");
+                                //Console.WriteLine("RemoteQuadcopter connected!");
                                 continue;
                             }
                         }

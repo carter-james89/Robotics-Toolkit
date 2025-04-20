@@ -4,11 +4,11 @@ using UnityEngine;
 namespace FlightControllers.Quadcopters
 {
     /// <summary>
-    /// A simulator Quadcopter meant to replicate the DJI Tello
-    /// Can be used to test <see cref="IAutoPilot"/> or any new features without destroying Tello
+    /// A simulator Quadcopter meant to replicate the DJI RemoteQuadcopter
+    /// Can be used to test <see cref="IAutoPilot"/> or any new features without destroying RemoteQuadcopter
     /// </summary>
     /// <remarks>
-    /// Tried my best to tune the simulator to match real life Tello, but dont expect PID tunings for simulator to work for Tello
+    /// Tried my best to tune the simulator to match real life RemoteQuadcopter, but dont expect PID tunings for simulator to work for RemoteQuadcopter
     /// </remarks>
     public class SimulationQuadcopter : Quadcopter
     {
@@ -89,7 +89,7 @@ namespace FlightControllers.Quadcopters
         /// All the physics for the simulator
         /// </summary>
         /// <remarks>
-        /// Tried my best to tune the simulator to match real life Tello, but dont expect PID tunings for simulator to work for Tello
+        /// Tried my best to tune the simulator to match real life RemoteQuadcopter, but dont expect PID tunings for simulator to work for RemoteQuadcopter
         /// </remarks>
         public void FixedUpdate()
         {

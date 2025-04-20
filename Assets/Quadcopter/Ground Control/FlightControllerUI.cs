@@ -32,23 +32,16 @@ public class FlightControllerUI : MonoBehaviour
 
         switch (_quadcopterGroundControl.GetGroundControlMode())
         {
-            case QuadcopterGroundControl.GroundControlMode.Tello:
-                _quadOptions.value = (int)QuadcopterGroundControl.GroundControlMode.Tello;
+            case QuadcopterGroundControl.GroundControlMode.RemoteQuadcopter:
+                _quadOptions.value = (int)QuadcopterGroundControl.GroundControlMode.RemoteQuadcopter;
                 break;
-            case QuadcopterGroundControl.GroundControlMode.TelloSim:
-                _quadOptions.value = (int)QuadcopterGroundControl.GroundControlMode.TelloSim;
+            case QuadcopterGroundControl.GroundControlMode.SiimulatedQuadcopter:
+                _quadOptions.value = (int)QuadcopterGroundControl.GroundControlMode.SiimulatedQuadcopter;
                 break;
-            case QuadcopterGroundControl.GroundControlMode.TelloSimBoth:
-                _quadOptions.value = (int)QuadcopterGroundControl.GroundControlMode.TelloSimBoth;
+            case QuadcopterGroundControl.GroundControlMode.Both:
+                _quadOptions.value = (int)QuadcopterGroundControl.GroundControlMode.Both;
                 break;
-            case QuadcopterGroundControl.GroundControlMode.Picopter:
-                break;
-            case QuadcopterGroundControl.GroundControlMode.PicopterSim:
-                break;
-            case QuadcopterGroundControl.GroundControlMode.Ardupilot:
-                break;
-            case QuadcopterGroundControl.GroundControlMode.ArdupilotSim:
-                break;
+     
             default:
                 break;
         }

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace FlightControllers.Quadcopters
 {
     /// <summary>
-    /// Controller which controls the Game UI, and displays the Tello's video feed to a texture
+    /// Controller which controls the Game UI, and displays the RemoteQuadcopter's video feed to a texture
     /// </summary>
     public class TelloVideoFeed : MonoBehaviour
     {

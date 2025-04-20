@@ -195,7 +195,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tello Quadcopter
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 219615728542688949, guid: ad6902574f2eeab43af4fe08972218b7, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

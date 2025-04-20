@@ -1,4 +1,5 @@
 using System;
+using Toolkit.Utilities.Events;
 using UnityEngine;
 
 namespace  FlightControllers.Quadcopters
@@ -18,9 +19,15 @@ namespace  FlightControllers.Quadcopters
         /// </summary>
         private bool autoPilotActive = false;
 
+        private InterfaceEventManager<AutoPilotEventData> _eventListeners = new InterfaceEventManager<AutoPilotEventData>();
+        private void NotifyEventListners(AutoPilotEventType eventType)
+        {
+            _eventListeners.RaiseEvent(new AutoPilotEventData(eventType, this));
+        }
+
         private void Awake()
         {
-            DeactivateAutoPilot();
+           // DeactivateAutoPilot();
         }
 
         /// <summary>
@@ -35,6 +42,14 @@ namespace  FlightControllers.Quadcopters
                 return;
             }
             this.quadToControl = quadToControl;
+            OnInitialized();
+            NotifyEventListners(AutoPilotEventType.OnAutoPilotInitialized);
+
+        }
+        protected virtual void OnInitialized()
+        {
+            // This is called after the autopilot has been initialized
+            // Override this method to add functionality
         }
 
         public IQuadcopter GetQuadcopterToControl()
@@ -89,6 +104,7 @@ namespace  FlightControllers.Quadcopters
                 MatchQuadTransform();
                 quadToControl.OverrideInputSource(this);
                 OnAutoPilotActivated();
+                NotifyEventListners(AutoPilotEventType.OnAutoPilotEngaged);
             }
         }
         /// <summary>
@@ -107,6 +123,7 @@ namespace  FlightControllers.Quadcopters
                 autoPilotActive = false;
                 quadToControl.RemoveInputOverride(this);
                 OnAutoPilotDeactivated();
+                NotifyEventListners(AutoPilotEventType.OnAutoPilotDisEngaged);
             }
             gameObject.SetActive(false);
         }
@@ -136,6 +153,7 @@ namespace  FlightControllers.Quadcopters
         /// </summary>
         protected void MatchQuadTransform()
         {
+            Debug.Log("Move Autopilot to transfrom to : " + quadToControl.GetGameObject().name);
             transform.position = quadToControl.GetGameObject().transform.position;
             SetAutoPilotRot(quadToControl.GetGameObject().transform.rotation);
         }
@@ -160,6 +178,27 @@ namespace  FlightControllers.Quadcopters
         public void Abort()
         {
             DeactivateAutoPilot();
+        }
+
+        public void SubscribeToEvents(IEventListener<AutoPilotEventData> listenerToSubscribe)
+        {
+         _eventListeners.AddListener(listenerToSubscribe);
+        }
+
+        public void UnsubscribeFromEvents(IEventListener<AutoPilotEventData> listenerToUnsubscribe)
+        {
+          _eventListeners.RemoveListener(listenerToUnsubscribe);
+        }
+
+        public Component GetComponent()
+        {
+            return this;
+        }
+
+        public void PositionAutoPilot(Vector3 globalPosition, Quaternion globalRotation)
+        {
+            transform.position = globalPosition;
+            transform.rotation = globalRotation;
         }
     }
 }
