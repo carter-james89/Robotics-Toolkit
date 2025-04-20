@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.MLAgents;
@@ -28,11 +29,27 @@ namespace FlightControllers.Quadcopters
             if (_autoPilotAgent.IsTraining()) 
             {
                // _quadcopterToControl.transform.localPosition = new Vector3(0, 0.5f, 0);
-                quadToControl.AttemptTakeoff();
-                ActivateAutoPilot();
-                _autoPilotAgent.SetNewTarget(transform);
+           
+                _autoPilotAgent.OnEpisodeBeginEvent.AddListener(OnEpisodeBegin);
+                _autoPilotAgent.OnEpisodeCompleteEvent.AddListener(OnEpisodeComplete);
             }
 
+        }
+
+        private void OnEpisodeBegin()
+        {
+            Debug.Log("Got Episode Begin"); 
+            quadToControl.AttemptTakeoff();
+            ActivateAutoPilot();
+            _autoPilotAgent.SetNewTarget(transform);
+        }
+
+        private void OnEpisodeComplete()
+        {
+            Debug.Log("Got Episode End");
+            DeactivateAutoPilot();
+            quadToControl.AttemptLand();
+            quadToControl.GetGameObject().transform.localPosition = Vector3.zero;
         }
 
         public override IInputSource.FlightControlValues Run()

@@ -100,7 +100,7 @@ namespace  FlightControllers.Quadcopters
             if (!autoPilotActive)
             {
                 autoPilotActive = true;
-                gameObject.SetActive(true);
+               // gameObject.SetActive(true);
                 MatchQuadTransform();
                 quadToControl.OverrideInputSource(this);
                 OnAutoPilotActivated();
@@ -125,7 +125,7 @@ namespace  FlightControllers.Quadcopters
                 OnAutoPilotDeactivated();
                 NotifyEventListners(AutoPilotEventType.OnAutoPilotDisEngaged);
             }
-            gameObject.SetActive(false);
+          //  gameObject.SetActive(false);
         }
         /// <summary>
         /// Called when autopilot has been deactivated

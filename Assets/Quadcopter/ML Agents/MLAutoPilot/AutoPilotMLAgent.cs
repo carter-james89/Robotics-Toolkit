@@ -2,6 +2,7 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace FlightControllers.Quadcopters
 {
@@ -28,6 +29,9 @@ namespace FlightControllers.Quadcopters
         private float _outOfYawRangeSeconds;
         [SerializeField] private float m_episodeRewards;
 
+        public UnityEvent OnEpisodeBeginEvent;
+        public UnityEvent OnEpisodeCompleteEvent;
+
         public void Initialize(IAutoPilot autoPilot)
         {
             Debug.Log("Initialize ML Agent");
@@ -39,7 +43,7 @@ namespace FlightControllers.Quadcopters
             _quadcopterInitialized = true;
 
 
-            if (_isTraining)
+            if (!_isTraining)
             {
                 MaxStep = 0;
                 //  _autoPilotAgent.Initialize(this);
@@ -64,12 +68,9 @@ namespace FlightControllers.Quadcopters
 
             if (!_firstFlight)
             {
-                _autoPilot.DeactivateAutoPilot();
-                _quadcopterToControl.AttemptLand();
-
-                _flightControlValues = new IInputSource.FlightControlValues();
-                _quadcopterToControl.transform.localPosition = Vector3.zero;
+                EndTheEpisode(m_atTarget ? 10f : -10f);
             }
+        
 
             _firstFlight = false;
             _achievedWaypoints = 0;
@@ -77,15 +78,15 @@ namespace FlightControllers.Quadcopters
             _outOfYawRangeSeconds = 0;
             _flying = false;
             _inYawRange = false;
-      
-         
+
+            OnEpisodeBeginEvent?.Invoke();
         }
 
         public override void CollectObservations(VectorSensor sensor)
         {
-            if(_autoPilot == null)
+            if (_autoPilot == null)
             {
-               // Debug.LogError("AutoPilot is null");
+                // Debug.LogError("AutoPilot is null");
                 return;
             }
             Vector3 relativePos = _autoPilot.transform.InverseTransformPoint(_quadcopterToControl.transform.position);
@@ -104,11 +105,11 @@ namespace FlightControllers.Quadcopters
         {
             _flightControlValues.yaw = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
 
-         //   Debug.Log("ML Action Receieved);");
+            //   Debug.Log("ML Action Receieved);");
 
             if (_inYawRange)
             {
-             //   Debug.Log("apply values");
+                //   Debug.Log("apply values");
                 _flightControlValues.throttle = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
                 _flightControlValues.pitch = Mathf.Clamp(actions.ContinuousActions[2], -1f, 1f);
                 _flightControlValues.roll = Mathf.Clamp(actions.ContinuousActions[3], -1f, 1f);
@@ -123,6 +124,7 @@ namespace FlightControllers.Quadcopters
 
         private void CalculateRewards(float dist)
         {
+         //   Debug.Log("Calculate Rewards");
             float stepReward = 0f;
 
             Vector3 posAgent = _quadcopterToControl.transform.position;
@@ -147,26 +149,26 @@ namespace FlightControllers.Quadcopters
                 }
             }
 
-                if (forwardError < 5f)
-                {
-                    _inYawRange = true;
-                    _outOfYawRangeSeconds = 0f;
-                    _groundRenderer.material.color = Color.yellow;
-                    stepReward += 0.01f;
-                }
-                else
-                {
-                    _inYawRange = false;
-                    _outOfYawRangeSeconds += Time.fixedDeltaTime;
-                }
-            
-         
+            if (forwardError < 5f)
+            {
+                _inYawRange = true;
+                _outOfYawRangeSeconds = 0f;
+                _groundRenderer.material.color = Color.yellow;
+                stepReward += 0.01f;
+            }
+            else
+            {
+                _inYawRange = false;
+                _outOfYawRangeSeconds += Time.fixedDeltaTime;
+            }
+
+
 
             if (dist < 0.03f && forwardError < 5f)
             {
                 m_atTarget = true;
                 _groundRenderer.material.color = Color.green;
-               // stepReward += proximityReward * 0.01f;
+                // stepReward += proximityReward * 0.01f;
 
                 // Reward for being stable (velocity near zero)
                 float speed = _quadcopterToControl.GetSensorData().LinearVelocityVector.magnitude;
@@ -187,17 +189,22 @@ namespace FlightControllers.Quadcopters
             AddReward(stepReward);
             m_episodeRewards = GetCumulativeReward();
 
-            if (StepCount == MaxStep)
-            {
-                _groundRenderer.material.color = Color.gray;
-                EndTheEpisode(m_atTarget ? 10f : -10f);
-            }
+            //if (StepCount == MaxStep )
+            //{
+            //    _groundRenderer.material.color = Color.gray;
+            //    EndTheEpisode(m_atTarget ? 10f : -10f);
+            //}
         }
+
+        
 
         private void EndTheEpisode(float reward)
         {
-            AddReward(reward);
-            EndEpisode();
+            Debug.Log("End Episode");
+            //AddReward(reward);
+            //EndEpisode();
+            _flightControlValues = new IInputSource.FlightControlValues();
+            OnEpisodeCompleteEvent?.Invoke();
         }
 
         public void SetNewTarget(Transform transformToSet)

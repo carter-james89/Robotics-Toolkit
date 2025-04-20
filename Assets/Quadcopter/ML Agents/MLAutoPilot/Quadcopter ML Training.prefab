@@ -463,12 +463,12 @@ Transform:
   m_GameObject: {fileID: 2759996085614797585}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.29467744, y: 2.2120452, z: -0.06306614}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3751949655042578430}
-  m_Father: {fileID: 5425402972330516416}
+  m_Father: {fileID: 2932028778778450447}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3400610855606968908
 GameObject:
@@ -815,7 +815,6 @@ Transform:
   m_Children:
   - {fileID: 2156885198771049389}
   - {fileID: 3715738755758699979}
-  - {fileID: 2768399598126410514}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6641303407292906300
@@ -1037,6 +1036,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5425402972330516416}
     m_Modifications:
+    - target: {fileID: 678990585727800070, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1203115709369066619, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -1117,6 +1120,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -305
       objectReference: {fileID: 0}
+    - target: {fileID: 3094764061827323648, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 3382632760385307338, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -1184,6 +1191,18 @@ PrefabInstance:
     - target: {fileID: 4541352041865366736, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -145
+      objectReference: {fileID: 0}
+    - target: {fileID: 4576999546423454491, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4902373685801191998, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5258115108935702063, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5823195374201349197, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1288,6 +1307,10 @@ PrefabInstance:
     - target: {fileID: 6976596480676096541, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
       propertyPath: m_Name
       value: Tello Ground Control
+      objectReference: {fileID: 0}
+    - target: {fileID: 7266561385691753759, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7365020794552724956, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1397,6 +1420,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8720459667679436817, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8953436446894870188, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
@@ -1431,7 +1458,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6529537655503663836, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2768399598126410514}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
 --- !u!114 &246972666764270793 stripped
@@ -1459,5 +1489,10 @@ MonoBehaviour:
 --- !u!4 &2156885198771049389 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8053545462848895870, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
+  m_PrefabInstance: {fileID: 8227297261036169427}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2932028778778450447 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6529537655503663836, guid: 8aa9f8e12ecf0d74fabd4a00e6054d61, type: 3}
   m_PrefabInstance: {fileID: 8227297261036169427}
   m_PrefabAsset: {fileID: 0}

@@ -10,7 +10,6 @@ namespace FlightControllers.Quadcopters
     /// </summary>
     public class SimulatedOnboardFlightController : QuadcopterFlightController
     {
-
         private Rigidbody simulatedRB;
         private Action<FlightStatus> _onFlightStatusChanged;
 
@@ -21,16 +20,12 @@ namespace FlightControllers.Quadcopters
         private IInputSource.FlightControlValues _craftInputs;
         private FlightStatus _flightStatus;
 
-
-
         /// <inheritdoc/>
         public override bool IsReadyToFly() => true;
 
         /// <inheritdoc/>
         protected override void OnInitialized()
         {
-
-
             var physicsSimulator = new GameObject("Simulation Physics Simulation");
             physicsSimulator.transform.SetParent(quadToControl.GetLocalTrackingSpace());
             physicsSimulator.transform.position = quadToControl.GetGameObject().transform.position;
@@ -42,13 +37,10 @@ namespace FlightControllers.Quadcopters
             simulatedRB.useGravity = quadRB.useGravity;
             simulatedRB.interpolation = quadRB.interpolation;
             simulatedRB.collisionDetectionMode = quadRB.collisionDetectionMode;
-            //  rigidBody.useGravity = false;
 
             var boxCollider = simulatedRB.gameObject.AddComponent<BoxCollider>();
             boxCollider.size = quadToControl.GetGameObject().GetComponent<BoxCollider>().size;
             boxCollider.center = quadToControl.GetGameObject().GetComponent<BoxCollider>().center;
-
-
 
             Time.timeScale = timeSpeed;
             _isInitialized = true;
@@ -92,7 +84,8 @@ namespace FlightControllers.Quadcopters
         /// <inheritdoc/>
         public override bool AttemptTakeoff()
         {
-            simulatedRB.Move(simulatedRB.transform.position + new Vector3(0, 0.8f, 0), transform.rotation);
+            transform.position += new Vector3(0, 0.8f, 0);
+            //simulatedRB.Move(simulatedRB.transform.position + new Vector3(0, 0.8f, 0), transform.rotation);
             simulatedRB.transform.position = quadToControl.GetGameObject().transform.position;
             simulatedRB.useGravity = true;
             simulatedRB.linearVelocity = Vector3.zero;
