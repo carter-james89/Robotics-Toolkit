@@ -1036,7 +1036,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d28d799bff811414a8614b7dc5ab39e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceType: 2
+  _instanceType: 0
   _controllerEnvironment: {fileID: 471254780}
   _physicalEnvironment: {fileID: 734930946}
   _simulatedEnvironment: {fileID: 253949327}

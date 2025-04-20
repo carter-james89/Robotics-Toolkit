@@ -3,11 +3,7 @@ using UnityEngine;
 
 namespace RoboticsToolkit.Robotics.Gaits
 {
-    public struct GaitCycleInfo
-    {
-        public int[] RotatingLimbs;
-        public int[] TranslatingLimbs;
-    }
+
     public class CrawlGait : Gait
     {
         private int _rotatingLimb = 0;

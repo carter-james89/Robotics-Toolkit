@@ -39,7 +39,6 @@ namespace RoboticsToolkit.Robotics
 
         public void SetLimbs(LimbValues[] limbData);
 
-        public GameObject GetGameObject();
         public IRoboticLimb[] GetLimbs();
         public RobotData GetRobotData();
 
@@ -49,8 +48,6 @@ namespace RoboticsToolkit.Robotics
 
         public void ResetController();
 
-        public void SubscribeToEvents(RobotEventData listener);
-        public void UnsubscribeToEvents(RobotEventData listener);
     }
     public enum RobotEventType
     {

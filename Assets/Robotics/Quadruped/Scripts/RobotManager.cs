@@ -1,7 +1,4 @@
-using RoboticsToolkit.Robotics.QuadrupedRobot;
 using RoboticsToolkit.Robotics.RoboticControllers;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Toolkit.Utilities.Events;
 using UnityEngine.Assertions;
@@ -27,15 +24,9 @@ namespace RoboticsToolkit.Robotics
         private IRobot _physcialRobot;
         private IRobot _simulatedRobot;
 
-        [SerializeField]
-        private float _hipHeight = .085f;
-
-    
-
+        [SerializeField] private float _hipHeight = .085f;
 
         private bool _ready = false;
-
-        //  private 
 
         private void Awake()
         {
@@ -47,7 +38,7 @@ namespace RoboticsToolkit.Robotics
         {
             _roboticController = _controllerEnvironment.GetController();
             _roboticController.SubscribeToEvents(this);
-            // _controller.SetH
+
             _simulatedEnvironment.gameObject.SetActive(false);
            _physicalEnvironment.gameObject.SetActive(false);
             Debug.Log("Start Manager in mode : " + _instanceType);
@@ -129,10 +120,10 @@ namespace RoboticsToolkit.Robotics
            // _roboticController.Initialize(_simulatedRobot);
         }
 
-        private void ManagerReady()
-        {
-            _roboticController.Initialize(_simulatedRobot);
-        }
+        //private void ManagerReady()
+        //{
+        //    _roboticController.Initialize(_simulatedRobot);
+        //}
 
         public void OnEventOccured(RobotEventData eventData)
         {
@@ -188,7 +179,7 @@ namespace RoboticsToolkit.Robotics
 
    
         private bool _bootupComplete = false;
-        public void OnControllerEventOccured(QuadrupedRoboticControllerEventData eventData)
+        public void OnEventOccured(QuadrupedRoboticControllerEventData eventData)
         {
           //  if (_instanceType == InstanceType.Simulation)
             {
@@ -206,7 +197,7 @@ namespace RoboticsToolkit.Robotics
                             //  (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .03f, .01f, .04f);
                             //(_gaitController as GaitController).TrotForward(IKLimbPositioners, .015f, .05f, .01f);
                             // ManagerReady();
-                             (_roboticController as DynamicRoboticController).BeginCrawl();
+                            // (_roboticController as DynamicRoboticController).BeginCrawl();
                             //(_roboticController as DynamicRoboticController).BeginTrot();
                         }
                         break;
@@ -214,11 +205,6 @@ namespace RoboticsToolkit.Robotics
                         break;
                 }
             }
-        }
-
-        public void OnEventOccured(QuadrupedRoboticControllerEventData eventData)
-        {
-         
         }
 
         public GameObject GetGameObject()

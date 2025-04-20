@@ -2,20 +2,14 @@ using RoboticsToolkit.Robotics;
 using RoboticsToolkit.Robotics.Gaits;
 using RoboticsToolkit.Robotics.Limbs;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Toolkit.Utilities.Events;
 using UnityEngine;
 using RoboticsToolkit.Robotics.RoboticControllers;
-using UnityEngine.UIElements;
-
-
 
 public class DynamicRoboticController : MonoBehaviour, IRoboticController, IEventListener<RobotEventData>
 {
     private InterfaceEventManager<QuadrupedRoboticControllerEventData> _eventManager = new InterfaceEventManager<QuadrupedRoboticControllerEventData>("Controlelr");
-    // private IQuadruped _quadruped;
 
     private QuadrupedLeg m_frMirrorLeg;
     private QuadrupedLeg m_flMirrorLeg;
@@ -68,17 +62,12 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IEven
 
     private IRobot _robot;
 
-    [SerializeField]
-    private float _hipHeight = .085f;
-    //public void SetHipHeight(float hipHeight)
-    //{
-    //    _hipHeight = hipHeight;
-    //}
+    [SerializeField]private float _hipHeight = .085f;
 
     public void BeginCrawl()
     {
-        (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .04f, .5f, 0);// .06f);
-       // (_gaitController as GaitController).PerformHighStep(GaitType.Crawl, .03f, .005f);
+        //(_gaitController as GaitController).CrawlForward(IKLimbPositioners, .04f, .5f, 0);// .06f);
+       _gaitController.PerformHighStep(GaitType.Crawl, .03f, .005f);
     }
 
     private enum Status
@@ -250,7 +239,6 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IEven
             return null;
         }
 
-        // transform.parent.position = _robot.GetGameObject().transform.position + new Vector3(0, .14f,0);
         var tempPos = transform.localPosition;
         tempPos.y = _robot.GetGameObject().transform.localPosition.y;
         transform.localPosition = tempPos;
@@ -265,8 +253,6 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IEven
             m_ikTargets.localEulerAngles = tempRot;
             var targetRot = transform.eulerAngles;
             targetRot.y = 0;
-            //  m_ikTargets.localRotation = Quaternion.Lerp(m_ikTargets.localRotation, Quaternion.Euler(targetRot), Time.deltaTime*_activeBalanceSpeed);
-
         }
         else
         {
@@ -341,6 +327,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IEven
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            BeginCrawl();
             //  (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .02f, .05f, .06f);
            // (_gaitController as GaitController).
         }

@@ -113,5 +113,16 @@ namespace RoboticsToolkit.Robotics.Gaits
         {
             throw new System.NotImplementedException();
         }
+
+        ///<inheritdoc/>
+        public GameObject GetGameObject()
+        {
+            return this == null ? null : gameObject;
+        }
+        ///<inheritdoc/>
+        public Component GetComponent()
+        {
+            return this;
+        }
     }
 }

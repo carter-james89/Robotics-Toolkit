@@ -8,34 +8,22 @@ using UnityEngine;
 
 namespace RoboticsToolkit.Robotics.Gaits
 {
-    public enum GaitType
-    {
-        Crawl,
-        Trot,
-    }
     public class GaitController : MonoBehaviour, IGaitController, IEventListener<GaitEventData>
     {
         private IRoboticLimb[] _puppetLimbs;
         private ILimbPositioner[] _limbPositioners;
-        // private IRobot m_robot;
 
         private bool m_postStrideCooldown = false;
         private float m_postStrideCooldownTime = 0;
         private float m_postStrideCooldownTargetTime = 1f;
-
-
-
 
         private Vector3 _currentWalkDirection;
         private bool _rotating = false;
 
 
         private IGait m_trotGait = new TrotGait();
-
         private IGait m_crawlGait = new CrawlGait();
-
         private bool m_beginReturnHome = false;
-
         private IGait m_activeGait;
 
         private IGaitController.GaitPattern m_currentPattern = IGaitController.GaitPattern.NONE;

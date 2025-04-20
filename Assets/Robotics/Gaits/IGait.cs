@@ -7,6 +7,11 @@ using UnityEngine;
 
 namespace RoboticsToolkit.Robotics.Gaits
 {
+    public struct GaitCycleInfo
+    {
+        public int[] RotatingLimbs;
+        public int[] TranslatingLimbs;
+    }
     public enum GaitEventType
     {
         OnGaitCycleBegin,

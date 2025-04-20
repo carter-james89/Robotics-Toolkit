@@ -3,72 +3,47 @@ using Toolkit.Utilities.Events;
 
 namespace RoboticsToolkit.Robotics.Gaits
 {
+    /// <summary>
+    /// Handles movement of an IK target for a robotic limb using arc-based rotation or linear translation.
+    /// Reports status and progress through event dispatching.
+    /// </summary>
     public class AdvancedLimbPositioner : MonoBehaviour, ILimbPositioner
     {
-        [SerializeField]
-        private Transform _targetEndPoint;
+        [SerializeField] private Transform _targetEndPoint;
         public Transform _ikTarget;
+
+        [Tooltip("Movement speed in units per second.")]
         public float speed = 1.0f;
+
+        [Tooltip("Arc height in units used for rotating/stepping.")]
         public float arcHeight = 1.0f;
 
+        /// <summary>
+        /// Represents the current movement mode.
+        /// </summary>
+        public enum Status { None, Translating, Rotating }
+
+        public Status CurrentStatus { get; private set; } = Status.None;
+
         private bool isMoving = false;
+        private bool _useEasing = false;
+
         private Vector3 startPosition;
         private Vector3 endPosition;
         private float trajectoryDuration;
         private float elapsedTime;
 
-        public Vector3 GetTargetGlobalPosition()
-        {
-            return _ikTarget.position;
-        }
+        private readonly InterfaceEventManager<LimbPositionerEventData> _eventManager =
+            new InterfaceEventManager<LimbPositionerEventData>("Advanced Limb Positioner");
 
-        public enum Status
-        {
-            None,
-            Translating,
-            Rotating,
-        }
-        public Status CurrentStatus { get; private set; } = Status.None;
+        #region Movement Setup
 
-        private InterfaceEventManager<LimbPositionerEventData> _eventManager = new InterfaceEventManager<LimbPositionerEventData>("Advanced Limb Positioner");
-        private bool _useEasing = false;
-
-        void Update()
-        {
-      
-        }
-
-        private float CalculateArcDistance(float horizontalDistance, float height)
-        {
-            Debug.Log("Calculate arc with horizontal distance : " + horizontalDistance + " - height " + height);
-
-            // If horizontal distance is zero, return double the height (up and down)
-            if (horizontalDistance < .01f)
-            {
-                Debug.Log("CalculatedArcDistance " + 2 * height);
-                return 2 * height;
-            }
-
-            // Check if height is negligible
-            if (Mathf.Approximately(height, 0f))
-            {
-                Debug.Log("CalculatedArcDistance " + horizontalDistance);
-                return horizontalDistance;
-            }
-
-            // Calculate the arc distance using an approximation
-            // This is a simplified formula and works well for small heights relative to the horizontal distance
-            float h = height; // Maximum height of the arc
-            float l = horizontalDistance; // Base length of the arc
-
-            // The formula for arc length in a parabolic trajectory
-            float arcDistance = l * (1 + (2 * h / l) * (2 * h / l));
-
-            Debug.Log("CalculatedArcDistance " + arcDistance);
-            return arcDistance;
-        }
-
-
+        /// <summary>
+        /// Starts an arc-based movement to the target using a specified duration.
+        /// </summary>
+        /// <param name="position">Global target position.</param>
+        /// <param name="height">Arc height.</param>
+        /// <param name="seconds">Time to complete the move.</param>
         public void RotateToPositionViaTime(Vector3 position, float height, float seconds)
         {
             if (_ikTarget == null)
@@ -76,19 +51,26 @@ namespace RoboticsToolkit.Robotics.Gaits
                 Debug.LogError("IK Target is not assigned!");
                 return;
             }
-            Debug.Log("rotate to position in seconds : " + seconds);
-            // Calculate the horizontal distance
-            Vector3 startPositionLocal = _ikTarget.transform.localPosition;
-            Vector3 endPositionLocal = transform.InverseTransformPoint(position);
-            float horizontalDistance = Vector3.Distance(new Vector3(startPositionLocal.x, 0, startPositionLocal.z), new Vector3(endPositionLocal.x, 0, endPositionLocal.z));
-            float effectiveDistance = CalculateArcDistance(horizontalDistance,height);
-            // Calculate the speed (distance per second)
+
+            Vector3 startLocal = _ikTarget.transform.localPosition;
+            Vector3 endLocal = transform.InverseTransformPoint(position);
+
+            float horizontalDistance = Vector3.Distance(
+                new Vector3(startLocal.x, 0, startLocal.z),
+                new Vector3(endLocal.x, 0, endLocal.z));
+
+            float effectiveDistance = CalculateArcDistance(horizontalDistance, height);
             float calculatedSpeed = effectiveDistance / seconds;
-            Debug.Log("Calculated speed to acheive time " + calculatedSpeed);
-            // Call the existing RotateToPosition with the calculated speed
+
             RotateToPosition(position, calculatedSpeed, height);
         }
 
+        /// <summary>
+        /// Starts an arc-based rotation to the specified position.
+        /// </summary>
+        /// <param name="position">Global target position.</param>
+        /// <param name="speed">Speed of movement.</param>
+        /// <param name="height">Arc height.</param>
         public void RotateToPosition(Vector3 position, float speed, float height)
         {
             if (_ikTarget == null)
@@ -98,82 +80,28 @@ namespace RoboticsToolkit.Robotics.Gaits
             }
 
             _targetEndPoint.position = position;
-
             startPosition = _ikTarget.transform.localPosition;
             endPosition = transform.InverseTransformPoint(position);
             arcHeight = height;
             this.speed = speed;
 
-            // Calculate only the horizontal distance
-            float horizontalDistance = Vector3.Distance(new Vector3(startPosition.x, 0, startPosition.z), new Vector3(endPosition.x, 0, endPosition.z));
+            float horizontalDistance = Vector3.Distance(
+                new Vector3(startPosition.x, 0, startPosition.z),
+                new Vector3(endPosition.x, 0, endPosition.z));
 
-            // Include a portion of the arc height in the distance calculation
-            // This is a simplification. For more accuracy, especially for large arc heights, a more complex calculation would be needed.
             float effectiveDistance = CalculateArcDistance(horizontalDistance, arcHeight);
-            Debug.Log("effectiveDistance " + effectiveDistance);
-            Debug.Log("speed " + this.speed);
-            // Calculate trajectory duration based on the effective distance
             trajectoryDuration = effectiveDistance / speed;
-            Debug.Log("set trajecotry duration " + trajectoryDuration);
-            elapsedTime = 0;
+            elapsedTime = 0f;
+
             isMoving = true;
             CurrentStatus = Status.Rotating;
         }
 
-
-
-        private void MoveAlongArc()
-        {
-            if (_ikTarget == null)
-            {
-                return;
-            }
-
-            elapsedTime += Time.deltaTime;
-           // Debug.Log("ElipsedTime " + elapsedTime);
-           // Debug.Log("trajecotryDuration " + trajectoryDuration);
-            if (elapsedTime < trajectoryDuration)
-            {
-                float linearT = elapsedTime / trajectoryDuration;
-                float t = _useEasing ? 1 - (1 - linearT) * (1 - linearT) : linearT; // Apply easing if useEasing is true
-
-                float heightT;
-                if (startPosition == endPosition)
-                {
-                    // Vertical lift and descent
-                    if (linearT <= 0.5f)
-                    {
-                        heightT = Mathf.Lerp(0, arcHeight, linearT * 2);
-                    }
-                    else
-                    {
-                        heightT = Mathf.Lerp(arcHeight, 0, (linearT - 0.5f) * 2);
-                    }
-                }
-                else
-                {
-                    // Normal arc
-                    heightT = Mathf.Sin(Mathf.PI * linearT) * arcHeight;
-                }
-
-                Vector3 basePosition = Vector3.Lerp(startPosition, endPosition, t);
-                Vector3 arcPosition = basePosition + Vector3.up * heightT;
-
-                if (elapsedTime > 0)
-                {
-                    Vector3 previousPosition = Vector3.Lerp(startPosition, endPosition, t - Time.deltaTime / trajectoryDuration) + Vector3.up * heightT;
-                    Debug.DrawLine(previousPosition, arcPosition, Color.red);
-                }
-
-                _ikTarget.transform.localPosition = arcPosition;
-            }
-            else
-            {
-                AtTarget();
-            }
-        }
-
-
+        /// <summary>
+        /// Starts a direct translation to a position.
+        /// </summary>
+        /// <param name="position">Target global position.</param>
+        /// <param name="speed">Speed in units per second.</param>
         public void TranslateToPosition(Vector3 position, float speed)
         {
             if (_ikTarget == null)
@@ -187,25 +115,52 @@ namespace RoboticsToolkit.Robotics.Gaits
             endPosition = transform.InverseTransformPoint(position);
             this.speed = speed;
 
-            // Calculate the duration based on the distance to the new position and the speed
             float distance = Vector3.Distance(startPosition, endPosition);
             trajectoryDuration = distance / speed;
 
-            elapsedTime = 0;
+            elapsedTime = 0f;
             isMoving = true;
             CurrentStatus = Status.Translating;
         }
 
- 
-        private void MoveToPosition()
+        #endregion
+
+        #region Movement Execution
+
+        private void MoveAlongArc()
         {
-            if (_ikTarget == null)
-            {
-                return;
-            }
-            Debug.DrawLine(startPosition, endPosition, Color.green);
+            if (_ikTarget == null) return;
 
             elapsedTime += Time.deltaTime;
+
+            if (elapsedTime < trajectoryDuration)
+            {
+                float linearT = elapsedTime / trajectoryDuration;
+                float t = _useEasing ? 1 - (1 - linearT) * (1 - linearT) : linearT;
+
+                float heightT = (startPosition == endPosition)
+                    ? (linearT <= 0.5f
+                        ? Mathf.Lerp(0, arcHeight, linearT * 2)
+                        : Mathf.Lerp(arcHeight, 0, (linearT - 0.5f) * 2))
+                    : Mathf.Sin(Mathf.PI * linearT) * arcHeight;
+
+                Vector3 basePosition = Vector3.Lerp(startPosition, endPosition, t);
+                Vector3 arcPosition = basePosition + Vector3.up * heightT;
+
+                _ikTarget.transform.localPosition = arcPosition;
+            }
+            else
+            {
+                AtTarget();
+            }
+        }
+
+        private void MoveToPosition()
+        {
+            if (_ikTarget == null) return;
+
+            elapsedTime += Time.deltaTime;
+
             if (elapsedTime < trajectoryDuration)
             {
                 float linearT = elapsedTime / trajectoryDuration;
@@ -218,7 +173,6 @@ namespace RoboticsToolkit.Robotics.Gaits
             }
         }
 
-
         private void AtTarget()
         {
             _ikTarget.transform.localPosition = endPosition;
@@ -226,77 +180,107 @@ namespace RoboticsToolkit.Robotics.Gaits
             CurrentStatus = Status.None;
         }
 
-        public GameObject GetGameObject()
-        {
-            return gameObject;
-        }
+        #endregion
 
-        public void RotateToPosition(Vector3 globalPosition, Quaternion rotationAxis, float time, bool localSpace)
-        {
-            throw new System.NotImplementedException();
-        }
+        #region ILimbPositioner Interface
 
-        public void RotateToPosition(Vector3 direction, Vector3 upDirection, float distance, float time)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void TranslateToPosition(Vector3 globalPosition, float time, bool localSpace)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void TranslateToPosition(Vector3 direction, Vector3 upDir, float distance, float time)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public bool LimbAtTarget()
-        {
-            return !isMoving;
-        }
-
-        public void SetLimbPosition(Vector3 globalPosition, bool localSpace)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Vector3 GetLimbPosition(bool localSpace)
-        {
-            throw new System.NotImplementedException();
-        }
-
+        /// <inheritdoc/>
         public bool Run()
         {
             switch (CurrentStatus)
             {
-                case Status.None:
-                    break;
                 case Status.Translating:
                     MoveToPosition();
                     break;
                 case Status.Rotating:
                     MoveAlongArc();
                     break;
-                default:
-                    break;
             }
-           return CurrentStatus == Status.None;
+
+            return CurrentStatus == Status.None;
         }
 
-        public void SubscribeToEvents(IEventListener<LimbPositionerEventData> listenerToSubscribe)
-        {
-         _eventManager.AddListener(listenerToSubscribe);
-        }
+        /// <inheritdoc/>
+        public bool LimbAtTarget() => !isMoving;
 
-        public void UnsubscribeFromEvents(IEventListener<LimbPositionerEventData> listenerToUnsubscribe)
-        {
-            _eventManager.RemoveListener(listenerToUnsubscribe);    
-        }
+        /// <inheritdoc/>
+        public GameObject GetGameObject() => gameObject;
 
-        public Component GetComponent()
+        /// <inheritdoc/>
+        public Component GetComponent() => this;
+
+        /// <inheritdoc/>
+        public Vector3 GetTargetGlobalPosition() => _ikTarget.position;
+
+        /// <inheritdoc/>
+        public void SetLimbPosition(Vector3 globalPosition, bool localSpace)
         {
             throw new System.NotImplementedException();
         }
+
+        /// <inheritdoc/>
+        public Vector3 GetLimbPosition(bool localSpace)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public void RotateToPosition(Vector3 globalPosition, Quaternion rotationAxis, float time, bool localSpace)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public void RotateToPosition(Vector3 direction, Vector3 upDirection, float distance, float time)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public void TranslateToPosition(Vector3 globalPosition, float time, bool localSpace)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public void TranslateToPosition(Vector3 direction, Vector3 upDir, float distance, float time)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        #endregion
+
+        #region Events
+
+        /// <inheritdoc/>
+        public void SubscribeToEvents(IEventListener<LimbPositionerEventData> listenerToSubscribe)
+        {
+            _eventManager.AddListener(listenerToSubscribe);
+        }
+
+        /// <inheritdoc/>
+        public void UnsubscribeFromEvents(IEventListener<LimbPositionerEventData> listenerToUnsubscribe)
+        {
+            _eventManager.RemoveListener(listenerToUnsubscribe);
+        }
+
+        #endregion
+
+        #region Utilities
+
+        /// <summary>
+        /// Calculates an effective arc path distance based on height and horizontal span.
+        /// </summary>
+        private float CalculateArcDistance(float horizontalDistance, float height)
+        {
+            if (horizontalDistance < 0.01f) return 2 * height;
+            if (Mathf.Approximately(height, 0f)) return horizontalDistance;
+
+            float h = height;
+            float l = horizontalDistance;
+            return l * (1 + (2 * h / l) * (2 * h / l));
+        }
+
+        #endregion
     }
 }
