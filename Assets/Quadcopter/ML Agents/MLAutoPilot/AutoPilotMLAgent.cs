@@ -24,7 +24,7 @@ namespace FlightControllers.Quadcopters
         [SerializeField] private Quadcopter _quadcopterToControl;
 
         private int _achievedWaypoints = 0;
-        private Vector3 _bounds = new Vector3(2, 1, 2);
+        private Vector3 _bounds = new Vector3(1.5f, 1, 1.5f);
         private float _atTargetSeconds;
         private float _outOfYawRangeSeconds;
         [SerializeField] private float m_episodeRewards;
