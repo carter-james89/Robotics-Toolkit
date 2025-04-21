@@ -159,6 +159,8 @@ namespace RoboticsToolkit.Robotics.QuadrupedRobot
 
         private void SetLimbsFromReceivedData()
         {
+            transform.eulerAngles = new Vector3(_receivedData.GyroX, _receivedData.GyroY, _receivedData.GyroZ);
+
             var limbData = new LimbValues[4] {
                     new LimbValues(Vector3.zero, new float[3] { 0, _receivedData.FLHipAngle, _receivedData.FLKneeAngle }),
                      new LimbValues(Vector3.zero, new float[3] { 0, _receivedData.FRHipAngle, _receivedData.FRKneeAngle }),

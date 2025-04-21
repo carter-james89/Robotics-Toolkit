@@ -89,7 +89,11 @@ namespace RoboticsToolkit.Robotics
 
         private void Update()
         {
-            if (_instanceType == InstanceType.Simulation)
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                StartHighStep();
+            }
+                if (_instanceType == InstanceType.Simulation)
             {
                 if (_simulatedRobot != null && _simulatedRobot.GetStatus() == IRobot.Status.Ready)
                 {
@@ -120,7 +124,11 @@ namespace RoboticsToolkit.Robotics
                 }
             }
         }
-
+        public void StartHighStep()
+        {
+           
+            _roboticController.PerformHighStep(); 
+        }
         private void OnSimulationReady()
         {
             var hipAngle = 70;

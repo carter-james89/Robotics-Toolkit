@@ -5,9 +5,12 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Quadcopter/Scenes/Quadcopter Ground Control.unity
     guid: e259c49e85d243748b1397188c4c95fd
+  - enabled: 1
+    path: Assets/Robotics/Robotic Controllers/Dynamic Controller.unity
+    guid: 88f2c4245bb7c6b49bdd59ce9577af3a
   m_configObjects:
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 553bd7f3e85fb344a8590187072b2266, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 5f8bc44207e3143469a2311b627001c2, type: 2}

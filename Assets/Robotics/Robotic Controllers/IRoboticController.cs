@@ -28,6 +28,7 @@ namespace RoboticsToolkit.Robotics.RoboticControllers
         public void SetRobotHeight(float height, float speed);
 
         public LimbValues[] CalculateLimbData(IRobot quadToControl);
+        void PerformHighStep();
     }
     public enum QuadrupedRoboticControllerEventType
     {
