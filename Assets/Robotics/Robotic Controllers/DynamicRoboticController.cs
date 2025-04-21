@@ -78,7 +78,7 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IEven
     public void BeginCrawl()
     {
         (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .04f, .5f, 0);// .06f);
-       // (_gaitController as GaitController).PerformHighStep(GaitType.Crawl, .03f, .005f);
+                                                                                          // (_gaitController as GaitController).PerformHighStep(GaitType.Crawl, .03f, .005f);
     }
 
     private enum Status
@@ -341,8 +341,10 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IEven
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //  (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .02f, .05f, .06f);
-           // (_gaitController as GaitController).
+           // PerformHighStep();
+          //  (_gaitController as GaitController).BeginMovement(IKLimbPositioners, IGaitController.GaitPattern.TROT, Vector3.forward, true);
+          //    (_gaitController as GaitController).CrawlForward(IKLimbPositioners, .02f, .01f, .06f);
+            // (_gaitController as GaitController).
         }
     }
 
@@ -411,5 +413,8 @@ public class DynamicRoboticController : MonoBehaviour, IRoboticController, IEven
         throw new NotImplementedException();
     }
 
-
+    public void PerformHighStep()
+    {
+        _gaitController.PerformHighStep(GaitType.Crawl, .03f, .35f);
+    }
 }
