@@ -70,7 +70,7 @@ namespace FlightControllers.Quadcopters
             {
                 EndTheEpisode(m_atTarget ? 10f : -10f);
             }
-        
+
 
             _firstFlight = false;
             _achievedWaypoints = 0;
@@ -124,7 +124,7 @@ namespace FlightControllers.Quadcopters
 
         private void CalculateRewards(float dist)
         {
-         //   Debug.Log("Calculate Rewards");
+            //   Debug.Log("Calculate Rewards");
             float stepReward = 0f;
 
             Vector3 posAgent = _quadcopterToControl.transform.position;
@@ -143,7 +143,7 @@ namespace FlightControllers.Quadcopters
                 Vector3 quadLocal = _quadcopterToControl.transform.localPosition;
                 if (Mathf.Abs(quadLocal.x) > _bounds.x || Mathf.Abs(quadLocal.y) > _bounds.y || Mathf.Abs(quadLocal.z) > _bounds.z)
                 {
-                    _groundRenderer.material.color = Color.red;
+                    if (_groundRenderer) _groundRenderer.material.color = Color.red;
                     EndTheEpisode(-5f);
                     return;
                 }
@@ -153,7 +153,8 @@ namespace FlightControllers.Quadcopters
             {
                 _inYawRange = true;
                 _outOfYawRangeSeconds = 0f;
-                _groundRenderer.material.color = Color.yellow;
+                if (_groundRenderer)
+                    _groundRenderer.material.color = Color.yellow;
                 stepReward += 0.01f;
             }
             else
@@ -167,7 +168,7 @@ namespace FlightControllers.Quadcopters
             if (dist < 0.03f && forwardError < 5f)
             {
                 m_atTarget = true;
-                _groundRenderer.material.color = Color.green;
+                if (_groundRenderer) _groundRenderer.material.color = Color.green;
                 // stepReward += proximityReward * 0.01f;
 
                 // Reward for being stable (velocity near zero)
@@ -179,7 +180,7 @@ namespace FlightControllers.Quadcopters
             {
                 m_atTarget = false;
                 _atTargetSeconds = 0;
-                _groundRenderer.material.color = forwardError < 5f ? Color.yellow : Color.red;
+                if (_groundRenderer) _groundRenderer.material.color = forwardError < 5f ? Color.yellow : Color.red;
                 stepReward -= proximityPenalty * 0.01f;
             }
 
@@ -196,7 +197,7 @@ namespace FlightControllers.Quadcopters
             //}
         }
 
-        
+
 
         private void EndTheEpisode(float reward)
         {

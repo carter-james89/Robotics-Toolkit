@@ -36,6 +36,7 @@ namespace RoboticsToolkit.Robotics
         private bool _ready = false;
 
         //  private 
+      [SerializeField]  private bool _autoInitialize = true;
 
         private void Awake()
         {
@@ -44,6 +45,14 @@ namespace RoboticsToolkit.Robotics
         }
 
         void Start()
+        {
+            if(_autoInitialize)
+            {
+                Initialize();
+            }
+        }
+
+        public void Initialize()
         {
             _roboticController = _controllerEnvironment.GetController();
             _roboticController.SubscribeToEvents(this);
