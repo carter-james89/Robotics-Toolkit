@@ -1135,7 +1135,7 @@ MonoBehaviour:
   _physicalEnvironment: {fileID: 734930946}
   _simulatedEnvironment: {fileID: 253949327}
   _hipHeight: 0.085
-  _autoInitialize: 0
+  _autoInitialize: 1
 --- !u!114 &562732979 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8437468995023062955, guid: 2c247602f2395534e8b275258ce21c63, type: 3}
