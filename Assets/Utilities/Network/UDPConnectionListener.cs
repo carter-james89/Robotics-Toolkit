@@ -82,7 +82,8 @@ namespace Toolkit.Networking
             // Deserialize the JSON string into the ConnectionData class
             ConnectionData data = JsonUtility.FromJson<ConnectionData>(receivedString);
 
-            NotifyListeners(new UDPConnectionEventData(UDPConnectionEventType.OnBroadcastReceived, remoteEndPoint.Address, listenPort, data));
+        //    NotifyListeners(new UDPConnectionEventData(UDPConnectionEventType.OnBroadcastReceived, remoteEndPoint.Address, listenPort, data));
+            _listenerManager.RaiseEvent(new UDPConnectionEventData(UDPConnectionEventType.OnBroadcastReceived, remoteEndPoint.Address, listenPort, data));
 
             // Continue listening for UDP messages
             if (isListening)
@@ -99,13 +100,13 @@ namespace Toolkit.Networking
         }
 
 
-        private void NotifyListeners(UDPConnectionEventData eventData)
-        {
-            foreach (var listener in _listenerManager.GetListeners())
-            {
-                listener.OnEventOccured(eventData);
-            }
-        }
+        //private void NotifyListeners(UDPConnectionEventData eventData)
+        //{
+        //    foreach (var listener in _listenerManager.GetListeners())
+        //    {
+        //        listener.OnEventOccured(eventData);
+        //    }
+        //}
 
         public void SubscribeToEvents(IEventListener<UDPConnectionEventData> listenerToSubscribe)
         {

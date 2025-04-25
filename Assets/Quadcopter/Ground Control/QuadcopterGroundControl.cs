@@ -47,12 +47,13 @@ namespace FlightControllers.Quadcopters
         //  [SerializeField] private Quadcopter _ardupilot;
         // public Quadcopter activeQuad { get; private set; }
 
-       // private SimulatedOnboardFlightController _simulatedOnboardFlightController;
-       // private TelloFlightController _telloFlightController;
+        // private SimulatedOnboardFlightController _simulatedOnboardFlightController;
+        // private TelloFlightController _telloFlightController;
         // [SerializeField] private PiCopterFlightController _picopterFlightController;
         // [SerializeField] private PiCopterFlightController _ardupilotFlightController;
         // private IFlightController _flightController;
 
+        private IQuadcopter _quadcopter;
         private IAutoPilot _autoPilot;
         [SerializeField] private WaypointAutoPilotController _waypointMissionController;
 
@@ -96,26 +97,28 @@ namespace FlightControllers.Quadcopters
             switch (_controlMode)
             {
                 case GroundControlMode.RemoteQuadcopter:
+                    _quadcopter = _remoteQuadcopter;
                     foreach (var flightController in _remoteQuadcopter.GetComponents<IFlightController>())
                     {
                         if (!flightController.IsSimulator())
                         {
                             _remoteQuadcopter.Initialize(flightController, _pilotInupts);
-                            _autoPilot = GetAutoPilot(_remoteQuadcopter);
-                            _waypointMissionController.Initialize(_autoPilot, _remoteQuadcopter);//has to happen first
-                            _autoPilot.Initialize(_remoteQuadcopter);
+                           // _autoPilot = GetAutoPilot(_remoteQuadcopter);
+                           // _waypointMissionController.Initialize(_autoPilot, _remoteQuadcopter);//has to happen first
+                           // _autoPilot.Initialize(_remoteQuadcopter);
                         }
                     }
                     break;
                 case GroundControlMode.SiimulatedQuadcopter:
+                    _quadcopter = _simulatedQuadcopter;
                     foreach (var flightController in _simulatedQuadcopter.GetComponents<IFlightController>())
                     {
                         if (flightController.IsSimulator())
                         {
                             _simulatedQuadcopter.Initialize(flightController, _pilotInupts);
-                            _autoPilot = GetAutoPilot(_simulatedQuadcopter);
-                            _waypointMissionController.Initialize(_autoPilot, _simulatedQuadcopter);//has to happen first
-                            _autoPilot.Initialize(_simulatedQuadcopter);
+                          //  _autoPilot = GetAutoPilot(_simulatedQuadcopter);
+                          //  _waypointMissionController.Initialize(_autoPilot, _simulatedQuadcopter);//has to happen first
+                          //  _autoPilot.Initialize(_simulatedQuadcopter);
                         }
                     }
                     break;
@@ -125,16 +128,16 @@ namespace FlightControllers.Quadcopters
                         if (!flightController.IsSimulator())
                         {
                             _remoteQuadcopter.Initialize(flightController, _pilotInupts);
-                            _autoPilot = GetAutoPilot(_remoteQuadcopter);
-                            _waypointMissionController.Initialize(_autoPilot, _remoteQuadcopter);//has to happen first
-                            _autoPilot.Initialize(_remoteQuadcopter);
+                          //  _autoPilot = GetAutoPilot(_remoteQuadcopter);
+                          //  _waypointMissionController.Initialize(_autoPilot, _remoteQuadcopter);//has to happen first
+                          //  _autoPilot.Initialize(_remoteQuadcopter);
                         }
                         else
                         {
                             _simulatedQuadcopter.Initialize(flightController, _pilotInupts);
-                            _autoPilot = GetAutoPilot(_simulatedQuadcopter);
-                            _waypointMissionController.Initialize(_autoPilot, _simulatedQuadcopter);//has to happen first
-                            _autoPilot.Initialize(_simulatedQuadcopter);
+                          //  _autoPilot = GetAutoPilot(_simulatedQuadcopter);
+                          //  _waypointMissionController.Initialize(_autoPilot, _simulatedQuadcopter);//has to happen first
+                          //  _autoPilot.Initialize(_simulatedQuadcopter);
                         }
                     }
                     break;
@@ -207,6 +210,8 @@ namespace FlightControllers.Quadcopters
             }
             _isFlying = false;
         }
+        private bool _autoPilotInitialized = false;
+
         public void ToggleAutoPilot()
         {
             Debug.Log("toggle auto pilot");
@@ -215,6 +220,20 @@ namespace FlightControllers.Quadcopters
                 Debug.LogError("not flying");   
                 return;
             }
+
+            if(!_autoPilotInitialized)
+            {
+                _autoPilot = GetAutoPilot(_quadcopter as Quadcopter);
+                _waypointMissionController.Initialize(_autoPilot, _quadcopter as Quadcopter);//has to happen first
+                _autoPilot.Initialize(_quadcopter);
+                _autoPilotInitialized = true;
+            }
+
+
+
+
+
+
             _autoPilot.ToggleAutoPilot();
             //switch (_controlMode)
             //{
@@ -302,6 +321,15 @@ namespace FlightControllers.Quadcopters
             }
         }
 
+        public AutoPilotMode GetAutoPilotMode()
+        {
+            return _autoPilotMode;
+        }
 
+        public void SetAutoPilotMode(AutoPilotMode mode)
+        {
+            _autoPilotMode = mode;
+            Initialize(); // reinitialize to apply new autopilot setting
+        }
     }
 }

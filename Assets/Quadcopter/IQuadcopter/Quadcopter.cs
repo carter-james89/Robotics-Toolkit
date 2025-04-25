@@ -306,6 +306,11 @@ namespace FlightControllers.Quadcopters
             if (_flightController?.IsInitialized() == true && _flightController.IsReadyToFly())
             {
                 var quadData = _flightController.GetSensorData();
+
+                if (GetFlightStatus() == FlightStatus.PreLaunch)
+                {
+                    return;
+                }
                 SetVirtualPosition(quadData);
                 _flightController.Run(_flightStatus, currentInputs);
                 OnTransformUpdated();
@@ -363,6 +368,10 @@ namespace FlightControllers.Quadcopters
 
         public void SetVirtualPosition(QuadcopterData quadData)
         {
+            if(GetFlightStatus() == FlightStatus.PreLaunch)
+            {
+                return;
+            }
             deltaHeight = _prevHeight - quadData.height;
             _prevHeight = quadData.height;
             transform.localPosition = new Vector3(quadData.posX, quadData.height + heightOffset, quadData.posZ);

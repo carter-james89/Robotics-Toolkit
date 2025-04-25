@@ -29,7 +29,7 @@ namespace FlightControllers.Quadcopters
         /// Once it achieves its hover, a huge and random offset is applied to the position, which needs to be accounted for for all 
         /// future positioning data
         /// </remarks>
-        private Vector3 _trackingFoundOffset = Vector3.zero;
+        private Vector3 _trackingErrorOffset = Vector3.zero;
         /// <summary>
         /// The current connection state with the RemoteQuadcopter, must be <see cref="Tello.ConnectionState.Connected"/> to control
         /// </summary>
@@ -81,7 +81,7 @@ namespace FlightControllers.Quadcopters
         /// </summary>
         public void ConnectToTello()
         {
-            Debug.Log("Connecting to Tello");
+            Log("Connecting to Tello");
             Tello.onConnection += Tello_onStateChanged;
             Tello.onUpdate += Tello_onUpdate;
             if (_videoFeed)
@@ -103,18 +103,18 @@ namespace FlightControllers.Quadcopters
         /// </summary>
         private void Tello_onStateChanged(Tello.ConnectionState newState)
         {
-            Debug.Log("Tello State Updated : " + newState);
+            Log("Tello State Updated : " + newState);
             if (newState == Tello.ConnectionState.Connected)
             {
                 _connectionStatusText.text = newState.ToString();
-                // Debug.Log("Connected to RemoteQuadcopter, please wait for camera feed " + RemoteQuadcopter.state.);
+                // Log("Connected to RemoteQuadcopter, please wait for camera feed " + RemoteQuadcopter.state.);
                 Tello.setPicVidMode(1); // 0: picture, 1: video
                 Tello.setVideoBitRate((int)TelloVideoFeed.VideoBitRate.VideoBitRateAuto);
                 Tello.requestIframe();
             }
             else if (newState == Tello.ConnectionState.Disconnected)
             {
-                Debug.Log("Disconnected from Tello");
+                Log("Disconnected from Tello");
             }
         }
         /// <summary>
@@ -149,6 +149,13 @@ namespace FlightControllers.Quadcopters
             SyncDataWithTello();
             return _quadcopterData;
         }
+
+        private void Log(string log)
+        {
+            Debug.Log(log);
+        }
+        private QuadcopterData _validQuadData;
+        private Vector3 _customTrackedPos = Vector3.zero;
         /// <summary>
         /// Store all the information from the RemoteQuadcopter package locally
         /// </summary>
@@ -157,27 +164,68 @@ namespace FlightControllers.Quadcopters
         /// </remmarks>
         public void SyncDataWithTello()
         {
+            Log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< " + Time.frameCount + " : " + quadToControl.GetFlightStatus());
             connectionState = Tello.connectionState;
 
             var state = Tello.state;
-            posX = Tello.state.posY - _trackingFoundOffset.x;
-            posY = -Tello.state.posZ - _trackingFoundOffset.y;
-            posZ = Tello.state.posX - _trackingFoundOffset.z;
-            //posX = RemoteQuadcopter.state.posY - _manualOffset.x;
-            //posY = -RemoteQuadcopter.state.posZ - _manualOffset.y;
-            //posZ = RemoteQuadcopter.state.posX - _manualOffset.z;
-
-
-            _quadcopterData.posX = posX;
-            _quadcopterData.posY = posY;
-            _quadcopterData.posZ = posZ;
-
-            verticalSpeed = state.verticalSpeed;
-
-            velY = state.velY;
-
+            posX = Tello.state.posY;// - _trackingErrorOffset.x;
+            posY = -Tello.state.posZ;// - _trackingErrorOffset.y;
+            posZ = Tello.state.posX;// - _trackingErrorOffset.z;
             rawPosition = new Vector3(posX, posY, posZ);
 
+            Log("Raw Pos " + rawPosition);
+            ///catch giant offset jumpts
+            var deltaRawPosition = _prevRawPosition - rawPosition;
+            if (deltaRawPosition.magnitude > 10)
+            {
+               // Log("Detected offset, fixing");
+                _validatingPositionOffset = false;
+                _trackingErrorOffset = rawPosition - _prevRawPosition;// unityWorldPos;
+                Log("Detected New Offset: " + _trackingErrorOffset);
+            }
+            var adjustedX = posX - _trackingErrorOffset.x;
+            var adjustedY = posY - _trackingErrorOffset.y;
+            var adjustedZ = posZ - _trackingErrorOffset.z;
+
+            var adjustedPos = new Vector3(adjustedX, adjustedY, adjustedZ);
+            //when stable, mark a Vector as our origin, all reported deltachanges will be applied to this
+            if (quadToControl.GetFlightStatus() == FlightStatus.Launching && flying && (Tello.state.height * .1f) > .3f && Tello.state.posUncertainty < .02f && Tello.state.flyMode == 11)
+            {
+                _trackingOriginPoint = adjustedPos;
+                _trackingOriginPoint.y = Tello.state.height * .1f;
+                Log("Tracking Origin Set : " + _trackingOriginPoint);
+                NotifyListeners(FlightControllerEventType.OnTakeOffEnd);
+            }
+
+            
+           
+            if(quadToControl.GetFlightStatus() == FlightStatus.Launching || quadToControl.GetFlightStatus() == FlightStatus.PreLaunch)
+            {
+                _quadcopterData.posX = adjustedPos.x;
+                _quadcopterData.posY = adjustedPos.y;
+                _quadcopterData.posZ = adjustedPos.z;
+                height = state.height * .1f;
+            }
+            else
+            {
+                var deltaPos = _previousAdjustedPos - adjustedPos;
+                _customTrackedPos -= deltaPos;
+
+                Log("CustomPos from offset : " + _customTrackedPos);
+
+                _quadcopterData.posX = _trackingOriginPoint.x + _customTrackedPos.x;
+                _quadcopterData.posY = _trackingOriginPoint.y + _customTrackedPos.y;
+                _quadcopterData.posZ = _trackingOriginPoint.z + _customTrackedPos.z;
+                height = _quadcopterData.posY;
+                _previousAdjustedPos = adjustedPos;
+                // Log("My Pos " + new Vector3(_quadcopterData.posX, _quadcopterData.posY, _quadcopterData.posZ));
+            }
+
+        
+            _prevRawPosition = rawPosition;
+
+            verticalSpeed = state.verticalSpeed;
+            velY = state.velY;
             quatW = state.quatW;
             quatX = state.quatW;
             quatY = state.quatW;
@@ -206,7 +254,7 @@ namespace FlightControllers.Quadcopters
             flyspeed = state.flySpeed;
             flyTime = state.flyTime;
             gravityState = state.gravityState;
-            height = state.height * .1f;
+
             imuCalibrationState = state.imuCalibrationState;
             imuState = state.imuState;
             lightStrength = state.lightStrength;
@@ -229,20 +277,22 @@ namespace FlightControllers.Quadcopters
             _batteryStatusText.text = batteryPercent + "%";
             _speedText.text = flyspeed.ToString();
             _posUncertText.text = posUncertainty.ToString();
+            Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
-
-            VallidateTrackingInfo(new Vector3(posX, posY, posZ));
+            _validQuadData = _quadcopterData;
         }
+
+        public Vector3 _trackingOriginPoint = Vector3.zero;
 
         public override void Run(FlightStatus flightStatus, IInputSource.FlightControlValues craftInputs)
         {
             if (_lastTelloUpdateFrame != Time.frameCount)
             {
-                // Debug.Log(flightStatus);
+                // Log(flightStatus);
                 switch (flightStatus)
                 {
                     case FlightStatus.Launching:
-                        CheckForLaunchComplete();
+                        //   CheckForLaunchComplete();
                         break;
                     case FlightStatus.Flying:
                         try
@@ -251,7 +301,7 @@ namespace FlightControllers.Quadcopters
                         }
                         catch (Exception e)
                         {
-                            Debug.Log(e + " : Emergency Abort");
+                            Log(e + " : Emergency Abort");
                             // abort?.Invoke();
                         }
                         break;
@@ -279,7 +329,7 @@ namespace FlightControllers.Quadcopters
             }
             else
             {
-                // Debug.Log("Tracking lost " + _telloFrameCount);
+                // Log("Tracking lost " + _telloFrameCount);
                 validTrackingFrame = false;
             }
             prevRecordedPos = pos;
@@ -294,7 +344,9 @@ namespace FlightControllers.Quadcopters
 
             if (connectionState == Tello.ConnectionState.Connected)
             {
-                Debug.Log("Tello takeoff");
+                Log("Tello takeoff");
+                _onFlyingHeight = 0;
+                _trackingErrorOffset = Vector3.zero;
                 Tello.takeOff();
                 NotifyListeners(FlightControllerEventType.OnTakeOffBegin);
                 return true;
@@ -315,6 +367,7 @@ namespace FlightControllers.Quadcopters
             NotifyListeners(FlightControllerEventType.OnLandBegin);
             return true;
         }
+        private float _onFlyingHeight = 0;
         /// <summary>
         /// Check to see if the RemoteQuadcopter has finished its auto takeoff
         /// </summary>
@@ -325,29 +378,10 @@ namespace FlightControllers.Quadcopters
         /// Also difficult to determin when this happens. <see cref="flymode"/> used to work but as of 3.0 it isnt realiable unless you also check for <see cref="flying"/>
         /// And even that isnt great as there is a long delay
         /// </remarks>
-        public void CheckForLaunchComplete()
-        {
-            var deltaRawPosition = _prevRawPosition - rawPosition;
-            _prevRawPosition = rawPosition;
-
-            // if (flymode == 11)// || deltaRawPosition.magnitude > 1)
-            if (flymode == 6 && flying)
-            {
-                var state = Tello.state;
-                posX = Tello.state.posY;
-                posY = -Tello.state.posZ;
-                posZ = Tello.state.posX;
-
-                _trackingFoundOffset = new Vector3(posX, posY, posZ);
-                Debug.Log("launch complete");
-                // _trackingFoundOffset = new Vector3(posX, posY, posZ);
-                Debug.Log("Set Launch offset to : " + _trackingFoundOffset);
-
-                NotifyListeners(FlightControllerEventType.OnTakeOffEnd);
-            }
-        }
 
 
+        private bool _validatingPositionOffset = false;
+        private int _offsetDetectedFrame;
 
         public override bool IsSimulator()
         {
@@ -358,7 +392,7 @@ namespace FlightControllers.Quadcopters
         {
             if (_isInitialized)
             {
-                Debug.Log("Stop Tello Connection");
+                Log("Stop Tello Connection");
                 if (connectionState == Tello.ConnectionState.Connecting)
                 {
                     //RemoteQuadcopter.stopConnecting();
@@ -374,6 +408,7 @@ namespace FlightControllers.Quadcopters
 
 
         public Vector3 rawPosition;
+        private Vector3 _previousAdjustedPos;
         private Vector3 _prevRawPosition;
 
         public int verticalSpeed { get; private set; }

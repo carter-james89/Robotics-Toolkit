@@ -160,7 +160,7 @@ namespace  FlightControllers.Quadcopters
         /// <returns>The Global Postion of the RemoteQuadcopter</returns>
         public Vector3 GetCurrentPos()
         {
-           // return new Vector3(posX - _trackingFoundOffset.x, posY - _trackingFoundOffset.y + _elevationOffset, posZ - _trackingFoundOffset.z);
+           // return new Vector3(posX - _trackingErrorOffset.x, posY - _trackingErrorOffset.y + _elevationOffset, posZ - _trackingErrorOffset.z);
             return new Vector3(posX - _trackingFoundOffset.x, height * .1f, posZ - _trackingFoundOffset.z);
         }
 
